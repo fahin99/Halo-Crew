@@ -1,0 +1,10 @@
+{
+  "description": "Aggregates astronaut health data into clear status and actions for mission crew and control, ensuring low cognitive load and mission-critical support.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
