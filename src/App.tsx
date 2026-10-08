@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { BodyRadar, FutureChart, ModelRadar, Spark, Trend, metricSummary } from "./charts";
+import WaveformDemo from "./waveform-demo";
 
 type Page =
   | "home" | "wellbeing" | "insights" | "why" | "future" | "support"
@@ -7,7 +9,8 @@ type Page =
 type IconName = "home" | "heart" | "spark" | "future" | "support" | "family" | "crew" |
   "mission" | "chat" | "model" | "history" | "shield" | "settings" | "moon" |
   "sun" | "bell" | "arrow" | "play" | "pause" | "check" | "leaf" | "music" |
-  "video" | "photo" | "audio" | "lock" | "eye" | "clock" | "close" | "menu";
+  "video" | "photo" | "audio" | "lock" | "eye" | "clock" | "close" | "menu" |
+  "pulse" | "drop" | "wave";
 
 const EARTH_IMAGE = "https://images.unsplash.com/photo-1634176866089-b633f4aec882?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=82&w=1600";
 const HOME_IMAGE = "https://images.unsplash.com/photo-1762363145981-21a82607ac67?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=82&w=1200";
@@ -55,6 +58,9 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
     eye: <><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></>,
     clock: <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>,
     close: <path d="m6 6 12 12M18 6 6 18"/>, menu: <path d="M4 7h16M4 12h16M4 17h16"/>,
+    pulse: <path d="M3 12h4l2.5-7 4.5 14 2.5-7H21"/>,
+    drop: <path d="M12 3s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11Z"/>,
+    wave: <path d="M2 12c2-7 4-7 6 0s4 7 6 0 4-7 6 0"/>,
   };
   return <svg className="icon" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
@@ -91,22 +97,6 @@ function Ring({ value = 82, label = "PERSONAL WELLBEING", small = false }: { val
 function Toggle({ value, onChange }: { value: boolean; onChange: () => void }) {
   return <button className={`toggle ${value ? "on" : ""}`} onClick={onChange} aria-label={value ? "Turn off" : "Turn on"}><span/></button>;
 }
-function MiniTrend({ color = "teal", down = false }: { color?: string; down?: boolean }) {
-  return <svg className={`mini-trend ${color}`} viewBox="0 0 120 34" preserveAspectRatio="none"><path d={down ? "M2 6 C28 5 25 12 44 13 S70 18 78 22 S102 25 118 29" : "M2 25 C20 23 28 27 43 18 S66 8 82 13 S104 7 118 5"}/></svg>;
-}
-function LineChart({ improved = false }: { improved?: boolean }) {
-  return <div className="line-chart">
-    <div className="chart-labels"><span>CALM</span><span>BASELINE</span><span>STRAIN</span></div>
-    <svg viewBox="0 0 800 230" preserveAspectRatio="none">
-      <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--teal)" stopOpacity=".24"/><stop offset="1" stopColor="var(--teal)" stopOpacity="0"/></linearGradient></defs>
-      <path className="baseline" d="M0 130 C160 110 260 138 400 120 S650 125 800 112"/>
-      <path className="area" d={improved ? "M0 136 C100 140 190 115 290 125 S470 105 560 116 S680 92 800 100 L800 230 L0 230Z" : "M0 125 C95 130 145 92 235 110 S350 150 435 137 S550 90 635 105 S730 78 800 85 L800 230 L0 230Z"}/>
-      <path className="trend" d={improved ? "M0 136 C100 140 190 115 290 125 S470 105 560 116 S680 92 800 100" : "M0 125 C95 130 145 92 235 110 S350 150 435 137 S550 90 635 105 S730 78 800 85"}/>
-    </svg>
-    <div className="chart-days"><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>TODAY</span></div>
-  </div>;
-}
-
 function Home({ go }: { go: (p: Page) => void }) {
   return <div className="page fade-in">
     <div className="home-hero">
@@ -116,7 +106,11 @@ function Home({ go }: { go: (p: Page) => void }) {
     </div>
     <div className="section-title-row"><div><span className="eyebrow">TODAY’S STATE</span><div className="section-title">A quiet look at now</div></div><span className="updated">Updated 8 min ago</span></div>
     <div className="metrics">
-      {[["Stress","Stable","Within your normal","62"],["Sleep","7h 18m","12 min below usual","78"],["Focus","Good","Improving today","84"],["Connection","Strong","2 meaningful moments","89"]].map(([a,b,c,d],i)=><Card className="metric" key={a}><div className="metric-top"><span>{a}</span><span className={`metric-icon m${i}`}><Icon name={i===0?"leaf":i===1?"moon":i===2?"spark":"family"} size={18}/></span></div><strong>{b}</strong><p>{c}</p><MiniTrend down={i===1} color={i===1?"amber":"teal"}/><span className="metric-value">{d}%</span></Card>)}
+      {[["Stress","Stable","Within your normal","62"],["Sleep","7h 18m","12 min below usual","78"],["Focus","Good","Improving today","84"],["Connection","Strong","2 meaningful moments","89"]].map(([a,b,c,d],i)=><Card className="metric" key={a}><div className="metric-top"><span>{a}</span><span className={`metric-icon m${i}`}><Icon name={i===0?"leaf":i===1?"moon":i===2?"spark":"family"} size={18}/></span></div><strong>{b}</strong><p>{c}</p><Spark data={[[61,64,63,72,65,60,68],[80,79,73,78,77,81,76],[78,74,80,79,86,82,84],[85,90,86,87,82,88,89]][i]} color={["#8b7ce0","#ddb273","#8b7ce0","#8fc2a2"][i]}/><span className="metric-value">{d}%</span></Card>)}
+    </div>
+    <div className="section-title-row"><div><span className="eyebrow">LIVE VITALS · MISSION BIOSENSORS</span><div className="section-title">Body signals, right now</div></div><span className="updated live"><i/>Live</span></div>
+    <div className="vitals">
+      {[["Heart rate","62 bpm","Resting · steady rhythm","−3 bpm vs usual",[68,66,74,64,63,69,62],"#d99a9b","pulse"],["Blood oxygen","98%","Excellent saturation","+0.2 pts this week",[97.6,98.1,97.4,98.3,97.9,98.4,98],"#7fb0d9","drop"],["Heart rate variability","48 ms","Balanced recovery","+4 ms this week",[42,44,38,46,45,52,48],"#8fc2a2","wave"]].map(([a,b,c,d,e,f,g])=><Card className="metric" key={a as string}><div className="metric-top"><span>{a}</span><span className="metric-icon" style={{ color: f as string, background: `color-mix(in srgb, ${f} 14%, transparent)` }}><Icon name={g as IconName} size={18}/></span></div><strong>{b}</strong><p>{c}</p><Spark data={e as number[]} color={f as string}/><span className="metric-value">{d}</span></Card>)}
     </div>
     <div className="home-grid">
       <Card className="baseline-card"><div className="card-kicker">YOUR NORMAL</div><div className="card-title">Close to your personal baseline</div><p>Small daily changes are expected. Today’s pattern remains comfortably within your usual range.</p><div className="baseline-viz"><div className="range"><span className="current" style={{left:"61%"}}><i/>CURRENT</span></div><div className="range-label"><span>Lower</span><b>Your usual range</b><span>Higher</span></div></div><Button kind="ghost" onClick={() => go("model")}>How HALO learns you <Icon name="arrow" size={16}/></Button></Card>
@@ -129,7 +123,7 @@ function Home({ go }: { go: (p: Page) => void }) {
 function Wellbeing({ go }: { go: (p: Page) => void }) {
   const [tab,setTab]=useState("7 Days"); const [metric,setMetric]=useState("Stress");
   return <div className="page fade-in"><PageHead title="My Wellbeing" sub="Understand your patterns over time, without getting lost in the numbers."/><div className="tabs">{["Today","7 Days","30 Days","Mission"].map(x=><button className={tab===x?"active":""} onClick={()=>setTab(x)} key={x}>{x}</button>)}</div>
-    <Card className="trend-card"><div className="card-row"><div><div className="card-kicker">WELLBEING TREND · {tab.toUpperCase()}</div><div className="card-title">{metric} is staying steady</div></div><Badge>WITHIN YOUR NORMAL</Badge></div><div className="metric-pills">{["Stress","Sleep","Focus","Connection","Mood"].map(x=><button className={metric===x?"active":""} onClick={()=>setMetric(x)} key={x}>{x}</button>)}</div><LineChart/><div className="chart-summary"><div><span>Current</span><strong>Stable</strong></div><div><span>7-day average</span><strong>78%</strong></div><div><span>Change</span><strong className="positive">+4% recovery</strong></div></div></Card>
+    <Card className="trend-card"><div className="card-row"><div><div className="card-kicker">WELLBEING TREND · {tab.toUpperCase()}</div><div className="card-title">{metric} is staying steady</div></div><Badge>WITHIN YOUR NORMAL</Badge></div><div className="metric-pills">{["Stress","Sleep","Focus","Connection","Mood","Heart rate","Blood oxygen","HRV"].map(x=><button className={metric===x?"active":""} onClick={()=>setMetric(x)} key={x}>{x}</button>)}</div><Trend metric={metric}/>{(()=>{const s=metricSummary(metric);return <div className="chart-summary"><div><span>Current</span><strong>{s.current}</strong></div><div><span>7-day average</span><strong>{s.avg}</strong></div><div><span>Change</span><strong className="positive">{s.delta}</strong></div></div>})()}</Card>
     <div className="two-col"><Card><div className="card-kicker">YOUR NORMAL</div><div className="card-title">Personal baseline</div><p>Your current state sits comfortably inside the range HALO has learned for you.</p><div className="baseline-wide"><span/><i style={{left:"65%"}}/><b>Today</b></div><div className="baseline-notes"><span>Lower than usual</span><span>Your usual range</span><span>Higher than usual</span></div><Button kind="ghost" onClick={()=>go("model")}>Explore my personal model <Icon name="arrow" size={16}/></Button></Card>
     <Card><div className="card-kicker">MOOD</div><div className="card-title">How today feels</div><div className="moods">{["Calm","Focused","Tired","Stressed","Low"].map((x,i)=><button className={i===0?"active":""} key={x}><span className={`mood-shape s${i}`}/>{x}</button>)}</div><p className="soft-note">Your check-ins help HALO understand context that sensors cannot.</p></Card></div>
   </div>;
@@ -147,7 +141,7 @@ function WhyPage() {
 
 function Future() {
   const [scenario,setScenario]=useState("Recovery break");
-  return <div className="page fade-in"><PageHead eyebrow="WHAT HAPPENS NEXT?" title="Future Self" sub="Explore how today’s patterns may evolve. These are projected trends, not certain outcomes."/><Card className="future-hero"><div className="future-head"><div><div className="card-kicker">PROJECTED WELLBEING · NEXT 48 HOURS</div><div className="card-title">A small choice can change the shape of tomorrow</div></div><Badge tone="info">MODEL CONFIDENCE 76%</Badge></div><div className="future-chart"><div className="future-label no-change"><i/>If nothing changes</div><div className="future-label intervention"><i/>If I take a {scenario.toLowerCase()}</div><svg viewBox="0 0 900 330" preserveAspectRatio="none"><path className="uncertainty" d="M20 120 C180 100 260 115 390 145 S680 205 880 250 L880 310 C650 250 500 220 390 180 S180 130 20 150Z"/><path className="future-bad" d="M20 135 C180 115 265 125 390 160 S670 220 880 278"/><path className="future-good" d="M20 135 C160 120 250 133 370 115 S650 100 880 78"/><line x1="20" y1="135" x2="20" y2="300"/></svg><div className="future-axis">{["NOW","+6H","+12H","+24H","+48H"].map(x=><span key={x}>{x}</span>)}</div></div><div className="uncertainty-note"><span><i className="good-line"/>Projected with support</span><span><i className="bad-line"/>Projected without change</span><span><i className="range-line"/>Uncertainty range</span></div></Card><Card className="scenario-card"><div><div className="card-kicker">TRY ANOTHER INTERVENTION</div><div className="card-title">What might shift the trajectory?</div><p>Choose an action to explore a possible outcome.</p></div><div className="scenario-options">{["Recovery break","Family connection","Guided breathing","Social interaction","Music","Sleep support"].map(x=><button className={scenario===x?"active":""} onClick={()=>setScenario(x)} key={x}><Icon name={x.includes("Family")?"family":x==="Music"?"music":x.includes("Sleep")?"moon":"leaf"} size={18}/>{x}{scenario===x&&<Icon name="check" size={16}/>}</button>)}</div></Card></div>;
+  return <div className="page fade-in"><PageHead eyebrow="WHAT HAPPENS NEXT?" title="Future Self" sub="Explore how today’s patterns may evolve. These are projected trends, not certain outcomes."/><Card className="future-hero"><div className="future-head"><div><div className="card-kicker">PROJECTED WELLBEING · NEXT 48 HOURS</div><div className="card-title">A small choice can change the shape of tomorrow</div></div><Badge tone="info">MODEL CONFIDENCE 76%</Badge></div><div className="future-chart"><div className="future-label no-change"><i/>If nothing changes</div><div className="future-label intervention"><i/>If I take a {scenario.toLowerCase()}</div><FutureChart scenario={scenario}/></div><div className="uncertainty-note"><span><i className="good-line"/>Projected with support</span><span><i className="bad-line"/>Projected without change</span><span><i className="range-line"/>Uncertainty range</span></div></Card><Card className="scenario-card"><div><div className="card-kicker">TRY ANOTHER INTERVENTION</div><div className="card-title">What might shift the trajectory?</div><p>Choose an action to explore a possible outcome.</p></div><div className="scenario-options">{["Recovery break","Family connection","Guided breathing","Social interaction","Music","Sleep support"].map(x=><button className={scenario===x?"active":""} onClick={()=>setScenario(x)} key={x}><Icon name={x.includes("Family")?"family":x==="Music"?"music":x.includes("Sleep")?"moon":"leaf"} size={18}/>{x}{scenario===x&&<Icon name="check" size={16}/>}</button>)}</div></Card></div>;
 }
 
 const recommendations=[["RECOVER","Take a protected recovery break","High","Low","Your sleep and recovery signals suggest a quiet reset may help.","moon"],["CONNECT","Talk to someone","Medium","Low","Connection has helped you return to baseline during similar days.","crew"],["FAMILY","Spend a few minutes with home","High","None","Family video has been one of your most positive supports.","family"],["RESET","Guided breathing","Medium","None","A short breathing practice often improves your focus rhythm.","leaf"]];
@@ -176,9 +170,7 @@ function Copilot({ go }: { go: (p: Page) => void }) {
 }
 
 function PersonalModel() {
-  const values=[["Stress",72,64],["Sleep",82,73],["Focus",75,80],["Social",68,76],["Recovery",78,69],["Mood",81,79]];
-  const points=(which:number)=>values.map((v,i)=>{const a=(Math.PI*2*i/values.length)-Math.PI/2;const r=Number(v[which])/100*105;return `${150+Math.cos(a)*r},${150+Math.sin(a)*r}`}).join(" ");
-  return <div className="page fade-in"><PageHead eyebrow="HALO LEARNS YOUR NORMAL" title="My Personal Model" sub="A living picture of your unique rhythms—not a comparison with anyone else."/><div className="model-grid"><Card className="radar-card"><div className="card-row"><div><div className="card-kicker">YOUR PATTERN TODAY</div><div className="card-title">Close to your normal</div></div><Badge>STABLE</Badge></div><div className="radar"><svg viewBox="0 0 300 300"><g className="radar-grid">{[35,70,105].map(r=><circle key={r} cx="150" cy="150" r={r}/>)}{values.map((_,i)=>{const a=Math.PI*2*i/6-Math.PI/2;return <line key={i} x1="150" y1="150" x2={150+Math.cos(a)*105} y2={150+Math.sin(a)*105}/>})}</g><polygon className="radar-base" points={points(1)}/><polygon className="radar-current" points={points(2)}/></svg>{values.map((v,i)=>{const a=Math.PI*2*i/6-Math.PI/2;return <span key={v[0]} style={{left:`${50+Math.cos(a)*43}%`,top:`${50+Math.sin(a)*43}%`}}>{v[0]}</span>})}</div><div className="radar-legend"><span><i className="base"/>Personal baseline</span><span><i className="now"/>Current state</span></div></Card><div className="model-info"><Card><div className="halo-mini"><Icon name="model"/></div><div className="card-title">Personal, not generic</div><p>HALO compares today with your own history, adapting as mission conditions and your rhythms change.</p></Card><Card><div className="card-kicker">MODEL MATURITY</div><strong className="big-stat">78%</strong><div className="progress"><i style={{width:"78%"}}/></div><p>Strong enough to recognize your usual range. More data adds context over time.</p></Card><Card className="model-private"><Icon name="shield"/><div><strong>Your model belongs to you</strong><p>Detailed signals stay in secure personal processing.</p></div></Card></div></div></div>;
+  return <div className="page fade-in"><PageHead eyebrow="HALO LEARNS YOUR NORMAL" title="My Personal Model" sub="A living picture of your unique rhythms—not a comparison with anyone else."/><div className="model-grid"><Card className="radar-card"><div className="card-row"><div><div className="card-kicker">YOUR PATTERN TODAY</div><div className="card-title">Close to your normal</div></div><Badge>STABLE</Badge></div><ModelRadar/><div className="radar-legend"><span><i className="base"/>Personal baseline</span><span><i className="now"/>Current state</span></div></Card><div className="model-info"><Card><div className="halo-mini"><Icon name="model"/></div><div className="card-title">Personal, not generic</div><p>HALO compares today with your own history, adapting as mission conditions and your rhythms change.</p></Card><Card><div className="card-kicker">MODEL MATURITY</div><strong className="big-stat">78%</strong><div className="progress"><i style={{width:"78%"}}/></div><p>Strong enough to recognize your usual range. More data adds context over time.</p></Card><Card className="model-private"><Icon name="shield"/><div><strong>Your model belongs to you</strong><p>Detailed signals stay in secure personal processing.</p></div></Card></div></div><Card className="physical-card"><div><div className="card-kicker">PHYSICAL CONDITION</div><div className="card-title">Body signals in your model</div><p>Resting heart rate, oxygen saturation, and variability — scored against your own baseline, not population averages.</p><div className="phys-rows">{[["Resting heart rate","62 bpm",78],["Blood oxygen saturation","98%",96],["Heart rate variability","48 ms",76]].map(x=><div key={x[0] as string}><div className="phys-top"><span>{x[0]}</span><b>{x[1]}</b></div><div className="progress"><i style={{width:`${x[2]}%`}}/></div></div>)}</div></div><div><BodyRadar/><div className="radar-legend"><span><i className="base"/>Personal baseline</span><span><i className="now"/>Current state</span></div></div></Card></div>;
 }
 
 function History() {
@@ -227,6 +219,7 @@ function App() {
   },[page,dark]);
   const navigate=(p:Page)=>{setPage(p);setMobileOpen(false);window.scrollTo({top:0,behavior:"smooth"})};
   return <div className="app dark">
+    {typeof window !== "undefined" && new URLSearchParams(window.location.search).has("waveform") ? <WaveformDemo/> : <>
     <a className="skip-link" href="#main">Skip to content</a>
     {onboarding&&<Onboarding close={()=>setOnboarding(false)}/>}
     <aside className={mobileOpen?"open":""}>
@@ -239,6 +232,7 @@ function App() {
       <header><button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)}><Icon name={mobileOpen?"close":"menu"}/></button><div className="top-mission"><span><i/>LOCAL MODE</span><b>MISSION DAY 147</b></div><div className="top-actions"><button aria-label="Notifications"><Icon name="bell"/><i/></button><div className="profile"><span>MC</span><div><b>COMMANDER MAYA</b><small>CALM · STABLE</small></div></div></div></header>
       <main id="main">{content}</main>
     </div>
+    </>}
   </div>;
 }
 
