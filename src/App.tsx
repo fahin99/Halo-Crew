@@ -72,8 +72,20 @@ function Badge({ children, tone = "good" }: { children: React.ReactNode; tone?: 
   return <span className={`badge ${tone}`}><i/>{children}</span>;
 }
 function Ring({ value = 82, label = "PERSONAL WELLBEING", small = false }: { value?: number; label?: string; small?: boolean }) {
-  return <div className={`halo-ring ${small ? "small" : ""}`} style={{ "--score": `${value * 3.6}deg` } as React.CSSProperties}>
-    <div><strong>{value}</strong><span>{label}</span></div>
+  const R = 80;
+  const frac = value / 100;
+  const tipA = (-90 + frac * 360) * Math.PI / 180;
+  const tip = { x: 95 + R * Math.cos(tipA), y: 95 + R * Math.sin(tipA) };
+  const ticks = Array.from({ length: 48 });
+  return <div className={`halo-ring ${small ? "small" : ""}`}>
+    <svg viewBox="0 0 190 190" aria-hidden="true">
+      <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#efe9ff"/><stop offset=".55" stopColor="#b9aef0"/><stop offset="1" stopColor="#7a6ad4"/></linearGradient></defs>
+      {ticks.map((_, i) => { const a = i * 7.5 * Math.PI / 180; const major = i % 12 === 0; const r1 = major ? 86 : 88.5, r2 = 92; return <line key={i} className={`tick${major ? " major" : ""}`} x1={95 + r1 * Math.cos(a)} y1={95 + r1 * Math.sin(a)} x2={95 + r2 * Math.cos(a)} y2={95 + r2 * Math.sin(a)} />; })}
+      <circle className="track" cx="95" cy="95" r={R} />
+      <circle className="prog" cx="95" cy="95" r={R} pathLength={100} strokeDasharray={`${value} 100`} transform="rotate(-90 95 95)" />
+      <circle className="tip" cx={tip.x} cy={tip.y} r="5" />
+    </svg>
+    <div><span className="ring-delta">+4% recovery</span><strong>{value}</strong><span>{label}</span></div>
   </div>;
 }
 function Toggle({ value, onChange }: { value: boolean; onChange: () => void }) {
@@ -98,7 +110,7 @@ function LineChart({ improved = false }: { improved?: boolean }) {
 function Home({ go }: { go: (p: Page) => void }) {
   return <div className="page fade-in">
     <div className="home-hero">
-      <div className="hero-copy"><Badge>STABLE TODAY</Badge><div className="hero-title">Good morning, Maya.</div><p>Your wellbeing is stable today. You’re moving through the mission with a steady rhythm.</p><Button onClick={() => go("wellbeing")} kind="secondary">Explore your patterns <Icon name="arrow" size={17}/></Button></div>
+      <div className="hero-copy"><Badge>STABLE TODAY</Badge><div className="hero-title">Good morning, <em>Maya.</em></div><p>Your wellbeing is stable today. You’re moving through the mission with a steady rhythm.</p><div className="hero-stats"><div><span>SLEEP</span><b>7h 18m</b></div><div><span>RECOVERY</span><b>Steady</b></div><div><span>MISSION</span><b>Day 147 of 286</b></div></div><Button onClick={() => go("wellbeing")} kind="secondary">Explore your patterns <Icon name="arrow" size={17}/></Button></div>
       <Ring/>
       <div className="orbit-decor"><span/><span/><span/></div>
     </div>
@@ -146,7 +158,7 @@ function Support() {
 
 function Family() {
   const memories=[["Mom’s birthday","Video","video"],["Home garden","Photo","photo"],["Family message","Audio · 3:24","audio"],["Blue skies","Music · 4:12","music"]];
-  return <div className="page family-page fade-in"><div className="family-hero" style={{backgroundImage:`linear-gradient(90deg, rgba(18,48,51,.92), rgba(18,48,51,.18)), url("${HOME_IMAGE}")`}}><div><span className="eyebrow">A LITTLE PIECE OF EARTH</span><div className="hero-title">Home</div><p>Familiar voices, places, and moments—wherever you are.</p><Button>Open a memory <Icon name="play" size={16}/></Button></div></div><div className="tabs family-tabs">{["For You","Family","Friends","Memories","Music","Messages"].map((x,i)=><button className={i===0?"active":""} key={x}>{x}</button>)}</div><div className="section-title-row"><div><span className="eyebrow">YOUR MEMORY VAULT</span><div className="section-title">Close, even from here</div></div><span className="privacy-small"><Icon name="lock" size={14}/> Private to you</span></div><div className="media-grid">{memories.map((x,i)=><Card className={`media-card media-${i}`} key={x[0]}><div className="media-art">{i===1&&<img src={HOME_IMAGE} alt="A warm porch and garden at home"/>}<span><Icon name={x[2] as IconName}/></span>{i===0&&<div className="portrait-art"><i/><i/><i/></div>}</div><div><strong>{x[0]}</strong><span>{x[1]}</span></div><button className="round-play"><Icon name="play" size={15}/></button></Card>)}</div><Card className="family-recommend"><div className="recommend-icon"><Icon name="family"/></div><div><span className="card-kicker">RECOMMENDED FOR YOU</span><div className="card-title">Would a few minutes with home feel good?</div><p>Your day has been a little heavier than usual. Family connection has helped you before.</p></div><Button>Open memory <Icon name="arrow" size={16}/></Button></Card></div>;
+  return <div className="page family-page fade-in"><div className="family-hero" style={{backgroundImage:`linear-gradient(90deg, rgba(30,22,64,.93), rgba(74,63,134,.38)), url("${HOME_IMAGE}")`}}><div><span className="eyebrow">A LITTLE PIECE OF EARTH</span><div className="hero-title">Home</div><p>Familiar voices, places, and moments—wherever you are.</p><Button>Open a memory <Icon name="play" size={16}/></Button></div></div><div className="tabs family-tabs">{["For You","Family","Friends","Memories","Music","Messages"].map((x,i)=><button className={i===0?"active":""} key={x}>{x}</button>)}</div><div className="section-title-row"><div><span className="eyebrow">YOUR MEMORY VAULT</span><div className="section-title">Close, even from here</div></div><span className="privacy-small"><Icon name="lock" size={14}/> Private to you</span></div><div className="media-grid">{memories.map((x,i)=><Card className={`media-card media-${i}`} key={x[0]}><div className="media-art">{i===1&&<img src={HOME_IMAGE} alt="A warm porch and garden at home"/>}<span><Icon name={x[2] as IconName}/></span>{i===0&&<div className="portrait-art"><i/><i/><i/></div>}</div><div><strong>{x[0]}</strong><span>{x[1]}</span></div><button className="round-play"><Icon name="play" size={15}/></button></Card>)}</div><Card className="family-recommend"><div className="recommend-icon"><Icon name="family"/></div><div><span className="card-kicker">RECOMMENDED FOR YOU</span><div className="card-title">Would a few minutes with home feel good?</div><p>Your day has been a little heavier than usual. Family connection has helped you before.</p></div><Button>Open memory <Icon name="arrow" size={16}/></Button></Card></div>;
 }
 
 function Crew() {
@@ -155,7 +167,7 @@ function Crew() {
 }
 
 function Mission() {
-  return <div className="page fade-in"><div className="mission-hero" style={{backgroundImage:`linear-gradient(90deg, rgba(6,28,42,.96), rgba(6,28,42,.35)), url("${EARTH_IMAGE}")`}}><div><Badge tone="info">MARS TRANSIT · NOMINAL</Badge><div className="mission-day">Mission Day <strong>147</strong></div><p>Context for your wellbeing, not another control panel.</p></div><div className="earth-distance"><span>EARTH DISTANCE</span><strong>41.2M km</strong><small>2 min 18 sec signal delay</small></div></div><div className="mission-stats">{[["Destination","Mars orbit"],["Mission phase","Outbound transit"],["Crew status","All connected"],["Next milestone","Course correction · 12d"]].map(x=><Card key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong></Card>)}</div><Card className="mission-timeline"><div className="card-kicker">MISSION TIMELINE</div><div className="card-title">The journey so far</div><div className="mission-line"><div className="line-progress"/>{[["Launch","Day 001","done"],["Earth departure","Day 018","done"],["Current","Day 147","current"],["Mars transit","Day 224",""],["Arrival","Day 286",""]].map(x=><div className={x[2]} key={x[0]}><i>{x[2]==="done"&&<Icon name="check" size={12}/>}</i><strong>{x[0]}</strong><span>{x[1]}</span></div>)}</div><p className="mission-context"><Icon name="spark" size={17}/> Long transit periods can change sleep and social rhythm. HALO adjusts your personal baseline as the mission evolves.</p></Card></div>;
+  return <div className="page fade-in"><div className="mission-hero" style={{backgroundImage:`linear-gradient(90deg, rgba(24,18,54,.95), rgba(74,63,134,.38)), url("${EARTH_IMAGE}")`}}><div><Badge tone="info">MARS TRANSIT · NOMINAL</Badge><div className="mission-day">Mission Day <strong>147</strong></div><p>Context for your wellbeing, not another control panel.</p></div><div className="earth-distance"><span>EARTH DISTANCE</span><strong>41.2M km</strong><small>2 min 18 sec signal delay</small></div></div><div className="mission-stats">{[["Destination","Mars orbit"],["Mission phase","Outbound transit"],["Crew status","All connected"],["Next milestone","Course correction · 12d"]].map(x=><Card key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong></Card>)}</div><Card className="mission-timeline"><div className="card-kicker">MISSION TIMELINE</div><div className="card-title">The journey so far</div><div className="mission-line"><div className="line-progress"/>{[["Launch","Day 001","done"],["Earth departure","Day 018","done"],["Current","Day 147","current"],["Mars transit","Day 224",""],["Arrival","Day 286",""]].map(x=><div className={x[2]} key={x[0]}><i>{x[2]==="done"&&<Icon name="check" size={12}/>}</i><strong>{x[0]}</strong><span>{x[1]}</span></div>)}</div><p className="mission-context"><Icon name="spark" size={17}/> Long transit periods can change sleep and social rhythm. HALO adjusts your personal baseline as the mission evolves.</p></Card></div>;
 }
 
 function Copilot({ go }: { go: (p: Page) => void }) {
@@ -179,7 +191,7 @@ function Privacy() {
   return <div className="page fade-in"><PageHead eyebrow="PRIVATE BY DESIGN" title="Your Mind. Your Data." sub="Detailed wellbeing information stays personal. You decide what leaves your private space."/><Card className="privacy-flow"><div><span className="privacy-icon private"><Icon name="lock"/></span><small>PRIVATE</small><strong>Detailed wellbeing signals</strong><p>Sleep, mood, stress, personal patterns</p></div><Icon name="arrow"/><div className="halo-process"><span className="privacy-icon"><Icon name="spark"/></span><small>HALO</small><strong>Secure personal processing</strong><p>Your model learns locally</p></div><Icon name="arrow"/><div><span className="privacy-icon safe"><Icon name="shield"/></span><small>CREW-SAFE</small><strong>Necessary support only</strong><p>General availability, safety when needed</p></div></Card><div className="privacy-grid"><Card><div className="card-kicker">YOUR SHARING CONTROLS</div><div className="card-title">Clear choices, changeable anytime</div>{[["Share detailed wellbeing data with medical team","Allows your mission clinician to review detailed trends."],["Allow family recommendations","Lets HALO suggest memories and messages when they may help."],["Allow crew support suggestions","Lets HALO recommend general crew connection without sharing why."]].map((x,i)=><div className="setting-row" key={x[0]}><div><strong>{x[0]}</strong><p>{x[1]}</p></div><Toggle value={toggles[i]} onChange={()=>setToggles(toggles.map((v,j)=>i===j?!v:v))}/></div>)}</Card><Card className="promise-card"><Icon name="shield" size={30}/><div className="card-title">The HALO privacy promise</div><ul><li><Icon name="check" size={15}/>No private psychological scores shown to crew</li><li><Icon name="check" size={15}/>No raw internal IDs or labels</li><li><Icon name="check" size={15}/>Safety alerts use only necessary information</li><li><Icon name="check" size={15}/>You can review sharing at any time</li></ul><Button kind="secondary">View data summary</Button></Card></div></div>;
 }
 
-function Settings({ dark, setDark }: { dark:boolean; setDark:(x:boolean)=>void }) {
+function Settings() {
   const [states,setStates]=useState([true,true,false,true,false]);
   const sections: Array<[string, Array<[string, string]>]> = [
     ["Wellbeing", [["Daily check-in", "A gentle prompt at 19:00"], ["Intervention suggestions", "Only when a meaningful change is found"]]],
@@ -188,7 +200,7 @@ function Settings({ dark, setDark }: { dark:boolean; setDark:(x:boolean)=>void }
     ["Accessibility", [["Larger text", "Increase interface text size"], ["Reduce motion", "Minimize visual transitions"]]],
   ];
   let n=0;
-  return <div className="page fade-in"><PageHead title="Settings" sub="Simple controls for how HALO feels, communicates, and supports you."/><div className="settings-layout"><div className="settings-nav">{sections.map((x,i)=><button className={i===0?"active":""} key={x[0]}>{x[0]}<Icon name="arrow" size={15}/></button>)}</div><div className="settings-main"><Card><div className="card-kicker">APPEARANCE</div><div className="setting-row"><div><strong>Low-light mode</strong><p>Designed for spacecraft night cycles with lower visual brightness.</p></div><button className="theme-choice" onClick={()=>setDark(!dark)}><Icon name={dark?"moon":"sun"}/><span>{dark?"Dark":"Light"}</span></button></div></Card>{sections.map((section)=><Card key={section[0]}><div className="card-kicker">{section[0].toUpperCase()}</div>{section[1].map((entry)=>{const idx=n++;return <div className="setting-row" key={entry[0]}><div><strong>{entry[0]}</strong><p>{entry[1]}</p></div><Toggle value={states[idx] ?? true} onChange={()=>setStates((current)=>current.map((v,j)=>idx===j?!v:v))}/></div>})}</Card>)}</div></div></div>;
+  return <div className="page fade-in"><PageHead title="Settings" sub="Simple controls for how HALO feels, communicates, and supports you."/><div className="settings-layout"><div className="settings-nav">{sections.map((x,i)=><button className={i===0?"active":""} key={x[0]}>{x[0]}<Icon name="arrow" size={15}/></button>)}</div><div className="settings-main">{sections.map((section)=><Card key={section[0]}><div className="card-kicker">{section[0].toUpperCase()}</div>{section[1].map((entry)=>{const idx=n++;return <div className="setting-row" key={entry[0]}><div><strong>{entry[0]}</strong><p>{entry[1]}</p></div><Toggle value={states[idx] ?? true} onChange={()=>setStates((current)=>current.map((v,j)=>idx===j?!v:v))}/></div>})}</Card>)}</div></div></div>;
 }
 
 function Onboarding({ close }: { close: () => void }) {
@@ -200,7 +212,7 @@ function Onboarding({ close }: { close: () => void }) {
 
 function App() {
   const [page,setPage]=useState<Page>("home");
-  const [dark,setDark]=useState(false);
+  const dark=true;
   const [mobileOpen,setMobileOpen]=useState(false);
   const [onboarding,setOnboarding]=useState(false);
   const content=useMemo(()=>{
@@ -210,11 +222,12 @@ function App() {
       case "future": return <Future/>; case "support": return <Support/>; case "family": return <Family/>;
       case "crew": return <Crew/>; case "mission": return <Mission/>; case "copilot": return <Copilot go={setPage}/>;
       case "model": return <PersonalModel/>; case "history": return <History/>; case "privacy": return <Privacy/>;
-      case "settings": return <Settings dark={dark} setDark={setDark}/>;
+      case "settings": return <Settings/>;
     }
   },[page,dark]);
   const navigate=(p:Page)=>{setPage(p);setMobileOpen(false);window.scrollTo({top:0,behavior:"smooth"})};
-  return <div className={`app ${dark?"dark":""}`}>
+  return <div className="app dark">
+    <a className="skip-link" href="#main">Skip to content</a>
     {onboarding&&<Onboarding close={()=>setOnboarding(false)}/>}
     <aside className={mobileOpen?"open":""}>
       <button className="brand brand-button" onClick={()=>setOnboarding(true)}><span className="brand-mark"/><b>HALO<span>—CREW</span></b></button>
@@ -223,8 +236,8 @@ function App() {
       <div className="side-bottom"><button className={page==="settings"?"active":""} onClick={()=>navigate("settings")}><Icon name="settings"/><span>Settings</span></button><button className={page==="privacy"?"active":""} onClick={()=>navigate("privacy")}><Icon name="shield"/><span>Privacy</span></button><div className="private-chip"><Icon name="lock" size={14}/><span>Personal data protected</span></div></div>
     </aside>
     <div className="app-main">
-      <header><button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)}><Icon name={mobileOpen?"close":"menu"}/></button><div className="top-mission"><span><i/>LOCAL MODE</span><b>MISSION DAY 147</b></div><div className="top-actions"><button onClick={()=>setDark(!dark)} aria-label="Toggle color mode"><Icon name={dark?"sun":"moon"}/></button><button aria-label="Notifications"><Icon name="bell"/><i/></button><div className="profile"><span>MC</span><div><b>COMMANDER MAYA</b><small>CALM · STABLE</small></div></div></div></header>
-      <main>{content}</main>
+      <header><button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)}><Icon name={mobileOpen?"close":"menu"}/></button><div className="top-mission"><span><i/>LOCAL MODE</span><b>MISSION DAY 147</b></div><div className="top-actions"><button aria-label="Notifications"><Icon name="bell"/><i/></button><div className="profile"><span>MC</span><div><b>COMMANDER MAYA</b><small>CALM · STABLE</small></div></div></div></header>
+      <main id="main">{content}</main>
     </div>
   </div>;
 }
