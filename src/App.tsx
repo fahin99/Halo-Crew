@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BodyRadar, FutureChart, ModelRadar, Spark, Trend, metricSummary } from "./charts";
-import WaveformDemo from "./waveform-demo";
+import { Waveform } from "./components/ui/waveform";
 
 type Page =
   | "home" | "wellbeing" | "insights" | "why" | "future" | "support"
@@ -10,10 +10,9 @@ type IconName = "home" | "heart" | "spark" | "future" | "support" | "family" | "
   "mission" | "chat" | "model" | "history" | "shield" | "settings" | "moon" |
   "sun" | "bell" | "arrow" | "play" | "pause" | "check" | "leaf" | "music" |
   "video" | "photo" | "audio" | "lock" | "eye" | "clock" | "close" | "menu" |
-  "pulse" | "drop" | "wave";
+  "pulse" | "drop" | "wave" | "phone" | "micoff";
 
 const EARTH_IMAGE = "https://images.unsplash.com/photo-1634176866089-b633f4aec882?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=82&w=1600";
-const HOME_IMAGE = "https://images.unsplash.com/photo-1762363145981-21a82607ac67?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=82&w=1200";
 
 const NAV: { id: Page; label: string; icon: IconName; group?: string }[] = [
   { id: "home", label: "Home", icon: "home" },
@@ -61,6 +60,8 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
     pulse: <path d="M3 12h4l2.5-7 4.5 14 2.5-7H21"/>,
     drop: <path d="M12 3s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11Z"/>,
     wave: <path d="M2 12c2-7 4-7 6 0s4 7 6 0 4-7 6 0"/>,
+    phone: <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2Z"/>,
+    micoff: <><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M19 11v1a7 7 0 0 1-14 0v-1m7 8v3"/><path d="m3 3 18 18"/></>,
   };
   return <svg className="icon" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
@@ -141,7 +142,7 @@ function WhyPage() {
 
 function Future() {
   const [scenario,setScenario]=useState("Recovery break");
-  return <div className="page fade-in"><PageHead eyebrow="WHAT HAPPENS NEXT?" title="Future Self" sub="Explore how today’s patterns may evolve. These are projected trends, not certain outcomes."/><Card className="future-hero"><div className="future-head"><div><div className="card-kicker">PROJECTED WELLBEING · NEXT 48 HOURS</div><div className="card-title">A small choice can change the shape of tomorrow</div></div><Badge tone="info">MODEL CONFIDENCE 76%</Badge></div><div className="future-chart"><div className="future-label no-change"><i/>If nothing changes</div><div className="future-label intervention"><i/>If I take a {scenario.toLowerCase()}</div><FutureChart scenario={scenario}/></div><div className="uncertainty-note"><span><i className="good-line"/>Projected with support</span><span><i className="bad-line"/>Projected without change</span><span><i className="range-line"/>Uncertainty range</span></div></Card><Card className="scenario-card"><div><div className="card-kicker">TRY ANOTHER INTERVENTION</div><div className="card-title">What might shift the trajectory?</div><p>Choose an action to explore a possible outcome.</p></div><div className="scenario-options">{["Recovery break","Family connection","Guided breathing","Social interaction","Music","Sleep support"].map(x=><button className={scenario===x?"active":""} onClick={()=>setScenario(x)} key={x}><Icon name={x.includes("Family")?"family":x==="Music"?"music":x.includes("Sleep")?"moon":"leaf"} size={18}/>{x}{scenario===x&&<Icon name="check" size={16}/>}</button>)}</div></Card></div>;
+  return <div className="page fade-in"><PageHead eyebrow="WHAT HAPPENS NEXT?" title="Future Self" sub="Explore how today’s patterns may evolve. These are projected trends, not certain outcomes."/><Card className="future-hero"><div className="future-head"><div><div className="card-kicker">PROJECTED WELLBEING · NEXT 48 HOURS</div><div className="card-title">A small choice can change the shape of tomorrow</div></div><Badge tone="info">MODEL CONFIDENCE 76%</Badge></div><div className="future-chart"><FutureChart scenario={scenario}/></div><div className="uncertainty-note"><span><i className="good-line"/>Projected with support</span><span><i className="bad-line"/>Projected without change</span><span><i className="range-line"/>Uncertainty range</span></div></Card><Card className="scenario-card"><div><div className="card-kicker">TRY ANOTHER INTERVENTION</div><div className="card-title">What might shift the trajectory?</div><p>Choose an action to explore a possible outcome.</p></div><div className="scenario-options">{["Recovery break","Family connection","Guided breathing","Social interaction","Music","Sleep support"].map(x=><button className={scenario===x?"active":""} onClick={()=>setScenario(x)} key={x}><Icon name={x.includes("Family")?"family":x==="Music"?"music":x.includes("Sleep")?"moon":"leaf"} size={18}/>{x}{scenario===x&&<Icon name="check" size={16}/>}</button>)}</div></Card></div>;
 }
 
 const recommendations=[["RECOVER","Take a protected recovery break","High","Low","Your sleep and recovery signals suggest a quiet reset may help.","moon"],["CONNECT","Talk to someone","Medium","Low","Connection has helped you return to baseline during similar days.","crew"],["FAMILY","Spend a few minutes with home","High","None","Family video has been one of your most positive supports.","family"],["RESET","Guided breathing","Medium","None","A short breathing practice often improves your focus rhythm.","leaf"]];
@@ -150,9 +151,30 @@ function Support() {
   return <div className="page fade-in"><PageHead eyebrow="WHAT MIGHT HELP?" title="Support, shaped around you" sub="Personalized suggestions based on what has helped before. You always decide what to try."/><div className="recommend-grid">{recommendations.map((x,i)=><Card className={`recommend r${i}`} key={x[0]}><div className="recommend-icon"><Icon name={x[5] as IconName}/></div><span className="card-kicker">{x[0]}</span><div className="card-title">{x[1]}</div><div className="benefits"><span>Expected benefit <b>{x[2]}</b></span><span>Mission disruption <b>{x[3]}</b></span></div><p><strong>Why HALO recommends this</strong>{x[4]}</p><Button onClick={()=>setActive(x[1])}>Try it <Icon name="arrow" size={16}/></Button></Card>)}</div>{active&&<div className="modal-backdrop" onClick={()=>setActive(null)}><div className="modal" onClick={e=>e.stopPropagation()}><button className="modal-close" onClick={()=>setActive(null)}><Icon name="close"/></button><div className="halo-mini"><Icon name="leaf"/></div><div className="page-title">Make space for yourself</div><p>{active} is ready whenever you are. HALO will keep this time protected and quiet.</p><div className="modal-actions"><Button onClick={()=>setActive(null)} icon="play">Begin now</Button><Button kind="secondary" onClick={()=>setActive(null)}>Maybe later</Button></div></div></div>}</div>;
 }
 
+const VOICE_AGENTS: Array<[string, string, string, string]> = [
+  ["Mei Chen", "Mom", "MC", "Hi sweetheart — how was your day up there?"],
+  ["Daniel Chen", "Dad", "DC", "Hey kiddo. The garden is blooming without you."],
+  ["Lily Chen", "Sister", "LC", "Maya! You have to hear what happened today."],
+];
+
 function Family() {
-  const memories=[["Mom’s birthday","Video","video"],["Home garden","Photo","photo"],["Family message","Audio · 3:24","audio"],["Blue skies","Music · 4:12","music"]];
-  return <div className="page family-page fade-in"><div className="family-hero" style={{backgroundImage:`linear-gradient(90deg, rgba(30,22,64,.93), rgba(74,63,134,.38)), url("${HOME_IMAGE}")`}}><div><span className="eyebrow">A LITTLE PIECE OF EARTH</span><div className="hero-title">Home</div><p>Familiar voices, places, and moments—wherever you are.</p><Button>Open a memory <Icon name="play" size={16}/></Button></div></div><div className="tabs family-tabs">{["For You","Family","Friends","Memories","Music","Messages"].map((x,i)=><button className={i===0?"active":""} key={x}>{x}</button>)}</div><div className="section-title-row"><div><span className="eyebrow">YOUR MEMORY VAULT</span><div className="section-title">Close, even from here</div></div><span className="privacy-small"><Icon name="lock" size={14}/> Private to you</span></div><div className="media-grid">{memories.map((x,i)=><Card className={`media-card media-${i}`} key={x[0]}><div className="media-art">{i===1&&<img src={HOME_IMAGE} alt="A warm porch and garden at home"/>}<span><Icon name={x[2] as IconName}/></span>{i===0&&<div className="portrait-art"><i/><i/><i/></div>}</div><div><strong>{x[0]}</strong><span>{x[1]}</span></div><button className="round-play"><Icon name="play" size={15}/></button></Card>)}</div><Card className="family-recommend"><div className="recommend-icon"><Icon name="family"/></div><div><span className="card-kicker">RECOMMENDED FOR YOU</span><div className="card-title">Would a few minutes with home feel good?</div><p>Your day has been a little heavier than usual. Family connection has helped you before.</p></div><Button>Open memory <Icon name="arrow" size={16}/></Button></Card></div>;
+  const [agent, setAgent] = useState(0);
+  const [micOn, setMicOn] = useState(false);
+  const [talking, setTalking] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setTalking((v) => !v), talking ? 3200 : 2500);
+    return () => clearTimeout(t);
+  }, [talking]);
+  const a = VOICE_AGENTS[agent];
+  const caption = talking ? `“${a[3]}”` : micOn ? "Listening — speak now." : "Tap the microphone to speak.";
+  const status = talking ? "LIVE · AGENT SPEAKING" : micOn ? "MIC OPEN · LISTENING" : "STANDBY";
+  return <div className="page fade-in"><PageHead eyebrow="A LITTLE PIECE OF EARTH" title="Family voices" sub="Talk with AI voice agents shaped by the people waiting back home. They remember you."/><div className="voice-layout">
+    <div className="voice-agents"><span className="eyebrow">AI VOICE AGENTS OF YOUR FAMILY MEMBER</span>{VOICE_AGENTS.map((x, i) => <button className={`agent-pick${i === agent ? " active" : ""}`} onClick={() => { setAgent(i); setTalking(false); }} key={x[0]}><span className="agent-avatar">{x[2]}</span><div><strong>{x[0]}</strong><small>{x[1]} · Ready to talk</small></div><span className="talk-pill"><Icon name="phone" size={13}/>Talk</span></button>)}</div>
+    <Card className="voice-stage"><div className="voice-head"><span className="agent-avatar big">{a[2]}</span><div><div className="card-title">{a[0]}</div><p>{a[1]} · AI voice agent · Private session</p></div>{talking && <Badge tone="info">ON AIR</Badge>}</div>
+      <Waveform label={`${a[0]} · VOICE`} bars={56} playing={talking} intensity="high" className="voice-wave-full" />
+      <div className="voice-caption">{caption}</div>
+      <div className="voice-controls"><button className={`mic-btn${micOn ? " on" : ""}`} onClick={() => setMicOn(!micOn)} aria-label={micOn ? "Mute microphone" : "Unmute microphone"}><Icon name={micOn ? "audio" : "micoff"} size={26}/></button><span className="voice-status">{status}</span></div>
+    </Card></div></div>;
 }
 
 function Crew() {
@@ -219,7 +241,6 @@ function App() {
   },[page,dark]);
   const navigate=(p:Page)=>{setPage(p);setMobileOpen(false);window.scrollTo({top:0,behavior:"smooth"})};
   return <div className="app dark">
-    {typeof window !== "undefined" && new URLSearchParams(window.location.search).has("waveform") ? <WaveformDemo/> : <>
     <a className="skip-link" href="#main">Skip to content</a>
     {onboarding&&<Onboarding close={()=>setOnboarding(false)}/>}
     <aside className={mobileOpen?"open":""}>
@@ -232,7 +253,6 @@ function App() {
       <header><button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)}><Icon name={mobileOpen?"close":"menu"}/></button><div className="top-mission"><span><i/>LOCAL MODE</span><b>MISSION DAY 147</b></div><div className="top-actions"><button aria-label="Notifications"><Icon name="bell"/><i/></button><div className="profile"><span>MC</span><div><b>COMMANDER MAYA</b><small>CALM · STABLE</small></div></div></div></header>
       <main id="main">{content}</main>
     </div>
-    </>}
   </div>;
 }
 
