@@ -79,8 +79,8 @@ function Button({ children, kind = "primary", icon, onClick }: { children: React
 function PageHead({ eyebrow, title, sub }: { eyebrow?: string; title: string; sub: string }) {
   return <div className="page-head">{eyebrow && <span className="eyebrow">{eyebrow}</span>}<div className="page-title">{title}</div><p>{sub}</p></div>;
 }
-function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <section className={`card ${className}`}>{children}</section>;
+function Card({ children, className = "", id }: { children: ReactNode; className?: string; id?: string }) {
+  return <section className={`card ${className}`} id={id}>{children}</section>;
 }
 function Badge({ children, tone = "good" }: { children: ReactNode; tone?: "good" | "info" | "attention" | "neutral" }) {
   return <span className={`badge ${tone}`}><i/>{children}</span>;
@@ -444,6 +444,7 @@ function Privacy() {
 
 function Settings() {
   const [states,setStates]=useState([true,true,false,true,false]);
+  const [active,setActive]=useState(0);
   const sections: Array<[string, Array<[string, string]>]> = [
     ["Wellbeing", [["Daily check-in", "A gentle prompt at 19:00"], ["Intervention suggestions", "Only when a meaningful change is found"]]],
     ["Privacy", [["Crew sharing", "General availability only"], ["Family sharing", "Recommendations only"]]],
@@ -451,7 +452,8 @@ function Settings() {
     ["Accessibility", [["Larger text", "Increase interface text size"], ["Reduce motion", "Minimize visual transitions"]]],
   ];
   let n=0;
-  return <div className="page fade-in"><PageHead title="Settings" sub="Simple controls for how HALO feels, communicates, and supports you."/><div className="settings-layout"><div className="settings-nav">{sections.map((x,i)=><button className={i===0?"active":""} key={x[0]}>{x[0]}<Icon name="arrow" size={15}/></button>)}</div><div className="settings-main">{sections.map((section)=><Card key={section[0]}><div className="card-kicker">{section[0].toUpperCase()}</div>{section[1].map((entry)=>{const idx=n++;return <div className="setting-row" key={entry[0]}><div><strong>{entry[0]}</strong><p>{entry[1]}</p></div><Toggle value={states[idx] ?? true} onChange={()=>setStates((current)=>current.map((v,j)=>idx===j?!v:v))}/></div>})}</Card>)}</div></div></div>;
+  const goTo=(i:number)=>{setActive(i);const el=document.getElementById(`setting-${i}`);if(el){const y=el.getBoundingClientRect().top+window.scrollY-110;window.scrollTo({top:y,behavior:"smooth"})}};
+  return <div className="page fade-in"><PageHead title="Settings" sub="Simple controls for how HALO feels, communicates, and supports you."/><div className="settings-layout"><div className="settings-nav">{sections.map((x,i)=><button className={i===active?"active":""} key={x[0]} onClick={()=>goTo(i)}>{x[0]}<Icon name="arrow" size={15}/></button>)}</div><div className="settings-main">{sections.map((section,i)=><Card key={section[0]} className="settings-section" id={`setting-${i}`}><div className="card-kicker">{section[0].toUpperCase()}</div>{section[1].map((entry)=>{const idx=n++;return <div className="setting-row" key={entry[0]}><div><strong>{entry[0]}</strong><p>{entry[1]}</p></div><Toggle value={states[idx] ?? true} onChange={()=>setStates((current)=>current.map((v,j)=>idx===j?!v:v))}/></div>})}</Card>)}</div></div></div>;
 }
 
 function Onboarding({ close }: { close: () => void }) {
