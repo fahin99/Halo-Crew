@@ -26,5 +26,12 @@ logs/
 # Local AI runtimes and private voice references
 .local-ai/
 .voice-references/
+voice-references/
 
 __pycache__/
+
+# Local UI verification captures and recording notes
+/docs/*.jpg
+/docs/*.png
+/docs/DEMO-RECORDING.md
+.DS_Store
