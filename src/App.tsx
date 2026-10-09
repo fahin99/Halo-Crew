@@ -466,6 +466,7 @@ function App() {
   const dark=true;
   const [mobileOpen,setMobileOpen]=useState(false);
   const [onboarding,setOnboarding]=useState(false);
+  useEffect(()=>{ document.title=`HaloCrew - ${PAGE_TITLES[page]}`; },[page]);
   const content=useMemo(()=>{
     switch(page){
       case "home": return <Home go={setPage}/>; case "wellbeing": return <Wellbeing go={setPage}/>;
