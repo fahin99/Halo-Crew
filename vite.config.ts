@@ -1,5 +1,6 @@
 import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import haloBackend from './server/backend'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
@@ -18,6 +19,7 @@ export default defineConfig(({ mode }) => {
       minify: !emitSourcemaps,
     },
     plugins: [
+      haloBackend(),
 react(),
       tailwindcss(),
       figmaSiteConfiguration(siteConfiguration),

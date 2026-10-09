@@ -1,0 +1,54 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { createServer } from 'node:http'
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import haloBackend from './backend.ts'
+
+test('mission persistence, validation, confirmed inbox and conversation persistence', async () => {
+  const original = process.cwd(), temp = await mkdtemp(path.join(tmpdir(), 'halo-backend-'))
+  process.chdir(temp)
+  let handler
+  const plugin = haloBackend()
+  plugin.configureServer({ middlewares: { use(fn) { handler = fn } } })
+  const server = createServer((req,res)=>handler(req,res,()=>{res.statusCode=404;res.end()}))
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve))
+  const base = `http://127.0.0.1:${server.address().port}`
+  const request = (route, value, method='POST') => fetch(base+route,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(value)})
+  try {
+    assert.equal((await request('/api/mission',{scenario:'Nominal',logs:[],checkin:{fatigue:99}},'PUT')).status,400)
+    const state={scenario:'Nominal',logs:[{id:'a',text:'exercise',synced:false}],checkin:{fatigue:3,mood:'Calm'}}
+    assert.equal((await request('/api/mission',state,'PUT')).status,200)
+    assert.deepEqual((await (await fetch(base+'/api/mission')).json()).state,state)
+    assert.deepEqual((await (await request('/api/sync',{logs:state.logs})).json()).ids,['a'])
+    const reply=await (await request('/api/chat',{message:'hello',channel:'halo',context:{},fallback:'Recorded response'})).json()
+    assert.ok(reply.answer)
+    assert.equal((await (await fetch(base+'/api/chat')).json()).conversations.halo.length,2)
+    assert.equal((await fetch(base+'/api/mission',{method:'PUT',headers:{Origin:'https://untrusted.example','Content-Type':'application/json'},body:JSON.stringify(state)})).status,403)
+  } finally {
+    await new Promise(resolve=>server.close(resolve));process.chdir(original);await rm(temp,{recursive:true,force:true})
+  }
+})
+
+import { createApp } from './start.ts'
+test('hosted entry gate protects mission records, validates session, and serves the app', async () => {
+  const original=process.cwd(),temp=await mkdtemp(path.join(tmpdir(),'halo-access-'))
+  process.chdir(temp)
+  const app=createApp({passcode:'test-team-passcode',secret:'isolated-test-secret'})
+  const server=createServer((req,res)=>app.handler(req,res))
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve))
+  const base=`http://127.0.0.1:${server.address().port}`
+  try{
+    assert.equal((await fetch(base+'/api/mission')).status,401)
+    const rejected=await fetch(base+'/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'passcode=wrong',redirect:'manual'})
+    assert.equal(rejected.status,401)
+    const response=await fetch(base+'/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'passcode=test-team-passcode',redirect:'manual'})
+    assert.equal(response.status,303)
+    const cookie=response.headers.get('set-cookie').split(';')[0]
+    assert.match(cookie,/halo_session=/)
+    assert.equal((await fetch(base+'/api/mission',{headers:{Cookie:cookie}})).status,200)
+    assert.equal((await fetch(base+'/api/mission',{headers:{Cookie:cookie+'forged'}})).status,401)
+    assert.equal((await fetch(base+'/healthz')).status,200)
+  }finally{await new Promise(resolve=>server.close(resolve));await app.close();process.chdir(original);await rm(temp,{recursive:true,force:true})}
+})

@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: halo-crew
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: halo-crew-db
+          property: connectionString
+      - key: HALO_SESSION_SECRET
+        generateValue: true
+      - key: HALO_TEAM_PASSCODE
+        sync: false
+
+databases:
+  - name: halo-crew-db
+    plan: free
+    region: oregon
+    databaseName: halo
+    user: halo
