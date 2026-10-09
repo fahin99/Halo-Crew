@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { BodyRadar, FutureChart, ModelRadar, Spark, Trend, metricSummary } from "./charts";
 import { Waveform } from "./components/ui/waveform";
 
@@ -28,8 +28,15 @@ const NAV: { id: Page; label: string; icon: IconName; group?: string }[] = [
   { id: "history", label: "What Works For Me", icon: "history" },
 ];
 
+const PAGE_TITLES: Record<Page, string> = {
+  home: "Home", wellbeing: "My Wellbeing", insights: "Insights", why: "Why?",
+  future: "Future Self", support: "Support", family: "Family", crew: "Crew",
+  mission: "Mission", copilot: "AI Copilot", model: "My Personal Model",
+  history: "What Works For Me", privacy: "Privacy", settings: "Settings",
+};
+
 function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
-  const paths: Record<IconName, React.ReactNode> = {
+  const paths: Record<IconName, ReactNode> = {
     home: <><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9M9 20v-7h6v7"/></>,
     heart: <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/>,
     spark: <><path d="m12 3-1.4 4.1a5.4 5.4 0 0 1-3.5 3.5L3 12l4.1 1.4a5.4 5.4 0 0 1 3.5 3.5L12 21l1.4-4.1a5.4 5.4 0 0 1 3.5-3.5L21 12l-4.1-1.4a5.4 5.4 0 0 1-3.5-3.5Z"/></>,
@@ -66,16 +73,16 @@ function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   return <svg className="icon" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 
-function Button({ children, kind = "primary", icon, onClick }: { children: React.ReactNode; kind?: "primary" | "secondary" | "ghost"; icon?: IconName; onClick?: () => void }) {
+function Button({ children, kind = "primary", icon, onClick }: { children: ReactNode; kind?: "primary" | "secondary" | "ghost"; icon?: IconName; onClick?: () => void }) {
   return <button className={`btn ${kind}`} onClick={onClick}>{children}{icon && <Icon name={icon} size={17}/>}</button>;
 }
 function PageHead({ eyebrow, title, sub }: { eyebrow?: string; title: string; sub: string }) {
   return <div className="page-head">{eyebrow && <span className="eyebrow">{eyebrow}</span>}<div className="page-title">{title}</div><p>{sub}</p></div>;
 }
-function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <section className={`card ${className}`}>{children}</section>;
 }
-function Badge({ children, tone = "good" }: { children: React.ReactNode; tone?: "good" | "info" | "attention" | "neutral" }) {
+function Badge({ children, tone = "good" }: { children: ReactNode; tone?: "good" | "info" | "attention" | "neutral" }) {
   return <span className={`badge ${tone}`}><i/>{children}</span>;
 }
 function Ring({ value = 82, label = "PERSONAL WELLBEING", small = false }: { value?: number; label?: string; small?: boolean }) {
@@ -186,9 +193,239 @@ function Mission() {
   return <div className="page fade-in"><div className="mission-hero" style={{backgroundImage:`linear-gradient(90deg, rgba(24,18,54,.95), rgba(74,63,134,.38)), url("${EARTH_IMAGE}")`}}><div><Badge tone="info">MARS TRANSIT · NOMINAL</Badge><div className="mission-day">Mission Day <strong>147</strong></div><p>Context for your wellbeing, not another control panel.</p></div><div className="earth-distance"><span>EARTH DISTANCE</span><strong>41.2M km</strong><small>2 min 18 sec signal delay</small></div></div><div className="mission-stats">{[["Destination","Mars orbit"],["Mission phase","Outbound transit"],["Crew status","All connected"],["Next milestone","Course correction · 12d"]].map(x=><Card key={x[0]}><span>{x[0]}</span><strong>{x[1]}</strong></Card>)}</div><Card className="mission-timeline"><div className="card-kicker">MISSION TIMELINE</div><div className="card-title">The journey so far</div><div className="mission-line"><div className="line-progress"/>{[["Launch","Day 001","done"],["Earth departure","Day 018","done"],["Current","Day 147","current"],["Mars transit","Day 224",""],["Arrival","Day 286",""]].map(x=><div className={x[2]} key={x[0]}><i>{x[2]==="done"&&<Icon name="check" size={12}/>}</i><strong>{x[0]}</strong><span>{x[1]}</span></div>)}</div><p className="mission-context"><Icon name="spark" size={17}/> Long transit periods can change sleep and social rhythm. HALO adjusts your personal baseline as the mission evolves.</p></Card></div>;
 }
 
-function Copilot({ go }: { go: (p: Page) => void }) {
-  const [prompt,setPrompt]=useState("Why is this happening?");
-  return <div className="page fade-in"><PageHead eyebrow="HALO KNOWS YOUR PATTERNS" title="HALO Copilot" sub="A specialized wellbeing companion that explains what it notices and leaves every choice with you."/><div className="copilot-grid"><Card className="copilot-main"><div className="halo-presence"><span className="halo-orb"><Icon name="spark"/></span><div><b>HALO</b><small>Personal model active · Private</small></div></div><div className="copilot-greeting"><div className="card-title">Good evening, Maya.</div><p>I’ve noticed your recovery has been slightly slower over the last three days. It appears connected to later sleep and a fuller mission schedule.</p><div className="evidence-strip"><span><Icon name="moon" size={17}/><b>Sleep</b>38 min below usual</span><span><Icon name="clock" size={17}/><b>Recovery</b>Slightly slower</span><span><Icon name="shield" size={17}/><b>Confidence</b>82%</span></div><p className="caveat">This is a meaningful change in your pattern, not a diagnosis.</p></div><div className="copilot-response"><span className="eyebrow">YOU ASKED · {prompt.toUpperCase()}</span><p>{prompt==="What can I do now?"?"A short recovery break is the lowest-effort option with the strongest expected benefit today.":"The clearest contributor is a small sleep shift across two nights. Workload timing may also be playing a part."}</p><Button onClick={()=>go("support")}>See a helpful next step <Icon name="arrow" size={16}/></Button></div></Card><div><span className="eyebrow">ASK HALO</span><div className="prompt-list">{["Why is this happening?","What can I do now?","Show my trends","Help me recover","Connect me with home"].map(x=><button className={prompt===x?"active":""} onClick={()=>setPrompt(x)} key={x}>{x}<Icon name="arrow" size={15}/></button>)}</div><Card className="privacy-note"><Icon name="lock"/><div><strong>This conversation stays private</strong><p>Only safety-critical information is shared, and only according to your settings.</p></div></Card></div></div></div>;
+type ChatMsg = { id: number; role: "user" | "assistant"; text: string; failed?: boolean };
+
+/* Clearly-separated mock response service (preview only — not a real AI answer). */
+function mockAiRespond(): Promise<string> {
+  return new Promise((resolve) => {
+    window.setTimeout(() => resolve("Hello crewmate Maya, how can i help you?"), 2000);
+  });
+}
+
+function renderInline(text: string, keyPrefix: string): ReactNode[] {
+  const parts: ReactNode[] = [];
+  const re = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+)/g;
+  let last = 0, m: RegExpExecArray | null, k = 0;
+  while ((m = re.exec(text))) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    const tok = m[0];
+    if (tok.startsWith("`")) parts.push(<code key={`${keyPrefix}-${k++}`} className="md-code">{tok.slice(1, -1)}</code>);
+    else if (tok.startsWith("**")) parts.push(<strong key={`${keyPrefix}-${k++}`}>{tok.slice(2, -2)}</strong>);
+    else parts.push(<em key={`${keyPrefix}-${k++}`}>{tok.slice(1, -1)}</em>);
+    last = m.index + tok.length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
+
+function renderMarkdown(text: string): ReactNode {
+  const blocks: ReactNode[] = [];
+  const lines = text.split("\n");
+  let i = 0, k = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (line.startsWith("```")) {
+      const buf: string[] = [];
+      i++;
+      while (i < lines.length && !lines[i].startsWith("```")) { buf.push(lines[i]); i++; }
+      i++;
+      blocks.push(<pre key={k++} className="md-pre"><code>{buf.join("\n")}</code></pre>);
+      continue;
+    }
+    if (/^#{1,3}\s/.test(line)) {
+      const level = line.match(/^(#{1,3})/)![1].length;
+      const Tag = level === 1 ? "h3" : level === 2 ? "h4" : "h5";
+      blocks.push(<Tag key={k++} className="md-head">{renderInline(line.replace(/^#{1,3}\s/, ""), `h${k}`)}</Tag>);
+      i++;
+      continue;
+    }
+    if (/^(\s*[-•]\s+)/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^(\s*[-•]\s+)/.test(lines[i])) { items.push(lines[i].replace(/^(\s*[-•]\s+)/, "")); i++; }
+      blocks.push(<ul key={k++} className="md-ul">{items.map((t, j) => <li key={j}>{renderInline(t, `u${k}-${j}`)}</li>)}</ul>);
+      continue;
+    }
+    if (/^\s*\d+\.\s+/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) { items.push(lines[i].replace(/^\s*\d+\.\s+/, "")); i++; }
+      blocks.push(<ol key={k++} className="md-ol">{items.map((t, j) => <li key={j}>{renderInline(t, `o${k}-${j}`)}</li>)}</ol>);
+      continue;
+    }
+    if (line.trim() === "") { i++; continue; }
+    blocks.push(<p key={k++} className="md-p">{renderInline(line, `p${k}`)}</p>);
+    i++;
+  }
+  return <>{blocks}</>;
+}
+
+function ThinkingIndicator() {
+  return (
+    <div className="thinking" role="status" aria-label="AI is thinking">
+      <span className="spinner" aria-hidden="true" />
+      <span>Thinking...</span>
+    </div>
+  );
+}
+
+function ChatHeader() {
+  return (
+    <div className="chat-header">
+      <span className="brand-mark chat-mark" aria-hidden="true" />
+      <div>
+        <b>Copilot</b>
+        <small>Private · Personal model active</small>
+      </div>
+    </div>
+  );
+}
+
+function ChatMessage({ msg, onRetry }: { msg: ChatMsg; onRetry?: () => void }) {
+  if (msg.role === "user") {
+    return (
+      <div className="msg-row user">
+        <div className="bubble user-bubble">{renderMarkdown(msg.text)}</div>
+      </div>
+    );
+  }
+  return (
+    <div className="msg-row ai">
+      <span className="brand-mark ai-mark" aria-hidden="true" />
+      <div className="ai-body">
+        {renderMarkdown(msg.text)}
+        {msg.failed && (
+          <div className="chat-error">
+            <span>Couldn't send that. Check your connection.</span>
+            <button onClick={onRetry}>Retry</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MessageComposer({ value, onChange, onSend, busy }: {
+  value: string; onChange: (v: string) => void; onSend: () => void; busy: boolean;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
+  }, [value]);
+  const canSend = value.trim().length > 0 && !busy;
+  return (
+    <div className="composer-wrap">
+      <div className="composer">
+        <textarea
+          ref={ref}
+          rows={1}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (canSend) onSend(); }
+          }}
+          placeholder="Message Copilot..."
+          aria-label="Message Copilot"
+        />
+        <button
+          className="send-btn"
+          onClick={onSend}
+          disabled={!canSend}
+          aria-label="Send message"
+        >
+          <Icon name="arrow" size={17} />
+        </button>
+      </div>
+      <small className="composer-hint">Enter to send · Shift + Enter for a new line</small>
+    </div>
+  );
+}
+
+function Copilot() {
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [input, setInput] = useState("");
+  const [thinking, setThinking] = useState(false);
+  const [follow, setFollow] = useState(true);
+  const idRef = useRef(1);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(() => () => {
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el && follow) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [messages, thinking, follow]);
+
+  const send = useCallback(async (override?: string) => {
+    const text = (override ?? input).trim();
+    if (!text || thinking) return;
+    const userMsg: ChatMsg = { id: idRef.current++, role: "user", text };
+    setMessages((m) => [...m, userMsg]);
+    setInput("");
+    setFollow(true);
+    setThinking(true);
+    try {
+      const reply = await mockAiRespond();
+      setMessages((m) => [...m, { id: idRef.current++, role: "assistant", text: reply }]);
+    } catch {
+      setMessages((m) => [...m, { id: idRef.current++, role: "assistant", text: "", failed: true }]);
+    } finally {
+      setThinking(false);
+    }
+  }, [input, thinking]);
+
+  const retry = useCallback(() => {
+    setMessages((m) => m.filter((x) => !x.failed));
+    const lastUser = [...messages].reverse().find((x) => x.role === "user");
+    if (lastUser) send(lastUser.text);
+  }, [messages, send]);
+
+  return (
+    <div className="page fade-in">
+      <PageHead eyebrow="HALO KNOWS YOUR PATTERNS" title="HALO Copilot" sub="A specialized wellbeing companion that explains what it notices and leaves every choice with you." />
+      <section className="card chat-shell">
+        <ChatHeader />
+        <div
+          className="chat-scroll"
+          ref={scrollRef}
+          onScroll={(e) => {
+            const el = e.currentTarget;
+            setFollow(el.scrollHeight - el.scrollTop - el.clientHeight < 80);
+          }}
+        >
+          {messages.length === 0 && !thinking ? (
+            <div className="chat-welcome">
+              <span className="brand-mark welcome-mark" aria-hidden="true" />
+              <div className="chat-welcome-title">What can I help you with today?</div>
+              <p>Ask about your patterns, recovery, or mission rhythm. This conversation stays in this session.</p>
+              <div className="chat-suggestions">
+                {["Why is my recovery slower?", "What can I do now?", "Show my trends"].map((s) => (
+                  <button key={s} onClick={() => send(s)}>{s}</button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="chat-thread">
+              {messages.map((msg) => (
+                <ChatMessage key={msg.id} msg={msg} onRetry={retry} />
+              ))}
+              {thinking && (
+                <div className="msg-row ai">
+                  <span className="brand-mark ai-mark" aria-hidden="true" />
+                  <div className="ai-body"><ThinkingIndicator /></div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        <MessageComposer value={input} onChange={setInput} onSend={() => send()} busy={thinking} />
+      </section>
+    </div>
+  );
 }
 
 function PersonalModel() {
@@ -234,7 +471,7 @@ function App() {
       case "home": return <Home go={setPage}/>; case "wellbeing": return <Wellbeing go={setPage}/>;
       case "insights": return <Insights go={setPage}/>; case "why": return <WhyPage/>;
       case "future": return <Future/>; case "support": return <Support/>; case "family": return <Family/>;
-      case "crew": return <Crew/>; case "mission": return <Mission/>; case "copilot": return <Copilot go={setPage}/>;
+      case "crew": return <Crew/>; case "mission": return <Mission/>;       case "copilot": return <Copilot />;
       case "model": return <PersonalModel/>; case "history": return <History/>; case "privacy": return <Privacy/>;
       case "settings": return <Settings/>;
     }
