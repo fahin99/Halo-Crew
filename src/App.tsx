@@ -164,24 +164,60 @@ const VOICE_AGENTS: Array<[string, string, string, string]> = [
   ["Lily Chen", "Sister", "LC", "Maya! You have to hear what happened today."],
 ];
 
+const FAMILY_VIDEOS: Array<[string, string, string, string]> = [
+  ["6:12", "2 days ago", "The garden finally bloomed — filming it just for you.", true],
+  ["3:48", "5 days ago", "Quick tour of the workshop. Miss your help with the boat.", false],
+  ["12:30", "1 week ago", "Sunday dinner from the kitchen table. We saved you a seat.", false],
+  ["2:05", "2 weeks ago", "Snow day! The whole neighborhood came out to the street.", false],
+];
+
 function Family() {
+  const [tab, setTab] = useState<"voice" | "video">("voice");
   const [agent, setAgent] = useState(0);
   const [micOn, setMicOn] = useState(false);
   const [talking, setTalking] = useState(false);
+  const [video, setVideo] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [replyMode, setReplyMode] = useState<"text" | "voice" | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [replies, setReplies] = useState<{ id: number; kind: "text" | "voice"; text: string; time: string; at: number }[]>([
+    { id: 1, kind: "voice", text: "Sent a voice reply · 0:42", time: "Yesterday", at: 1 },
+    { id: 2, kind: "text", text: "Thank you both so much — this made my whole week. I miss the garden!", time: "3 days ago", at: 2 },
+  ]);
+  const sendReply = (kind: "text" | "voice") => {
+    const item = kind === "text"
+      ? { id: Date.now(), kind, text: replyText.trim() || "Thanks for the video — love you all!", time: "Just now", at: 0 }
+      : { id: Date.now(), kind, text: "Sent a voice reply · 0:38", time: "Just now", at: 0 };
+    setReplies((r) => [item, ...r]);
+    setReplyText("");
+    setReplyMode(null);
+  };
   useEffect(() => {
     const t = setTimeout(() => setTalking((v) => !v), talking ? 3200 : 2500);
     return () => clearTimeout(t);
   }, [talking]);
   const a = VOICE_AGENTS[agent];
+  const v = FAMILY_VIDEOS[video];
   const caption = talking ? `“${a[3]}”` : micOn ? "Listening — speak now." : "Tap the microphone to speak.";
   const status = talking ? "LIVE · AGENT SPEAKING" : micOn ? "MIC OPEN · LISTENING" : "STANDBY";
-  return <div className="page fade-in"><PageHead eyebrow="A LITTLE PIECE OF EARTH" title="Family voices" sub="Talk with AI voice agents shaped by the people waiting back home. They remember you."/><div className="voice-layout">
+  return <div className="page fade-in"><PageHead eyebrow="A LITTLE PIECE OF EARTH" title="Family voices & videos" sub="Talk with AI voice agents shaped by the people back home, and watch the memories they send up from Earth."/>
+    <div className="tabs"><button className={tab === "voice" ? "active" : ""} onClick={() => setTab("voice")}><Icon name="phone" size={14}/> Family Voice</button><button className={tab === "video" ? "active" : ""} onClick={() => setTab("video")}><Icon name="video" size={14}/> Family Video</button></div>
+    {tab === "voice" ? <div className="voice-layout">
     <div className="voice-agents"><span className="eyebrow">AI VOICE AGENTS OF YOUR FAMILY MEMBER</span>{VOICE_AGENTS.map((x, i) => <button className={`agent-pick${i === agent ? " active" : ""}`} onClick={() => { setAgent(i); setTalking(false); }} key={x[0]}><span className="agent-avatar">{x[2]}</span><div><strong>{x[0]}</strong><small>{x[1]} · Ready to talk</small></div><span className="talk-pill"><Icon name="phone" size={13}/>Talk</span></button>)}</div>
     <Card className="voice-stage"><div className="voice-head"><span className="agent-avatar big">{a[2]}</span><div><div className="card-title">{a[0]}</div><p>{a[1]} · AI voice agent · Private session</p></div>{talking && <Badge tone="info">ON AIR</Badge>}</div>
       <Waveform label={`${a[0]} · VOICE`} bars={56} playing={talking} intensity="high" className="voice-wave-full" />
       <div className="voice-caption">{caption}</div>
       <div className="voice-controls"><button className={`mic-btn${micOn ? " on" : ""}`} onClick={() => setMicOn(!micOn)} aria-label={micOn ? "Mute microphone" : "Unmute microphone"}><Icon name={micOn ? "audio" : "micoff"} size={26}/></button><span className="voice-status">{status}</span></div>
-    </Card></div></div>;
+    </Card></div> : <div className="voice-layout">
+    <div className="voice-agents video-side"><span className="eyebrow">VIDEOS FROM EARTH</span>{FAMILY_VIDEOS.map((x, i) => <button className={`video-row${i === video ? " active" : ""}`} onClick={() => { setVideo(i); setPlaying(false); }} key={x[1]}><span className="video-thumb"><Icon name="video" size={16}/></span><div><strong>{x[2]}</strong><small>{x[1]} · {x[0]}</small></div>{x[3] ? <span className="video-new">NEW</span> : <span className="talk-pill">Viewed</span>}</button>)}</div>
+    <Card className="video-stage">
+    <div className="video-account"><span className="agent-avatar big">CF</span><div><div className="card-title">Chen Family</div><p>Family account on Earth · Signal delay 2 min 18 sec</p></div><Badge tone="good"><Icon name="shield" size={12}/> Verified</Badge></div>
+    <div className="video-player"><div className="video-glow"/><button className="video-play" onClick={() => setPlaying(!playing)} aria-label={playing ? "Pause video" : "Play video"}><Icon name={playing ? "pause" : "play"} size={30}/></button><span className="video-duration">{v[0]}</span>{playing && <div className="video-live"><i/>PLAYING</div>}</div>
+    <div className="video-meta"><span className="video-when">Sent {v[1]}</span><div className="video-caption">“{v[2]}”</div></div>
+    <div className="video-actions"><Button icon="chat" onClick={() => setReplyMode(replyMode === "text" ? null : "text")}>Reply with text</Button><Button kind="secondary" icon="audio" onClick={() => sendReply("voice")}>Reply with voice</Button></div>
+    {replyMode === "text" && <div className="reply-composer"><input value={replyText} onChange={(e) => setReplyText(e.target.value)} placeholder="Write a message to your family on Earth…" onKeyDown={(e) => e.key === "Enter" && sendReply("text")}/><Button icon="arrow" onClick={() => sendReply("text")}>Send</Button></div>}
+    <div className="video-replies"><span className="eyebrow">YOUR PREVIOUS REPLIES</span>{replies.map((r) => <div className="reply-item" key={r.id}><span className={`reply-ico ${r.kind}`}><Icon name={r.kind === "text" ? "chat" : "audio"} size={15}/></span><div><p>{r.text}</p><span>{r.time}</span></div></div>)}</div>
+  </Card></div>}</div>;
 }
 
 function Crew() {
