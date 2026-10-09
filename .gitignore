@@ -22,3 +22,9 @@ logs/
 
 # Private local mission records
 .halo-data/
+
+# Local AI runtimes and private voice references
+.local-ai/
+.voice-references/
+
+__pycache__/

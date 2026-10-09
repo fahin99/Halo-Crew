@@ -1,11 +1,17 @@
 import type { Plugin } from "vite"
+import { createCloudAI } from "./cloud-ai.ts"
 import createStorage from "./storage.ts"
 import type { IncomingMessage } from "node:http"
 
-// Local single-astronaut backend. Bind behind localhost; not a public multi-user service.
+// Shared astronaut workspace; model and voice inference use operator-configured services.
 export function createApiHandler(hosted = false) {
   const storage = createStorage()
+  const cloud=createCloudAI()
   let queue = Promise.resolve()
+  const voiceUrl = process.env.HALO_VOICE_URL || "http://127.0.0.1:11435"
+  const voiceStatus = async () => {
+    try { const r=await fetch(`${voiceUrl}/status`,{signal:AbortSignal.timeout(800)}); if(!r.ok)return []; const v=await r.json(); return Array.isArray(v.voices)?v.voices.filter((x:string)=>["family-0","family-1","family-2"].includes(x)):[] } catch { return [] }
+  }
   const read = storage.read
   const save = (name: string, value: unknown) => {
     const task = queue.then(()=>storage.write(name,value))
@@ -31,8 +37,25 @@ export function createApiHandler(hosted = false) {
     try {
       if (route === "/api/status" && req.method === "GET") {
         let ai = false
-        try { const result = await fetch(`${process.env.HALO_MODEL_URL || "http://127.0.0.1:11434"}/api/tags`, { signal: AbortSignal.timeout(800) }); const models = await result.json(); ai = !!models.models?.some((m: any) => m.name === (process.env.HALO_LOCAL_MODEL || "llama3.2:3b")) } catch {}
-        return json(200, { storage: storage.kind, ai: ai ? "local-model" : "rules", model: ai ? process.env.HALO_LOCAL_MODEL || "llama3.2:3b" : null })
+        try { const result = await fetch(`${process.env.HALO_MODEL_URL || "http://127.0.0.1:11434"}/api/tags`, { signal: AbortSignal.timeout(800) }); const models = await result.json(); ai = !!models.models?.some((m: any) => m.name === (process.env.HALO_LOCAL_MODEL || "llama3.2:1b")) } catch {}
+        const remote=await cloud.status()
+        return json(200, { voices: remote.ai?remote.voices:await voiceStatus(), storage:storage.kind, ai:remote.ai?"cloud-model":ai?"local-model":"rules", model:remote.ai?remote.model:ai?process.env.HALO_LOCAL_MODEL||"llama3.2:1b":null })
+      }
+      if (route === "/api/speech" && req.method === "POST") {
+        const {channel}=await body(req)
+        if (!["family-0","family-1","family-2"].includes(channel)) return json(400,{error:"Invalid voice channel"})
+        const conversations=await read("conversations") || {}
+        const last=conversations[channel]?.at(-1)
+        if (!last || last.role === "You" || typeof last.text !== "string") return json(400,{error:"No saved companion reply"})
+        if((await cloud.status()).voices.includes(channel)){
+          const bytes=await cloud.speech({channel,text:last.text.slice(0,1200)})
+          res.statusCode=200;res.setHeader("Content-Type","audio/wav");res.setHeader("Cache-Control","no-store");res.end(bytes);return
+        }
+        if (!(await voiceStatus()).includes(channel)) return json(503,{error:"Voice reference not configured"})
+        const audio=await fetch(`${voiceUrl}/speech`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({channel,text:last.text.slice(0,1200)}),signal:AbortSignal.timeout(180000)})
+        if(!audio.ok || !audio.headers.get("Content-Type")?.startsWith("audio/wav")) return json(503,{error:"Voice generation unavailable"})
+        const bytes=Buffer.from(await audio.arrayBuffer())
+        res.statusCode=200;res.setHeader("Content-Type","audio/wav");res.setHeader("Cache-Control","no-store");res.end(bytes);return
       }
       if (route === "/api/mission") {
         if (req.method === "GET") return json(200, { state: await read("mission") })
@@ -55,11 +78,15 @@ export function createApiHandler(hosted = false) {
         const conversations = await read("conversations") || {}
         const history = conversations[channel] || []
         let answer = fallback, engine = "rules"
-        // No cloud API or credentials required. Optional locally installed model.
+        // Private free ZeroGPU inference, or optional local Ollama. Failures use labeled rules.
         try {
           const instruction = channel === "halo" ? "You are HALO, a concise astronaut wellbeing companion. Use only supplied records. Never invent readings, diagnose disease, infer immune function or bone density, prescribe drugs or doses, or claim validated predictions. Explain missing evidence. Suggest mission medical review for urgent symptoms." : `You are a clearly identified AI family companion using a preconfigured ${["mother","father","sibling"][Number(channel.slice(-1))]} persona. Be warm and brief, never claim to be the actual relative or invent their real memories. Do not diagnose or prescribe. Acknowledge medical concerns and recommend mission medical review.`
-          const result = await fetch(`${process.env.HALO_MODEL_URL || "http://127.0.0.1:11434"}/api/chat`, { method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(45000), body: JSON.stringify({ model: process.env.HALO_LOCAL_MODEL || "llama3.2:3b", stream: false, messages: [{ role: "system", content: instruction + "\nIllustrative mission context: " + JSON.stringify(context) }, ...history.slice(-10).map((x: any) => ({ role: x.role === "You" ? "user" : "assistant", content: x.text })), { role: "user", content: message }] }) })
+          if(cloud.configured){
+            answer=await cloud.chat({channel,instruction,context,history:history.slice(-10),message});engine="cloud-model"
+          }else{
+          const result = await fetch(`${process.env.HALO_MODEL_URL || "http://127.0.0.1:11434"}/api/chat`, { method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(45000), body: JSON.stringify({ model: process.env.HALO_LOCAL_MODEL || "llama3.2:1b", stream: false, options:{num_predict:220}, messages: [{ role: "system", content: instruction + "\nIllustrative mission context: " + JSON.stringify(context) }, ...history.slice(-10).map((x: any) => ({ role: x.role === "You" ? "user" : "assistant", content: x.text })), { role: "user", content: message }] }) })
           if (result.ok) { const generated = await result.json(); if (generated.message?.content) { answer = generated.message.content; engine = "local-model" } }
+          }
         } catch {}
         const updated = [...history, { role: "You", text: message }, { role: channel === "halo" ? "HALO" : value.name || "Family companion", text: answer }].slice(-100)
         // Serialize chat writes so two conversation channels cannot overwrite each other.

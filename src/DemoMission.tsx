@@ -1,4 +1,4 @@
-import { loadConversations, requestReply } from "./backend-client"
+import { loadConversations, requestReply, loadServiceStatus, requestFamilySpeech } from "./backend-client"
 import { sampleHistory } from "./sample-history"
 import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { scenarios, useMission, type Scenario } from "./mission-state"
@@ -1311,9 +1311,31 @@ export function DemoFamily() {
   const [audioQueued, setAudioQueued] = useState(false)
   const audioBlob = useRef<Blob | null>(null)
   const active = relatives[index]
+  const [clonedVoices,setClonedVoices]=useState<string[]>([])
+  const spokenAudio=useRef<HTMLAudioElement|null>(null)
+  const spokenUrl=useRef<string|null>(null)
+  const activeIndex=useRef(index)
+  const voiceEnabled=useRef(voice)
+  useEffect(()=>{activeIndex.current=index;voiceEnabled.current=voice},[index,voice])
+  const speechRequest=useRef(0)
+  useEffect(()=>{loadServiceStatus().then(s=>setClonedVoices(s.voices||[])).catch(()=>{})},[])
+  const stopVoice=()=>{speechRequest.current++;spokenAudio.current?.pause();if(spokenUrl.current)URL.revokeObjectURL(spokenUrl.current);spokenUrl.current=null;window.speechSynthesis?.cancel()}
+  const speakClone=async(channel:string)=>{
+    if(!voice)return
+    stopVoice();const id=speechRequest.current
+    try {
+      const blob=await requestFamilySpeech(channel)
+      if(id!==speechRequest.current)return
+      const url=URL.createObjectURL(blob), audio=new Audio(url)
+      spokenAudio.current=audio;spokenUrl.current=url
+      audio.onended=()=>URL.revokeObjectURL(url)
+      audio.onerror=()=>{URL.revokeObjectURL(url);setStatus("Voice playback unavailable; your reply is saved.")}
+      await audio.play()
+    }catch{if(id===speechRequest.current)setStatus("Cloned voice unavailable right now; your text reply is saved.")}
+  }
   useEffect(
     () => () => {
-      window.speechSynthesis?.cancel()
+      stopVoice()
       recognition.current?.abort()
       if (media.current?.state === "recording") media.current.stop()
       stream.current?.getTracks().forEach((t) => t.stop())
@@ -1362,8 +1384,8 @@ export function DemoFamily() {
       if(m.offline)throw new Error()
       const result=await requestReply(input,`family-${selected}`,person,{checkin:m.checkin},fallback)
       setMessages(v=>({...v,[selected]:result.messages}))
-      setStatus(result.engine==="local-model"?"Local AI reply · conversation saved":"Companion reply · conversation saved · scripted voice persona")
-      speak(result.answer)
+      setStatus(result.engine==="cloud-model"?"Online AI reply · conversation saved":result.engine==="local-model"?"Local AI reply · conversation saved":"Companion reply · conversation saved")
+      if(activeIndex.current===selected && voiceEnabled.current){if(clonedVoices.includes(`family-${selected}`))void speakClone(`family-${selected}`);else speak(result.answer)}
     } catch {
       setMessages(v=>({...v,[selected]:[...(v[selected]||[]),{role:"You",text:input},{role:person,text:fallback}]}))
       setStatus("Offline companion reply · not saved to server")
@@ -1440,9 +1462,7 @@ export function DemoFamily() {
         eyebrow="CONNECTION · MULTIPLE FAMILY COMPANIONS"
         title="A little piece of Earth."
       >
-        Three distinct scripted companions, optional browser speech, real audio
-        uploads and recorded replies. These are not cloned family voices or live
-        calls.
+        Talk with three AI companions, listen to family memories, and hear a consented family voice when configured. These are AI conversations, not live calls.
       </Head>
       <div className="connection-sculpture"><div className="connection-copy"><span className="eyebrow">FAR FROM EARTH. CLOSE TO HOME.</span><h2>A familiar voice.<br/><em>A softer landing.</em></h2><div className="connection-people"><span>MC</span><span>DC</span><span>LC</span><small>Your circle, always within reach.</small></div></div><Suspense fallback={<MaterialPlaceholder/>}><SpaceMaterial kind="family"/></Suspense></div>
       <div className="family-consent">
@@ -1453,7 +1473,7 @@ export function DemoFamily() {
             onChange={(e) => {
               setConsent(e.target.checked)
               if (!e.target.checked) {
-                window.speechSynthesis?.cancel()
+                stopVoice()
                 recognition.current?.abort()
               }
             }}
@@ -1466,10 +1486,10 @@ export function DemoFamily() {
             checked={voice}
             onChange={(e) => {
               setVoice(e.target.checked)
-              if (!e.target.checked) window.speechSynthesis?.cancel()
+              if (!e.target.checked) stopVoice()
             }}
           />{" "}
-          Browser voice playback
+          Voice playback
         </label>
       </div>
       <div className="voice-layout">
@@ -1480,7 +1500,7 @@ export function DemoFamily() {
               key={r.name}
               onClick={() => {
                 setIndex(i)
-                window.speechSynthesis?.cancel()
+                stopVoice()
                 recognition.current?.abort()
                 setStatus("")
               }}
@@ -1488,7 +1508,7 @@ export function DemoFamily() {
               <span className="agent-avatar">{r.initials}</span>
               <div>
                 <strong>{r.name}</strong>
-                <small>{r.role} · scripted sample persona</small>
+                <small>{r.role} · AI companion</small>
               </div>
             </button>
           ))}
@@ -1498,7 +1518,7 @@ export function DemoFamily() {
             {active.name} · {active.role}
           </div>
           <span className="badge info">
-            Synthetic browser voice · not cloned
+            {clonedVoices.includes(`family-${index}`)?"AI-generated voice · consented family reference":"Synthetic browser voice · voice reference not configured"}
           </span>
           <div className="family-messages">
             <p>{active.opening}</p>
@@ -1676,7 +1696,7 @@ export function DemoCopilot() {
       if(m.offline)throw new Error()
       const result=await requestReply(t,"halo","HALO",{signals:m.signals,checkin:m.checkin,scores:m.scores,notice:m.notice,logs:m.logs.slice(0,8)},fallback)
       setMessages(result.messages)
-      setChatStatus(result.engine==="local-model"?"Local AI · reply saved":"Rule-based assistant · reply saved")
+      setChatStatus(result.engine==="cloud-model"?"Online AI · reply saved":result.engine==="local-model"?"Local AI · reply saved":"Rule-based assistant · reply saved")
     } catch {
       setMessages(v=>[...v,{role:"You",text:t},{role:"HALO",text:fallback}])
       setChatStatus("Offline rule-based reply · not saved to server")
@@ -1689,7 +1709,7 @@ export function DemoCopilot() {
         title="Ask HALO about your patterns."
       >
         Responses use the active scenario, saved check-in and action history.
-        A local language model can provide conversational replies when installed; otherwise HALO uses transparent rule-based responses.
+        HALO uses the connected AI service, with a rule-based fallback if it is unavailable.
       </Head>
       <section className="card sample-chat">
         <div className="chat-header">

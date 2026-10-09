@@ -12,6 +12,7 @@
     "start": "node --experimental-strip-types server/start.ts"
   },
   "dependencies": {
+    "@gradio/client": "^2.7.1",
     "clsx": "^2.1.1",
     "pg": "^8.23.1",
     "react": "^19.0.0",

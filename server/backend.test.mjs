@@ -52,3 +52,28 @@ test('hosted entry gate protects mission records, validates session, and serves 
     assert.equal((await fetch(base+'/healthz')).status,200)
   }finally{await new Promise(resolve=>server.close(resolve));await app.close();process.chdir(original);await rm(temp,{recursive:true,force:true})}
 })
+
+import {Client} from '@gradio/client'
+import {createCloudAI} from './cloud-ai.ts'
+test('private cloud adapter validates status, chat and WAV output without exposing credentials',async(t)=>{
+ const previous=process.env.HF_TOKEN
+ process.env.HF_TOKEN='hf_isolated_test_token'
+ const calls=[]
+ t.mock.method(Client,'connect',async(space,options)=>{
+   assert.equal(space,'RJBee4u/halo-crew-ai')
+   assert.equal(options.token,'hf_isolated_test_token')
+   return {submit(endpoint,payload){
+     calls.push({endpoint,payload})
+     const data=endpoint==='/status'?{ai:true,voices:['family-0','invalid'],model:'test-model'}:endpoint==='/chat'?'A generated reply':Buffer.from('RIFF0000WAVEtest').toString('base64')
+     return {async *[Symbol.asyncIterator](){yield {type:'data',data:[data]}},cancel(){}}
+   }}
+ })
+ try{
+   const cloud=createCloudAI()
+   assert.deepEqual(await cloud.status(),{ai:true,voices:['family-0'],model:'test-model'})
+   assert.equal(await cloud.chat({message:'hello'}),'A generated reply')
+   assert.equal((await cloud.speech({channel:'family-0',text:'hello'})).toString(),'RIFF0000WAVEtest')
+   assert.equal(calls.length,3)
+   assert.equal(calls.some(x=>JSON.stringify(x.payload).includes('hf_')),false)
+ }finally{if(previous===undefined)delete process.env.HF_TOKEN;else process.env.HF_TOKEN=previous}
+})
