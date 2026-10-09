@@ -466,6 +466,14 @@ function App() {
   const dark=true;
   const [mobileOpen,setMobileOpen]=useState(false);
   const [onboarding,setOnboarding]=useState(false);
+  const [notifOpen,setNotifOpen]=useState(false);
+  const [notifications,setNotifications]=useState<{id:number;icon:IconName;tone:string;title:string;body:string;time:string;read:boolean}[]>([
+    {id:1,icon:"moon",tone:"teal",title:"Sleep quality improved",body:"Your restfulness is up 12% versus last week. Keep the 22:30 wind-down.",time:"12m ago",read:false},
+    {id:2,icon:"pulse",tone:"coral",title:"Elevated heart-rate pattern",body:"A short spike was detected during ARES III briefing. No action needed.",time:"1h ago",read:false},
+    {id:3,icon:"family",tone:"emerald",title:"New message from family",body:"Your daughter sent a voice note. It's a good moment to reply.",time:"3h ago",read:false},
+    {id:4,icon:"crew",tone:"teal",title:"Crew check-in due",body:"Team Wellbeing session is scheduled for Mission Day 148 at 09:00.",time:"Yesterday",read:true},
+    {id:5,icon:"spark",tone:"teal",title:"Insight from your model",body:"Focus peaks between 10:00 and 12:00—consider deep work here.",time:"2d ago",read:true},
+  ]);
   useEffect(()=>{ document.title=`HaloCrew - ${PAGE_TITLES[page]}`; },[page]);
   const content=useMemo(()=>{
     switch(page){
@@ -488,7 +496,7 @@ function App() {
       <div className="side-bottom"><button className={page==="settings"?"active":""} onClick={()=>navigate("settings")}><Icon name="settings"/><span>Settings</span></button><button className={page==="privacy"?"active":""} onClick={()=>navigate("privacy")}><Icon name="shield"/><span>Privacy</span></button><div className="private-chip"><Icon name="lock" size={14}/><span>Personal data protected</span></div></div>
     </aside>
     <div className="app-main">
-      <header><button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)}><Icon name={mobileOpen?"close":"menu"}/></button><div className="top-mission"><span><i/>LOCAL MODE</span><b>MISSION DAY 147</b></div><div className="top-actions"><button aria-label="Notifications"><Icon name="bell"/><i/></button><div className="profile"><span>MC</span><div><b>COMMANDER MAYA</b><small>CALM · STABLE</small></div></div></div></header>
+      <header><button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)}><Icon name={mobileOpen?"close":"menu"}/></button><div className="top-mission"><span><i/>LOCAL MODE</span><b>MISSION DAY 147</b></div><div className="top-actions"><div className="notif-wrap"><button aria-label="Notifications" aria-expanded={notifOpen} onClick={()=>setNotifOpen(v=>!v)}><Icon name="bell"/>{notifications.some(n=>!n.read)&&<i/>}</button>{notifOpen&&<><div className="notif-scrim" onClick={()=>setNotifOpen(false)}/><div className="notif-panel fade-in"><div className="notif-head"><div><b>Notifications</b><small>{notifications.filter(n=>!n.read).length} unread</small></div><button className="notif-mark" onClick={()=>setNotifications(ns=>ns.map(n=>({...n,read:true})))}>Mark all read</button></div><div className="notif-list">{notifications.map(n=><div className={`notif-item${n.read?" read":""}`} key={n.id} onClick={()=>setNotifications(ns=>ns.map(x=>x.id===n.id?{...x,read:true}:x))}><span className={`notif-ico tone-${n.tone}`}><Icon name={n.icon} size={16}/></span><div className="notif-body"><strong>{n.title}</strong><p>{n.body}</p><span>{n.time}</span></div>{!n.read&&<span className="notif-dot"/>}</div>)}</div></div></>}</div><div className="profile"><span>MC</span><div><b>COMMANDER MAYA</b><small>CALM · STABLE</small></div></div></div></header>
       <main id="main">{content}</main>
     </div>
   </div>;
