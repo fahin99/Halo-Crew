@@ -1,0 +1,27 @@
+# Execute with HaloCrew_VisionGuard_Complete.FCStd open. Reversible display modes.
+import FreeCAD as App,FreeCADGui as Gui
+from PySide import QtWidgets,QtCore
+from FreeCAD import Vector
+D=App.ActiveDocument
+if not D:raise RuntimeError('Open HaloCrew_VisionGuard_Complete.FCStd first')
+objects=[o for o in D.Objects if 'AssembledPosition' in o.PropertiesList]
+mode,ok=QtWidgets.QInputDialog.getItem(Gui.getMainWindow(),'VisionGuard inspection','Configuration',['Normal assembled','Exploded','Transparent casings','Sensor leaders','Isometric','Front','Rear','Left','Right','Top','Bottom','Camera orbit'],0,False)
+if ok:
+ if mode in ['Normal assembled','Exploded','Transparent casings','Sensor leaders']:
+  for o in objects:
+   pl=o.Placement;pl.Base=o.AssembledPosition+(o.ExplodeOffset if mode=='Exploded' else Vector());o.Placement=pl;o.Visibility=True
+   if 'RemovableCover' in o.Name or o.Name=='Tonometer_CaseLid':o.ViewObject.Transparency=85 if mode=='Transparent casings' else 0
+  for o in D.Objects:
+   if o.Name.startswith('Leader_'):o.Visibility=(mode=='Sensor leaders')
+  D.recompute()
+ v=Gui.activeDocument().activeView()
+ if mode in ['Front','Rear','Left','Right','Top','Bottom']:getattr(v,'view'+mode)()
+ else:v.viewIsometric()
+ v.fitAll()
+ if mode=='Camera orbit':
+  # QTimer remains live in the macro module until one revolution completes.
+  timer=QtCore.QTimer(Gui.getMainWindow());state={'i':0};orientation=v.getCameraOrientation()
+  def tick():
+   state['i']+=1;v.setCameraOrientation((App.Rotation(Vector(0,0,1),state['i']*3)*orientation).Q)
+   if state['i']>=120:timer.stop()
+  timer.timeout.connect(tick);timer.start(50)

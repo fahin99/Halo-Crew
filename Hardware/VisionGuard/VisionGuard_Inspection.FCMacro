@@ -1,0 +1,60 @@
+import FreeCAD as App,FreeCADGui as Gui,Part,os,json
+from FreeCAD import Vector as V
+from PySide import QtCore
+from pivy import coin
+out=os.environ.get('VISIONGUARD_OUTPUT',os.path.dirname(globals().get('__file__','')) or os.path.expanduser('~/VisionGuard'))
+doc=App.openDocument(out+'/HaloCrew_VisionGuard_Complete.FCStd');doc.recompute()
+parts=[o for o in doc.Objects if 'HardwareClass' in o.PropertiesList]
+validation={'reopened':True,'components':len(parts),'invalid':[o.Name for o in parts if not o.Shape.isValid() or not o.Shape.Solids],'failed_states':[(o.Name,list(o.State)) for o in doc.Objects if 'Invalid' in o.State]}
+# Parametric change test: lens opening and housing pad / cavity.
+p=doc.Design_Parameters;old=p.LensOpening;oldw=p.OCT_ConceptHousingEnvelopeWidth
+before=doc.Left_LensRim.Shape.BoundBox.XLength
+p.LensOpening=55;p.OCT_ConceptHousingEnvelopeWidth=154;doc.recompute()
+validation['parameter_test']={'rim_before_mm':before,'rim_after_mm':doc.Left_LensRim.Shape.BoundBox.XLength,'housing_after_mm':doc.OCT_ConceptHousing.Shape.BoundBox.XLength}
+p.LensOpening=old;p.OCT_ConceptHousingEnvelopeWidth=oldw;doc.recompute()
+# Housing clearance checks: exclude intentional bosses, mounts and cover screws.
+clashes=[]
+for body in [o for o in parts if o.TypeId=='PartDesign::Body' and 'Housing' in o.Name]:
+ par=next((g for g in doc.Objects if g.TypeId=='App::DocumentObjectGroup' and body in g.Group),None)
+ for o in parts:
+  if not par or o not in par.Group or o==body or any(k in o.Name for k in ['Cover','Boss','Screw','Vent','EyeCup','Cradle']):continue
+  if body.Shape.BoundBox.intersect(o.Shape.BoundBox):
+   vol=body.Shape.common(o.Shape).Volume
+   if vol>0.5:clashes.append({'housing':body.Name,'component':o.Name,'overlap_mm3':round(vol,2)})
+validation['housing_clashes']=clashes
+with open(out+'/VisionGuard_ValidationReport.json','w') as f:json.dump(validation,f,indent=2)
+# Consistent camera-space callout projection for rendered captures.
+def capture(name,targets,exploded=False):
+ view=Gui.activeDocument().activeView();view.viewIsometric();view.fitAll();Gui.updateGui()
+ view.saveImage(out+'/'+name+'.png',2000,1400,'White')
+ cam=view.getCameraOrientation();cn=view.getCameraNode();vv=cn.getViewVolume(2000/1400)
+ rows=[]
+ for label,obj in targets:
+  c=obj.Shape.BoundBox.Center;s=vv.projectToScreen(coin.SbVec3f(c.x,c.y,c.z));rows.append({'label':label,'name':obj.Name,'x':float(s[0])*2000,'y':(1-float(s[1]))*1400})
+ with open(out+'/'+name+'_anchors.json','w') as f:json.dump(rows,f)
+lookup=[('01 | VISIONGUARD GLASSES',doc.Left_LensRim),('02 | CONCEPT OCT',doc.OCT_ConceptHousing),('03 | FUNDUS CAMERA',doc.Fundus_Housing),('04 | REFRACTION TEST',doc.Refraction_TestLensHolder_1),('05 | ULTRASOUND',doc.Ultrasound_Console),('06 | REBOUND TONOMETER',doc.Tonometer_ErgonomicShell),('07 | VISUAL TEST STATION',doc.VisualStation_TestDisplay),('08 | EXAMINATION DOCK',doc.CommonMount_Receiver_MountPlate)]
+capture('VisionGuard_SystemCalloutsRaw',lookup)
+for o in parts:
+ if 'RemovableCover' in o.Name or o.Name=='Tonometer_CaseLid':o.Visibility=False
+ pl=o.Placement;pl.Base=pl.Base+o.ExplodeOffset;o.Placement=pl
+capture('VisionGuard_ExplodedCalloutsRaw',lookup,True)
+for o in parts:
+ pl=o.Placement;pl.Base=o.AssembledPosition;o.Placement=pl;o.Visibility=True
+# Wearable closeup and individual module inspection; separate sheets prevent tiny sensor labels.
+for prefix,groupname in [('Wearable','Wearable_Glasses'),('OCT','OCT_Concept_Assembly'),('Fundus','Fundus_Camera_Assembly')]:
+ allowed=set()
+ def descend(g):
+  for o in g.Group:
+   if o.TypeId=='App::DocumentObjectGroup':descend(o)
+   else:allowed.add(o.Name)
+ descend(doc.getObject(groupname))
+ for o in parts:o.Visibility=o.Name in allowed and 'RemovableCover' not in o.Name
+ if prefix in ['OCT','Fundus']:
+  doc.getObject('OCT_ConceptHousing' if prefix=='OCT' else 'Fundus_Housing').ViewObject.Transparency=80
+ if prefix=='Wearable':
+  targets=[('01 | IR EYE CAMERA',doc.Left_IRCameraBarrel),('02 | RECESSED IR EMITTER',doc.Left_IREmitter_0),('03 | PROCESSOR PCB',doc.Processor_PCB),('04 | SIX-AXIS IMU',doc.SixAxis_IMU),('05 | MICRODISPLAY',doc.NearEyeMicrodisplay),('06 | OPTICAL COUPLER',doc.OpticalCouplerPrism),('07 | AMBIENT LIGHT',doc.AmbientLightSensor),('08 | TEMPERATURE',doc.TemperatureSensor),('09 | HUMIDITY',doc.HumiditySensor),('10 | BATTERY CELL',doc.ProtectedBatteryCell),('11 | POWER-MANAGEMENT PCB',doc.PowerManagement_PCB),('12 | TELEMETRY ANTENNA',doc.TelemetryAntenna)]
+ elif prefix=='OCT':targets=[('01 | SOURCE + COOLING',doc.OCT_LightSourcePackage),('02 | BEAM SPLITTER',doc.OCT_BeamSplitter),('03 | REFERENCE MIRROR',doc.OCT_ReferenceMirror),('04 | SCANNING MIRRORS',doc.OCT_ScanningMirror_0),('05 | OBJECTIVE',doc.OCT_ObjectiveBarrel),('06 | LINE-ARRAY DETECTOR',doc.OCT_LineScanDetector)]
+ else:targets=[('01 | OBJECTIVE',doc.Fundus_ObjectiveBarrel),('02 | ANNULAR ILLUMINATION',doc.Fundus_IlluminationAnnulus),('03 | BEAM SPLITTER',doc.Fundus_BeamSplitter),('04 | APERTURE',doc.Fundus_Aperture),('05 | RELAY LENS',doc.Fundus_RelayLens_0),('06 | IMAGING SENSOR',doc.Fundus_ImagingSensor)]
+ capture('VisionGuard_'+prefix+'Raw',targets)
+# Do not save inspection visibility into the delivered native project.
+if os.environ.get('VISIONGUARD_BATCH')=='1':QtCore.QTimer.singleShot(1000,lambda:os._exit(0))

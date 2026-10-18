@@ -1,0 +1,26 @@
+{
+  "reopened": true,
+  "components": 444,
+  "invalid": [],
+  "failed_states": [],
+  "parameter_test": {
+    "rim_before_mm": 61.0,
+    "rim_after_mm": 63.0,
+    "housing_after_mm": 154.0
+  },
+  "housing_clashes": [],
+  "step_reimport": {
+    "solids": 462,
+    "valid": true
+  },
+  "glb_check": {
+    "named_nodes": 444,
+    "valid_container": true
+  },
+  "generation_macro_test": {
+    "fresh_output_run": true,
+    "components": 444,
+    "invalid_solids": 0
+  },
+  "clearance_check_scope": "Housing vs same-subsystem components; intentional bosses, fasteners, covers and vent markers excluded. Not an exhaustive collision certification."
+}

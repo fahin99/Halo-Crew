@@ -1,0 +1,414 @@
+# Error-reporting wrapper for all modeling and export operations.
+import os, traceback
+try:
+ # HaloCrew VisionGuard — FreeCAD native engineering concept, mm
+ # Execute in FreeCAD GUI. Geometry is not a medical device validation.
+ import FreeCAD as App, Part, Sketcher, math, os, json, csv, traceback
+ from FreeCAD import Vector as V
+ try:
+  import FreeCADGui as Gui
+ except ImportError: Gui=None
+ OUT=os.environ.get('VISIONGUARD_OUTPUT',os.path.dirname(globals().get('__file__','')) or os.path.expanduser('~/VisionGuard'))
+ os.makedirs(OUT,exist_ok=True)
+ DOC='HaloCrew_VisionGuard_Complete'
+ if DOC in App.listDocuments(): App.closeDocument(DOC)
+ doc=App.newDocument(DOC)
+ C={'black':(0.10,0.12,0.15),'white':(.85,.89,.92),'metal':(.52,.59,.65),'dark':(.20,.25,.30),'pcb':(.04,.34,.29),'gold':(.85,.63,.22),'cyan':(.05,.78,.90),'glass':(.62,.88,.96),'silicone':(.17,.19,.21)}
+ parts=[]; covers=[]; groups={}; highlights=[]; errors=[]
+ def group(name,parent=None):
+  g=doc.addObject('App::DocumentObjectGroup',name); g.Label=name.replace('_',' ')
+  if parent: parent.addObject(g)
+  groups[name]=g; return g
+ root=group('VisionGuard_System')
+ p=doc.addObject('App::FeaturePython','Design_Parameters'); root.addObject(p)
+ for name,val in [('GlassesWidth',145),('LensOpening',53),('LensHeight',37),('Bridge',19),('TempleLength',145),('FrameThickness',4),('HousingWall',2.5),('OCTWidth',150),('OCTDepth',190),('OCTHeight',95),('FundusWidth',100),('FundusDepth',155),('FundusHeight',85),('DisplayWidth',270),('DisplayHeight',170),('TestDistance',500),('DockRailWidth',36),('FitClearance',.4)]:
+  p.addProperty('App::PropertyLength',name,'Dimensions'); setattr(p,name,val)
+ p.addProperty('App::PropertyString','DesignStatus','Clinical'); p.DesignStatus='Unvalidated geometric concept; no performance or eye-safety claim'
+ A=group('Wearable_Glasses',root)
+ for n in ['Structural_Frame','Optical_Lenses','Eye_Tracking_Assembly','IR_Illumination_Assembly','IMU_Assembly','Visual_Test_Display','Environmental_Sensors','Electronics','Battery_And_Power','Hinges_And_Temples']:group(n,A)
+ B=group('Diagnostic_Optical_Modules',root)
+ for n in ['OCT_Concept_Assembly','Fundus_Camera_Assembly','Refractive_Test_Assembly','Docking_Connectors']:group(n,B)
+ CC=group('Clinical_Instruments',root)
+ for n in ['Ocular_Ultrasound','Tonometer','Vision_Test_Station']:group(n,CC)
+ aux=group('Presentation_Optical_Paths',root)
+ def register(o,g,color='white',fn='',purpose='',kind='',cover=False):
+  o.Label=o.Name.replace('_',' '); groups[g].addObject(o)
+  for prop,value in [('Function',fn or o.Label),('ClinicalPurpose',purpose or 'Mechanical integration / concept packaging'),('HardwareClass',kind or ('Wearable' if g in [x.Name for x in A.Group] else 'Detachable' if g in [x.Name for x in B.Group] else 'Separate examination instrument')),('ValidationStatus','Concept geometry; not clinically validated')]:
+   o.addProperty('App::PropertyString',prop,'Identification'); setattr(o,prop,value)
+  o.addProperty('App::PropertyVector','AssembledPosition','Configurations'); o.AssembledPosition=o.Placement.Base
+  o.addProperty('App::PropertyVector','ExplodeOffset','Configurations'); o.ExplodeOffset=V(0,0,45 if cover else 15+(len(parts)%4)*12)
+  if Gui:
+   o.ViewObject.ShapeColor=C[color]; o.ViewObject.LineColor=(.16,.21,.25)
+   if color=='glass': o.ViewObject.Transparency=72
+  parts.append(o)
+  if cover:covers.append(o)
+  return o
+ 
+ def box(n,g,pos,size,color='white',fn='',purpose='',cover=False):
+  o=doc.addObject('Part::Box',n); o.Length,o.Width,o.Height=size; o.Placement.Base=V(*pos)
+  return register(o,g,color,fn,purpose,cover=cover)
+ def cyl(n,g,pos,r,h,color='metal',axis=(0,0,1),fn='',purpose=''):
+  o=doc.addObject('Part::Cylinder',n); o.Radius=r; o.Height=h;o.Placement=App.Placement(V(*pos),App.Rotation(V(0,0,1),V(*axis)))
+  return register(o,g,color,fn,purpose)
+ def solid(n,g,shape,color='white',fn='',purpose='',cover=False):
+  o=doc.addObject('Part::Feature',n);o.Shape=shape
+  return register(o,g,color,fn,purpose,cover=cover)
+ def ring(n,g,pos,ro,ri,h,color='metal',axis=(0,0,1),fn=''):
+  s=Part.makeCylinder(ro,h,V(*pos),V(*axis)).cut(Part.makeCylinder(ri,h+.2,V(*pos)-V(*axis)*.1,V(*axis)))
+  return solid(n,g,s,color,fn)
+ def rod(n,g,a,b,r=1,color='metal',fn=''):
+  v=V(*b)-V(*a);return cyl(n,g,a,r,v.Length,color,tuple(v),fn)
+ def cable(n,g,points,r=1,color='black'):
+  # Swept-looking segmented routing; individual rounded bend junctions
+  shapes=[]
+  for a,b in zip(points[:-1],points[1:]):
+   d=V(*b)-V(*a);shapes.append(Part.makeCylinder(r,d.Length,V(*a),d))
+  for pt in points[1:-1]:shapes.append(Part.makeSphere(r,V(*pt)))
+  return solid(n,g,Part.makeCompound(shapes),color,'Routed flexible harness; bend geometry is a packaging illustration')
+ def screw(n,g,pos,size=1.5):
+  s=Part.makeCylinder(size,5,V(*pos)).fuse(Part.makeCylinder(size*1.7,1.4,V(*pos)+V(0,0,5)))
+  slot=Part.makeBox(size*2.6,.6,.8,V(*pos)+V(-size*1.3,-.3,5.8))
+  return solid(n,g,s.cut(slot),'metal','Captive service fastener')
+ def pcb(n,g,pos,size,chipcount=4):
+  o=box(n,g,pos,size,'pcb','Printed circuit board with modeled ICs and connector pads')
+  x,y,z=pos;w,d,h=size
+  for i in range(chipcount):
+   cx=x+3+(i%3)*(w-8)/3;cy=y+3+(i//3)*8
+   box(n+'_IC_'+str(i+1),g,(cx,cy,z+h+.15),(min(5,w/5),min(5,d/4),1.2),'black')
+  for i in range(6):box(n+'_Pad_'+str(i+1),g,(x+1+i*1.5,y+d-2,z+h),(.8,1.4,.1),'gold')
+  return o
+ 
+ def rectsk(body,n,w,d,pos):
+  s=doc.addObject('Sketcher::SketchObject',n);body.addObject(s);s.Placement.Base=V(*pos)
+  pts=[(0,0),(w,0),(w,d),(0,d)]
+  for i in range(4):
+   a,b=pts[i],pts[(i+1)%4];s.addGeometry(Part.LineSegment(V(*a,0),V(*b,0)),False)
+  for i in range(4):s.addConstraint(Sketcher.Constraint('Coincident',i,2,(i+1)%4,1))
+  for i in [0,2]:s.addConstraint(Sketcher.Constraint('Horizontal',i))
+  for i in [1,3]:s.addConstraint(Sketcher.Constraint('Vertical',i))
+  s.addConstraint(Sketcher.Constraint('Coincident',0,1,-1,1))
+  s.addConstraint(Sketcher.Constraint('Distance',0,w));s.renameConstraint(9,'Width')
+  s.addConstraint(Sketcher.Constraint('Distance',1,d));s.renameConstraint(10,'Depth')
+  return s
+ 
+ def housing(n,g,pos,size,wall=2.5,frontport=None):
+  # Native sketch + pad + pocket; editable cavity and wall dimensions.
+  x,y,z=pos;w,d,h=size
+  body=doc.addObject('PartDesign::Body',n);groups[g].addObject(body)
+  body.addProperty('App::PropertyLength','EnvelopeWidth','Dimensions');body.EnvelopeWidth=w
+  body.addProperty('App::PropertyLength','EnvelopeDepth','Dimensions');body.EnvelopeDepth=d
+  body.addProperty('App::PropertyLength','EnvelopeHeight','Dimensions');body.EnvelopeHeight=h
+  body.addProperty('App::PropertyLength','Wall','Dimensions');body.Wall=wall
+  body.Placement.Base=V(x,y,z)
+  for suffix,value in [('EnvelopeWidth',w),('EnvelopeDepth',d),('EnvelopeHeight',h),('Wall',wall)]:
+   p.addProperty('App::PropertyLength',n+suffix,'Housing dimensions');setattr(p,n+suffix,value)
+  sk=rectsk(body,n+'_OuterSketch',w,d,(0,0,0));sk.setExpression('Constraints.Width','Design_Parameters.'+n+'EnvelopeWidth');sk.setExpression('Constraints.Depth','Design_Parameters.'+n+'EnvelopeDepth')
+  pad=body.newObject('PartDesign::Pad',n+'_Pad');pad.Profile=sk;pad.Length=h;pad.setExpression('Length','Design_Parameters.'+n+'EnvelopeHeight');doc.recompute();sk.Visibility=False
+  inn=rectsk(body,n+'_CavitySketch',w-2*wall,d-2*wall,(wall,wall,h));inn.setExpression('Constraints.Width','Design_Parameters.'+n+'EnvelopeWidth - 2 * Design_Parameters.'+n+'Wall');inn.setExpression('Constraints.Depth','Design_Parameters.'+n+'EnvelopeDepth - 2 * Design_Parameters.'+n+'Wall');inn.setExpression('Placement.Base.z','Design_Parameters.'+n+'EnvelopeHeight')
+  pocket=body.newObject('PartDesign::Pocket',n+'_Pocket');pocket.Profile=inn;pocket.Length=h-wall;pocket.setExpression('Length','Design_Parameters.'+n+'EnvelopeHeight - Design_Parameters.'+n+'Wall');doc.recompute();sk.Visibility=False;pad.Visibility=False;inn.Visibility=False
+  if frontport:
+   cx,cz,rr=frontport
+   port=body.newObject('Sketcher::SketchObject',n+'_ObjectivePortSketch');port.Placement=App.Placement(V(cx,0,cz),App.Rotation(V(1,0,0),90));port.addGeometry(Part.Circle(V(0,0,0),V(0,0,1),rr),False)
+   cut=body.newObject('PartDesign::Pocket',n+'_ObjectivePort');cut.Profile=port;cut.Length=wall+.5;doc.recompute();pocket.Visibility=False;port.Visibility=False
+  vents=body.newObject('Sketcher::SketchObject',n+'_VentSketch');vents.Placement=App.Placement(V(w,0,0),App.Rotation(V(0,1,0),90))
+  for i in range(7):vents.addGeometry(Part.Circle(V(-h*.45,d*.22+i*d*.08,0),V(0,0,1),min(1.7,h*.10)),False)
+  ventcut=body.newObject('PartDesign::Pocket',n+'_VentPocket');ventcut.Profile=vents;ventcut.Length=wall+.5;doc.recompute();vents.Visibility=False
+  for f in body.Group:
+   if f!=body.Tip:f.Visibility=False
+  register(body,g,'white','Serviceable housing with editable pad/pocket, port and ventilation history')
+  cover=box(n+'_RemovableCover',g,(x,y,z+h+.3),(w,d,wall),'white',cover=True)
+  for i,(dx,dy) in enumerate([(5,5),(w-5,5),(5,d-5),(w-5,d-5)]):
+   ring(n+'_Boss_'+str(i),g,(x+dx,y+dy,z+wall),3.5,1.7,6)
+   screw(n+'_CoverScrew_'+str(i),g,(x+dx,y+dy,z+h-4))
+  return body,cover
+ 
+ # A: front frame at (-245,-190,80); rearward temples along +Y.
+ X,Y,Z=-245,-190,80
+ for side,s in [('Left',-1),('Right',1)]:
+  cx=X+s*36;g='Structural_Frame'
+  # Closed octagonal ring sketches preserve native edit history.
+  body=doc.addObject('PartDesign::Body',side+'_LensRim');groups[g].addObject(body)
+  sk=doc.addObject('Sketcher::SketchObject',side+'_RimSketch');body.addObject(sk)
+  sk.Placement=App.Placement(V(cx,Y,Z),App.Rotation(V(1,0,0),90))
+  for w,h,rev in [(61,45,False),(53,37,True)]:
+   q=[(-w/2+5,-h/2),(w/2-5,-h/2),(w/2,-h/2+5),(w/2,h/2-5),(w/2-5,h/2),(-w/2+5,h/2),(-w/2,h/2-5),(-w/2,-h/2+5)]
+   if rev:q=q[::-1]
+   start=sk.GeometryCount
+   for i in range(8):
+    a,b=q[i],q[(i+1)%8];sk.addGeometry(Part.LineSegment(V(a[0],a[1],0),V(b[0],b[1],0)),False)
+   for i in range(8):sk.addConstraint(Sketcher.Constraint('Coincident',start+i,2,start+(i+1)%8,1))
+   for i,(a,b) in enumerate(q):
+    for axis,value,dimension,span in [('DistanceX',a,'LensOpening',w),('DistanceY',b,'LensHeight',h)]:
+     k=sk.addConstraint(Sketcher.Constraint(axis,start+i,1,value))
+     extra=8 if not rev else 0
+     inset=5 if abs(value)<span/2-.1 else 0
+     expr=('' if value>0 else '-')+'((Design_Parameters.'+dimension+' + '+str(extra)+' mm) / 2 - '+str(inset)+' mm)'
+     sk.setExpression('Constraints['+str(k)+']',expr)
+  pad=body.newObject('PartDesign::Pad',side+'_RimPad');pad.Profile=sk;pad.Length=4;pad.setExpression('Length','Design_Parameters.FrameThickness');doc.recompute();sk.Visibility=False
+  register(body,g,'black','Primary optical rim; editable sketch and pad')
+  # Clear lens plate follows chamfered opening.
+  q=[(-21.5,-18.3),(21.5,-18.3),(26.3,-13.5),(26.3,13.5),(21.5,18.3),(-21.5,18.3),(-26.3,13.5),(-26.3,-13.5)]
+  pts=[V(cx+a,Y-1.4,Z+b) for a,b in q];pts.append(pts[0]);lens=Part.Face(Part.makePolygon(pts)).extrude(V(0,1.2,0))
+  solid(side+'_ClearOpticalLens','Optical_Lenses',lens,'glass','Protective optical lens; no prescription specified')
+  # Eye tracking barrels face backwards into eye volume, outside clear aperture.
+  camx=cx-s*21
+  camera=cyl(side+'_IRCameraBarrel','Eye_Tracking_Assembly',(camx,Y+3,Z-14),3.1,7,'black',(0,1,0),'Inward NIR pupil and eyelid imaging','Pupil, gaze and blink screening; does not diagnose SANS');highlights.append(camera)
+  cyl(side+'_IRCameraObjective','Eye_Tracking_Assembly',(camx,Y+10,Z-14),2.1,.8,'glass',(0,1,0))
+  pcb(side+'_EyeCameraPCB','Eye_Tracking_Assembly',(camx-5,Y+1,Z-20),(10,9,.8),1)
+  for i,(dx,dz) in enumerate([(-21,14),(21,14),(-23,-10),(23,-10)]):
+   ring(side+'_IRRecess_'+str(i),'IR_Illumination_Assembly',(cx+dx,Y+1,Z+dz),1.8,1.1,2.5,'black',(0,1,0))
+   o=cyl(side+'_IREmitter_'+str(i),'IR_Illumination_Assembly',(cx+dx,Y+1,Z+dz),.9,1.5,'cyan',(0,1,0),'Recessed infrared illumination package; radiant output unspecified','Requires eye-safety testing before use');highlights.append(o) if i==0 else None
+  # Detachable hinges and temples; hollow electronics pod at ear stem.
+  hx=X+s*69
+  box(side+'_HingeLeaf','Hinges_And_Temples',(hx-3,Y-3,Z+10),(6,10,8),'metal')
+  cyl(side+'_HingePin','Hinges_And_Temples',(hx,Y+2,Z+9),1.1,10)
+  temple=box(side+'_TempleRail','Hinges_And_Temples',(hx-2,Y+7,Z+15),(4,13,5),'black')
+  rear=box(side+'_RearTempleRail','Hinges_And_Temples',(hx-2,Y+82,Z+15),(4,46,5),'black');rear.setExpression('Width','Design_Parameters.TempleLength - 99 mm')
+  cable(side+'_EarHook','Hinges_And_Temples',[(hx,Y+128,Z+17),(hx,Y+142,Z+13),(hx,Y+149,Z-3)],2.7)
+  for i in range(3):box(side+'_TempleWireChannel_'+str(i),'Electronics',(hx-1,Y+15+i*30,Z+20),(2,27,.5),'gold','Exposed FPC trace segment in temple channel')
+  rod(side+'_NosePadArm','Structural_Frame',(X+s*10,Y,Z-3),(X+s*7,Y+9,Z-8),1)
+  cyl(side+'_NosePad','Structural_Frame',(X+s*7,Y+7,Z-10),3.3,2.5,'silicone',(0,1,0),'Adjustable silicone nose support')
+ rod('BridgeArch','Structural_Frame',(X-6,Y-2,Z+9),(X+6,Y-2,Z+9),2.7,'black')
+ box('BridgeCrossbar','Structural_Frame',(X-11,Y-4,Z+7),(22,4,5),'black')
+ # Native serviceable temple pods, intentionally wider than fashion eyewear.
+ for name,xx,g in [('ComputePod',X-75,'Electronics'),('BatteryPod',X+63,'Battery_And_Power')]:
+  housing(name,g,(xx,Y+20,Z+10),(12,62,13),1.1)
+ proc=pcb('Processor_PCB','Electronics',(X-73.5,Y+23,Z+11.5),(9,54,.8),5);highlights.append(proc)
+ imu=box('SixAxis_IMU','IMU_Assembly',(X-70,Y+60,Z+13.7),(3,3,1),'black','3-axis acceleration and 3-axis angular rate','Head motion context for eye metric analysis');highlights.append(imu)
+ box('TelemetryAntenna','Electronics',(X-72,Y+72,Z+13),(1,8,.3),'gold','Wireless antenna; RF matching not specified')
+ batt=box('ProtectedBatteryCell','Battery_And_Power',(X+65,Y+23,Z+11.5),(8,37,8),'dark','Rechargeable cell package; capacity and thermal qualification TBD');highlights.append(batt)
+ pcb('PowerManagement_PCB','Battery_And_Power',(X+64.5,Y+62,Z+12),(9,15,.7),2)
+ ring('ChargingConnectorShell','Battery_And_Power',(X+69,Y+80,Z+15),2.4,1.6,3,'metal',(0,1,0))
+ for i in range(4):cyl('ChargingContact_'+str(i),'Battery_And_Power',(X+67.5+i,Y+83,Z+15),.25,1,'gold',(0,1,0))
+ for n,pt,fn in [('AmbientLightSensor',(X+56,Y-3,Z+24),'Ambient illuminance context'),('TemperatureSensor',(X-70,Y+16,Z+20.2),'Local device/environment temperature; not core temperature'),('HumiditySensor',(X+67.5,Y+85,Z+20.2),'Local relative humidity; not tear-film measurement')]:
+  o=box(n,'Environmental_Sensors',pt,(3,3,1),'black',fn);highlights.append(o)
+ md=box('NearEyeMicrodisplay','Visual_Test_Display',(X+52,Y+1,Z+14),(8,5,5),'dark','Microdisplay visual target source','Concept visual testing; luminance, focus and calibration unvalidated');highlights.append(md)
+ box('MicrodisplayActiveFace','Visual_Test_Display',(X+52,Y+6,Z+14),(8,.4,5),'cyan')
+ solid('OpticalCouplerPrism','Visual_Test_Display',Part.makeBox(9,7,6,V(X+42,Y+1,Z+11)),'glass','Concept folded near-eye optical coupler; optical prescription TBD')
+ cable('BilateralFPC','Electronics',[(X-69,Y+25,Z+20),(X-69,Y+1,Z+23),(X,Y-1,Z+24),(X+69,Y+1,Z+23),(X+69,Y+25,Z+20)],.65,'gold')
+ 
+ # B: mechanically separate table-supported modules, same rail interface.
+ def dock(prefix,g,x,y,z):
+  box(prefix+'_MountPlate',g,(x,y,z),(50,65,4),'metal')
+  for s in [-1,1]:box(prefix+'_DovetailRail_'+str(s),g,(x+25+s*18-2,y+6,z+4),(4,52,5),'dark')
+  for i in range(4):cyl(prefix+'_SpringContact_'+str(i),g,(x+19+i*4,y+55,z+4),.8,2,'gold')
+  box(prefix+'_ReleaseLatch',g,(x+18,y+60,z+4),(14,7,4),'cyan')
+ 
+ ox,oy,oz=-145,-95,25;g='OCT_Concept_Assembly'
+ housing('OCT_ConceptHousing',g,(ox,oy,oz),(150,190,95),frontport=(102,50,18.4))
+ box('OCT_OpticalBreadboard',g,(ox+7,oy+7,oz+5),(136,176,5),'metal','Optical engine datum plate')
+ for i in range(12):screw('OCT_BreadboardFastener_'+str(i),g,(ox+12+(i%4)*38,oy+13+(i//4)*70,oz+3))
+ pcb('OCT_ControlPCB',g,(ox+8,oy+145,oz+14),(78,34,1.6),8)
+ box('OCT_LightSourcePackage',g,(ox+10,oy+15,oz+15),(35,35,20),'metal','Broadband source package concept','Source spectrum and power unspecified; no safe exposure claim')
+ for i in range(7):box('OCT_SourceCoolingFin_'+str(i),g,(ox+10+i*5,oy+15,oz+35),(2,35,10),'metal')
+ # Interferometer at horizontal optical bench height Z+50.
+ H=oz+50
+ solid('OCT_BeamSplitter',g,Part.makeBox(12,12,12,V(ox+64,oy+57,H-6)),'glass','Concept free-space interferometer splitter')
+ box('OCT_SplitterMount',g,(ox+60,oy+53,oz+11),(20,20,30),'dark')
+ ring('OCT_ReferenceCollimator',g,(ox+24,oy+63,H),7,4,12,'metal',(1,0,0))
+ cyl('OCT_ReferenceMirror',g,(ox+14,oy+63,H),5,1,'metal',(1,0,0),'Reference arm mirror')
+ rod('OCT_ReferenceTranslationRail',g,(ox+12,oy+55,oz+15),(ox+48,oy+55,oz+15),2)
+ box('OCT_ReferenceStage',g,(ox+12,oy+53,oz+17),(14,20,8),'dark')
+ for i in range(2):
+  box('OCT_GalvoMotor_'+str(i),g,(ox+96,oy+70+i*25,H-11),(18,18,22),'dark','Scanning actuator package')
+  cyl('OCT_ScanningMirror_'+str(i),g,(ox+91,oy+77+i*25,H),5,.8,'metal',(1,0,0),'Sample arm scanning mirror')
+ ring('OCT_ObjectiveBarrel',g,(ox+102,oy-18,H),18,13,45,'metal',(0,1,0))
+ for i in range(3):cyl('OCT_ObjectiveLens_'+str(i),g,(ox+102,oy-15+i*10,H),12,2,'glass',(0,1,0))
+ ring('OCT_SiliconeEyeAlignment',g,(ox+102,oy-25,H),21,15,6,'silicone',(0,1,0),'Non-load-bearing eye alignment interface')
+ rod('OCT_FocusLeadScrew',g,(ox+128,oy+2,H-20),(ox+128,oy+55,H-20),2)
+ cyl('OCT_FocusThumbwheel',g,(ox+128,oy+58,H-20),8,4,'black',(0,1,0))
+ solid('OCT_SpectrometerEnclosure',g,Part.makeBox(72,38,44,V(ox+10,oy+94,oz+14)).cut(Part.makeBox(68,34,43,V(ox+12,oy+96,oz+16))),'dark','Hollow spectral-domain detector subsystem enclosure')
+ solid('OCT_DiffractionGrating',g,Part.makeBox(18,2,18,V(ox+36,oy+107,H-9)),'gold','Spectrometer diffraction grating concept')
+ cyl('OCT_SpectrometerFocusLens',g,(ox+56,oy+113,H),7,2,'glass',(1,0,0))
+ box('OCT_LineScanDetector',g,(ox+70,oy+106,H-6),(1,14,12),'pcb','Line-array detector package; pixel specification TBD')
+ fix=cyl('OCT_FixationTarget',g,(ox+102,oy+39,H),2,2,'cyan',(0,1,0),'Fixation target; projection optical prescription TBD');highlights.append(fix)
+ for i in range(8):box('OCT_RearVent_'+str(i),g,(ox+143,oy+110+i*7,oz+20),(1,4,12),'black','Vent location marker; cover machining TBD')
+ cable('OCT_SourceFiber',g,[(ox+40,oy+30,H),(ox+50,oy+30,H),(ox+70,oy+63,H)],1,'gold')
+ for n,a,b in [('ReferencePath',(ox+70,oy+63,H),(ox+20,oy+63,H)),('SamplePath',(ox+70,oy+63,H),(ox+102,oy+77,H)),('ObjectivePath',(ox+102,oy+77,H),(ox+102,oy-20,H)),('DetectorPath',(ox+70,oy+63,H),(ox+45,oy+113,H))]:rod('OCT_'+n,'Presentation_Optical_Paths',a,b,.65,'cyan','Illustrative optical path; no ray trace or performance model')
+ dock('OCT_Dock','Docking_Connectors',ox+50,oy+65,oz-12)
+ 
+ fx,fy,fz=35,-90,25;g='Fundus_Camera_Assembly'
+ housing('Fundus_Housing',g,(fx,fy,fz),(100,155,85),frontport=(50,46,22.4))
+ box('Fundus_OpticalBench',g,(fx+7,fy+8,fz+4),(86,138,5),'metal')
+ H=fz+46
+ ring('Fundus_ObjectiveBarrel',g,(fx+50,fy-22,H),22,17,62,'metal',(0,1,0))
+ for i in range(3):cyl('Fundus_ObjectiveLens_'+str(i),g,(fx+50,fy-15+i*16,H),16,2,'glass',(0,1,0))
+ ring('Fundus_EyeCup',g,(fx+50,fy-29,H),25,18,7,'silicone',(0,1,0))
+ ring('Fundus_IlluminationAnnulus',g,(fx+50,fy+32,H),20,15,3,'gold',(0,1,0),'Annular retinal illumination optics')
+ for i in range(8):
+  t=i*math.pi/4;cyl('Fundus_IlluminationEmitter_'+str(i),g,(fx+50+18*math.cos(t),fy+35,H+18*math.sin(t)),1.3,2,'white',(0,1,0),'Retinal illumination package; exposure not specified')
+ solid('Fundus_BeamSplitter',g,Part.makeBox(20,20,20,V(fx+40,fy+54,H-10)),'glass','Imaging/illumination beam splitter')
+ ring('Fundus_Aperture',g,(fx+50,fy+83,H),12,5,2,'black',(0,1,0),'Optical stop')
+ for i in range(2):ring('Fundus_RelayLensMount_'+str(i),g,(fx+50,fy+90+i*15,H),13,10,4,'metal',(0,1,0));cyl('Fundus_RelayLens_'+str(i),g,(fx+50,fy+91+i*15,H),9.5,2,'glass',(0,1,0))
+ sensor=box('Fundus_ImagingSensor',g,(fx+43,fy+127,H-6),(14,2,12),'dark','Retinal image detector package','Scheduled retinal/optic disc imaging concept');highlights.append(sensor)
+ pcb('Fundus_InterfacePCB',g,(fx+8,fy+111,fz+10),(30,33,1.6),4)
+ rod('Fundus_FocusRail',g,(fx+78,fy+12,H-20),(fx+78,fy+92,H-20),2)
+ cyl('Fundus_FocusDial',g,(fx+78,fy+94,H-20),9,4,'black',(0,1,0))
+ box('Fundus_AlignmentCamera',g,(fx+17,fy+5,H+15),(12,12,9),'black','External eye alignment camera')
+ dock('Fundus_Dock','Docking_Connectors',fx+25,fy+45,fz-12)
+ 
+ rx,ry,rz=170,-70,25;g='Refractive_Test_Assembly'
+ box('Refraction_Base',g,(rx,ry,rz),(100,125,8),'white')
+ for i in [-1,1]:rod('Refraction_LinearRail_'+str(i),g,(rx+50+i*31,ry+10,rz+20),(rx+50+i*31,ry+105,rz+20),3)
+ for j in range(3):
+  ring('Refraction_TestLensHolder_'+str(j),g,(rx+50,ry+18+j*25,rz+58),25,20,6,'metal',(0,1,0))
+  cyl('Refraction_TestOptic_'+str(j),g,(rx+50,ry+20+j*25,rz+58),19,1.8,'glass',(0,1,0),'Exchangeable test optic; no calibrated dioptric power assigned')
+  rod('Refraction_HolderSupport_'+str(j),g,(rx+50,ry+20+j*25,rz+9),(rx+50,ry+20+j*25,rz+34),3)
+ box('Refraction_TargetDisplay',g,(rx+30,ry+108,rz+38),(40,4,40),'black','Visual target display; manual subjective test concept')
+ box('Refraction_TargetFace',g,(rx+33,ry+107.5,rz+41),(34,.4,34),'cyan')
+ ring('Refraction_AlignmentRing',g,(rx+50,ry+7,rz+58),27,22,5,'silicone',(0,1,0))
+ rod('Refraction_AdjustmentLeadScrew',g,(rx+90,ry+10,rz+15),(rx+90,ry+107,rz+15),2)
+ cyl('Refraction_AdjustmentKnob',g,(rx+90,ry+108,rz+15),7,5,'black',(0,1,0))
+ pcb('Refraction_TargetDriver',g,(rx+10,ry+80,rz+10),(25,25,1),3)
+ dock('Refraction_Dock','Docking_Connectors',rx+25,ry+35,rz-12)
+ # Dedicated alignment mount: load carried by base, not glasses.
+ box('Common_ExaminationMountBase','Docking_Connectors',(-50,125,12),(110,80,10),'metal')
+ for i in [-1,1]:rod('CommonMount_Post_'+str(i),'Docking_Connectors',(-5+i*30,155,22),(-5+i*30,155,155),5)
+ dock('CommonMount_Receiver','Docking_Connectors',-30,125,155)
+ box('Glasses_LocatingAdapter','Docking_Connectors',(-24,122,164),(38,8,7),'black','Frame locating clip; examination stand bears diagnostic payload')
+ 
+ # C: instrument tray and independent handheld instruments.
+ g='Ocular_Ultrasound'; tx,ty,tz=-240,235,12
+ tray=Part.makeBox(455,180,12,V(tx,ty,tz)).cut(Part.makeBox(449,174,10,V(tx+3,ty+3,tz+3)))
+ solid('Clinical_InstrumentTray',g,tray,'metal','Instrument storage tray')
+ ux,uy,uz=-217,255,28
+ housing('Ultrasound_Console',g,(ux,uy,uz),(110,135,30))
+ box('Ultrasound_DisplayBezel',g,(ux+10,uy+13,uz+32.8),(90,65,3),'black')
+ box('Ultrasound_Display',g,(ux+14,uy+17,uz+36),(82,57,.5),'cyan','B-mode console display representation; no live data')
+ pcb('Ultrasound_ProcessingBoard',g,(ux+8,uy+8,uz+4),(92,70,1.6),9)
+ box('Ultrasound_Battery',g,(ux+10,uy+91,uz+4),(65,30,17),'dark')
+ for i in range(4):cyl('Ultrasound_ControlButton_'+str(i),g,(ux+18+i*23,uy+103,uz+32),5,2,'black')
+ ring('Ultrasound_ProbeConnector',g,(ux+111,uy+28,uz+16),6,3,5,'metal',(1,0,0))
+ px,py,pz=-78,292,43
+ probe=cyl('Ultrasound_ProbeBody',g,(px,py,pz),11,65,'white',(0,1,0),'Handheld ocular ultrasound probe housing','Scheduled ocular structure assessment; ocular power settings require validation');highlights.append(probe)
+ cyl('Ultrasound_TransducerHead',g,(px,py-5,pz),10,5,'silicone',(0,1,0),'Acoustic transducer contact face')
+ cyl('Ultrasound_PiezoElement',g,(px,py+2,pz),8,1,'gold',(0,1,0))
+ ring('Ultrasound_ProbeCableConnector',g,(px,py+65,pz),7,4,9,'metal',(0,1,0))
+ box('Ultrasound_StorageCradle',g,(px-16,py+10,pz-17),(32,45,6),'dark')
+ for i in [-1,1]:box('Ultrasound_CradleSide_'+str(i),g,(px+i*13-2,py+10,pz-12),(4,45,10),'dark')
+ cable('Ultrasound_ProbeCable',g,[(px,py+74,pz),(px,py+91,pz),(ux+120,py+91,pz),(ux+120,uy+28,uz+16),(ux+115,uy+28,uz+16)],2.4)
+ 
+ g='Tonometer';qx,qy,qz=35,275,42
+ # Rebound tonometer: electromagnetic guide and disposable contacting tip.
+ body=Part.makeCylinder(14,108,V(qx,qy,qz),V(0,1,0)).cut(Part.makeCylinder(11,102,V(qx,qy+3,qz),V(0,1,0)))
+ solid('Tonometer_ErgonomicShell',g,body,'white','Rebound tonometer hollow shell; contact mechanism concept')
+ ring('Tonometer_NoseGuide',g,(qx,qy-20,qz),7,2,22,'metal',(0,1,0))
+ rod('Tonometer_ReboundProbeShaft',g,(qx,qy-30,qz),(qx,qy+8,qz),.4,'metal')
+ o=cyl('Tonometer_DisposableContactTip',g,(qx,qy-32,qz),1,2,'silicone',(0,1,0),'Disposable rebound probe tip','IOP measurement concept; force, calibration and accuracy unvalidated');highlights.append(o)
+ ring('Tonometer_Solenoid',g,(qx,qy+5,qz),9,2,22,'gold',(0,1,0),'Electromagnetic actuation/detection coil concept')
+ pcb('Tonometer_MeasurementPCB',g,(qx-8,qy+37,qz-4),(16,40,1),4)
+ box('Tonometer_Battery',g,(qx-6,qy+80,qz-6),(12,20,12),'dark')
+ box('Tonometer_Display',g,(qx-9,qy+42,qz+14),(18,28,1),'cyan')
+ cyl('Tonometer_Control',g,(qx,qy+78,qz+14),3,2,'black')
+ box('Tonometer_ForeheadAlignmentSupport',g,(qx+14,qy-7,qz-3),(22,6,6),'metal')
+ cyl('Tonometer_AlignmentPad',g,(qx+38,qy-8,qz),4,3,'silicone',(0,1,0))
+ case=Part.makeBox(60,145,12,V(qx-30,qy-20,qz-22)).cut(Part.makeBox(54,139,10,V(qx-27,qy-17,qz-19)))
+ solid('Tonometer_ProtectiveCase',g,case,'dark')
+ box('Tonometer_CaseLid',g,(qx+49,qy-20,qz-22),(60,145,3),'dark',cover=True)
+ 
+ # C3: near-distance display test fixture, NOT a calibrated perimeter.
+ g='Vision_Test_Station';sx,sy,sz=450,530,25
+ box('VisualStation_Base',g,(sx-165,sy-30,sz),(330,100,12),'metal')
+ for i in [-1,1]:
+  rod('VisualStation_AdjustablePost_'+str(i),g,(sx+i*110,sy+34,sz+12),(sx+i*110,sy+34,sz+240),7)
+  ring('VisualStation_HeightCollar_'+str(i),g,(sx+i*110,sy+34,sz+135),11,7.4,18,'dark')
+  screw('VisualStation_LockScrew_'+str(i),g,(sx+i*110,sy+34,sz+149),2)
+  box('VisualStation_RearMountBracket_'+str(i),g,(sx+i*110-10,sy+16,sz+170),(20,18,8),'metal','Rear support bracket between display and post')
+ housing('VisualStation_DisplayHousing',g,(sx-140,sy-8,sz+115),(280,24,180),2)
+ display=box('VisualStation_TestDisplay',g,(sx-135,sy-10.5,sz+120),(270,1,170),'black','Display visual targets for acuity, contrast, Amsler and exploratory field tests','Requires photometric/geometric calibration; not a validated clinical perimeter');highlights.append(display)
+ # Visible Amsler target physically modeled as thin contrast strips.
+ for i in range(11):
+  box('Amsler_Vertical_'+str(i),g,(sx-55+i*11,sy-11,sz+153),(.35,.3,110),'white')
+  box('Amsler_Horizontal_'+str(i),g,(sx-55,sy-11,sz+153+i*11),(110,.3,.35),'white')
+ cyl('Amsler_FixationPoint',g,(sx,sy-11.5,sz+208),1.5,.5,'cyan',(0,1,0))
+ pcb('VisualStation_ControllerPCB',g,(sx-120,sy-3,sz+117),(75,14,1),5)
+ # Alignment frame 500 mm in front of screen; includes distance-setting rods.
+ for i in [-1,1]:
+  rod('VisualStation_DistanceRail_'+str(i),g,(sx+i*95,sy-12,sz+12),(sx+i*95,sy-500,sz+12),3)
+  rod('VisualStation_AlignmentUpright_'+str(i),g,(sx+i*95,sy-500,sz+12),(sx+i*95,sy-500,sz+160),4)
+ rod('VisualStation_ForeheadCrossbar',g,(sx-95,sy-500,sz+160),(sx+95,sy-500,sz+160),4)
+ box('VisualStation_ForeheadPad',g,(sx-50,sy-505,sz+156),(100,6,10),'silicone')
+ box('VisualStation_ChinRest',g,(sx-35,sy-495,sz+103),(70,25,5),'silicone')
+ rod('VisualStation_ChinRestPost',g,(sx,sy-485,sz+12),(sx,sy-485,sz+103),5)
+ ring('VisualStation_OccluderPivot',g,(sx-60,sy-505,sz+160),7,2.2,4,'metal',(0,1,0))
+ cyl('VisualStation_OcclusionShield',g,(sx-32,sy-506,sz+133),22,2,'black',(0,1,0),'Monocular occlusion shield')
+ box('VisualStation_ControlPanel',g,(sx+170,sy-28,sz+13),(42,55,18),'white')
+ for i in range(4):cyl('VisualStation_TestMode_'+str(i),g,(sx+180+(i%2)*20,sy-14+(i//2)*23,sz+32),5,2,'cyan','Acuity contrast Amsler exploratory visual field'.split()[i] if False else (0,0,1))
+ # Independent articulated external covers are removed in exploded configuration.
+ for o in parts:
+  if o.Name.startswith('OCT_'):o.ExplodeOffset=V(-20,0,80 if o in covers else 18+(parts.index(o)%4)*18)
+  elif o.Name.startswith('Fundus_'):o.ExplodeOffset=V(30,0,75 if o in covers else 15+(parts.index(o)%4)*14)
+  elif o.Name.startswith('Tonometer_'):o.ExplodeOffset=V(0,0,40+(parts.index(o)%3)*14)
+ 
+ # Named 3D identification anchors and leader arrows (hidden in normal config).
+ ann=group('Sensor_Callouts',root)
+ for i,o in enumerate(highlights,1):
+  doc.recompute();bb=o.Shape.BoundBox;center=bb.Center
+  anchor=doc.addObject('App::FeaturePython','Callout_%02d'%i);ann.addObject(anchor)
+  anchor.addProperty('App::PropertyLink','Target','Annotation');anchor.Target=o
+  anchor.addProperty('App::PropertyString','Text','Annotation');anchor.Text='%02d | %s | %s'%(i,o.Label,o.Function)
+  endpoint=center+V(20,15,32)
+  delta=center-endpoint
+  shape=Part.makeCylinder(.5,delta.Length,endpoint,delta).fuse(Part.makeCone(2,0,5,center-delta.normalize()*5,delta))
+  arrow=doc.addObject('Part::Feature','Leader_%02d'%i);arrow.Shape=shape;ann.addObject(arrow);arrow.ViewObject.ShapeColor=C['cyan'] if Gui else (0,1,1)
+  arrow.addProperty('App::PropertyLink','Target','Annotation');arrow.Target=o;arrow.Visibility=False
+ # Validate every registered component, retain failures and never silently accept null solids.
+ doc.recompute()
+ for o in parts:
+  if o.Shape.isNull() or not o.Shape.isValid() or not o.Shape.Solids:errors.append(o.Name+': invalid / missing solid')
+  for st in o.State:
+   if st=='Invalid':errors.append(o.Name+': invalid recompute state')
+ # Final assembled geometry must remain persistently visible (internals behind removable covers).
+ for o in parts:o.Visibility=True
+ for body in [o for o in parts if o.TypeId=='PartDesign::Body']:
+  for f in body.Group:
+   if f!=body.Tip:f.Visibility=False
+  body.Tip.Visibility=True
+ if Gui:
+  Gui.activeDocument().activeView().viewIsometric();Gui.activeDocument().activeView().fitAll()
+  Gui.activeDocument().activeView().setAnimationEnabled(False) if hasattr(Gui.activeDocument().activeView(),'setAnimationEnabled') else None
+  Gui.updateGui()
+ doc.saveAs(os.path.join(OUT,DOC+'.FCStd'))
+ try:
+  Part.export(parts,os.path.join(OUT,DOC+'.step'))
+ except Exception as e:errors.append('STEP export: '+str(e))
+ # Standalone tessellation allows an optional glTF exporter outside FreeCAD.
+ meshes=[]
+ for o in parts:
+  vv,ff=o.Shape.tessellate(.65)
+  meshes.append({'name':o.Name,'vertices':[[v.x,v.y,v.z] for v in vv],'faces':[list(f) for f in ff],'color':list(C.get('white')) if not Gui else list(o.ViewObject.ShapeColor),'transparent':o.Name.endswith('Lens') or (Gui and o.ViewObject.Transparency>0),'offset':list(o.ExplodeOffset),'cover':o in covers,'center':list(o.Shape.BoundBox.Center),'group':o.getParentGeoFeatureGroup().Name if o.getParentGeoFeatureGroup() else ''})
+ with open(os.path.join(OUT,'geometry.json'),'w') as f:json.dump(meshes,f)
+ with open(os.path.join(OUT,'VisionGuard_Components.csv'),'w',newline='') as f:
+  w=csv.writer(f);w.writerow(['ID','CAD_Name','Component','Subsystem','HardwareClass','Function','ClinicalPurpose','ValidationStatus','SolidCount','Volume_mm3'])
+  for i,o in enumerate(parts,1):
+   parent=next((k for k,v in groups.items() if o in v.Group),'');w.writerow([i,o.Name,o.Label,parent,o.HardwareClass,o.Function,o.ClinicalPurpose,o.ValidationStatus,len(o.Shape.Solids),round(o.Shape.Volume,3)])
+ with open(os.path.join(OUT,'validation.json'),'w') as f:json.dump({'components':len(parts),'solids':sum(len(o.Shape.Solids) for o in parts),'invalid':errors,'FreeCAD':App.Version(),'concept':True},f,indent=2)
+ # GUI screenshots and standard engineering views. Additional macros provide configurations.
+ if Gui:
+  view=Gui.activeDocument().activeView()
+  for name,method in [('Front','viewFront'),('Rear','viewRear'),('Left','viewLeft'),('Right','viewRight'),('Top','viewTop'),('Bottom','viewBottom')]:
+   getattr(view,method)();view.fitAll();Gui.updateGui();view.saveImage(os.path.join(OUT,'VisionGuard_'+name+'.png'),1800,1200,'White')
+  view.viewIsometric();view.fitAll();Gui.updateGui();view.saveImage(os.path.join(OUT,'VisionGuard_FullAssembly.png'),2000,1400,'White')
+  for o in covers:o.ViewObject.Transparency=85
+  Gui.updateGui();view.saveImage(os.path.join(OUT,'VisionGuard_TransparentInspection.png'),2000,1400,'White')
+  for o in covers:o.ViewObject.Transparency=0
+  # Explode whole parts by shape transform; works also for geometry with world-position coordinates.
+  original={o.Name:o.Placement for o in parts}
+  for o in parts:
+   pl=o.Placement;pl.Base=pl.Base+o.ExplodeOffset;o.Placement=pl
+  doc.recompute();view.fitAll();Gui.updateGui();view.saveImage(os.path.join(OUT,'VisionGuard_ExplodedView.png'),2000,1400,'White')
+  for o in parts:o.Placement=original[o.Name]
+  doc.recompute();view.viewIsometric();view.fitAll();Gui.updateGui();doc.save()
+ if errors:App.Console.PrintError('\nVisionGuard errors: '+str(errors)+'\n')
+ else:App.Console.PrintMessage('\nVisionGuard: %d solid components validated. Saved to %s\n'%(len(parts),OUT))
+ if os.environ.get('VISIONGUARD_BATCH')=='1':
+  from PySide import QtCore
+  QtCore.QTimer.singleShot(1000,lambda: os._exit(0))
+except Exception:
+ report=traceback.format_exc()
+ try:
+  folder=globals().get("OUT",os.path.expanduser("~/VisionGuard"));os.makedirs(folder,exist_ok=True)
+  with open(os.path.join(folder,"VisionGuard_GenerationError.txt"),"w") as errorfile:errorfile.write(report)
+  App.Console.PrintError(report)
+ except Exception:print(report)
+ raise
