@@ -1,0 +1,678 @@
+ObjectName,Label,Assembly,IntendedFunction,MountLocation,MeasurementLimit
+Reference_Head_Component,Reference_Head001,Reference_Body,Anthropometric reference,1750 mm stylized adult reference,
+Reference_Nose_Component,Reference_Nose001,Reference_Body,Anthropometric reference,1750 mm stylized adult reference,
+Reference_Torso_Component,Reference_Torso001,Reference_Body,Anthropometric reference,1750 mm stylized adult reference,
+Reference_Pelvis_Component,Reference_Pelvis001,Reference_Body,Anthropometric reference,1750 mm stylized adult reference,
+Torso_Textile,Torso_Textile,Textile_Suit,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Neck_Collar,Neck_Collar,Textile_Suit,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Collar_Interface,Collar_Interface,Torso_Assembly,Conductive stretch band / connector substrate,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_Arm_Textile,Left_Arm_Textile,Textile_Suit,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_Leg_Textile,Left_Leg_Textile,Textile_Suit,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_Boot,Left_Boot,Textile_Suit,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_Reference_Arm_Component,Left_Reference_Arm001,Reference_Body,Anthropometric reference,1750 mm stylized adult reference,
+Left_Reference_Leg_Component,Left_Reference_Leg001,Reference_Body,Anthropometric reference,1750 mm stylized adult reference,
+Left_Shoulder_Panel,Left_Shoulder_Panel,Torso_Assembly,Segmented protective panel,Left Shoulder,
+Left_Forearm_Panel,Left_Forearm_Panel,Torso_Assembly,Segmented protective panel,Left Forearm,
+Left_Knee_Panel,Left_Knee_Panel,Torso_Assembly,Segmented protective panel,Left Knee,
+Left_Shin_Panel,Left_Shin_Panel,Torso_Assembly,Segmented protective panel,Left Shin,
+Left_Thigh_Panel,Left_Thigh_Panel,Torso_Assembly,Segmented protective panel,Left Thigh,
+Left_Elbow_FlexZone,Left_Elbow_FlexZone,Torso_Assembly,Conductive stretch band / connector substrate,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_Knee_FlexZone,Left_Knee_FlexZone,Torso_Assembly,Conductive stretch band / connector substrate,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_Ankle_FlexZone,Left_Ankle_FlexZone,Torso_Assembly,Conductive stretch band / connector substrate,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_Wrist_Connector,Left_Wrist_Connector,Fasteners_And_Connectors,Conductive stretch band / connector substrate,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_Wrist_Pogo_N10_Component,Left_Wrist_Pogo_N011,Fasteners_And_Connectors,Glove power/data pogo contact,Left wrist,
+Left_Wrist_Pogo_0_Component,Left_Wrist_Pogo_001,Fasteners_And_Connectors,Glove power/data pogo contact,Left wrist,
+Left_Wrist_Pogo_10_Component,Left_Wrist_Pogo_002,Fasteners_And_Connectors,Glove power/data pogo contact,Left wrist,
+Right_Arm_Textile,Right_Arm_Textile,Textile_Suit,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_Leg_Textile,Right_Leg_Textile,Textile_Suit,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_Boot,Right_Boot,Textile_Suit,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_Reference_Arm_Component,Right_Reference_Arm001,Reference_Body,Anthropometric reference,1750 mm stylized adult reference,
+Right_Reference_Leg_Component,Right_Reference_Leg001,Reference_Body,Anthropometric reference,1750 mm stylized adult reference,
+Right_Shoulder_Panel,Right_Shoulder_Panel,Torso_Assembly,Segmented protective panel,Right Shoulder,
+Right_Forearm_Panel,Right_Forearm_Panel,Torso_Assembly,Segmented protective panel,Right Forearm,
+Right_Knee_Panel,Right_Knee_Panel,Torso_Assembly,Segmented protective panel,Right Knee,
+Right_Shin_Panel,Right_Shin_Panel,Torso_Assembly,Segmented protective panel,Right Shin,
+Right_Thigh_Panel,Right_Thigh_Panel,Torso_Assembly,Segmented protective panel,Right Thigh,
+Right_Elbow_FlexZone,Right_Elbow_FlexZone,Torso_Assembly,Conductive stretch band / connector substrate,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_Knee_FlexZone,Right_Knee_FlexZone,Torso_Assembly,Conductive stretch band / connector substrate,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_Ankle_FlexZone,Right_Ankle_FlexZone,Torso_Assembly,Conductive stretch band / connector substrate,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_Wrist_Connector,Right_Wrist_Connector,Fasteners_And_Connectors,Conductive stretch band / connector substrate,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_Wrist_Pogo_N10_Component,Right_Wrist_Pogo_N011,Fasteners_And_Connectors,Glove power/data pogo contact,Right wrist,
+Right_Wrist_Pogo_0_Component,Right_Wrist_Pogo_001,Fasteners_And_Connectors,Glove power/data pogo contact,Right wrist,
+Right_Wrist_Pogo_10_Component,Right_Wrist_Pogo_002,Fasteners_And_Connectors,Glove power/data pogo contact,Right wrist,
+Sternum_Service_Panel,Sternum_Service_Panel,Torso_Assembly,Serviceable chest sensor cover,Sternum,
+Sternum_Status_Stripe,Sternum_Status_Stripe,Torso_Assembly,Status indicator,Sternum,
+Abdominal_Closure_Left,Abdominal_Closure_Left,Torso_Assembly,Quick-release front closure,Abdomen,
+Abdominal_Closure_Right,Abdominal_Closure_Right,Torso_Assembly,Quick-release front closure,Abdomen,
+Closure_Latch,Closure_Latch,Fasteners_And_Connectors,Mechanical quick release latch,Abdomen,
+ECG_RA_Carrier_Component,ECG_RA_Carrier001,Cardiovascular_Sensors,Replaceable electrode carrier,Torso / RA,
+ECG_RA_Contact_Component,ECG_RA_Contact001,Cardiovascular_Sensors,ECG biopotential electrode,Torso / RA,Torso limb-lead placement is modified; clinical rhythm interpretation needs validation
+ECG_RA_Snap_Component,ECG_RA_Snap001,Cardiovascular_Sensors,Conductive snap,Torso / RA,
+ECG_LA_Carrier_Component,ECG_LA_Carrier001,Cardiovascular_Sensors,Replaceable electrode carrier,Torso / LA,
+ECG_LA_Contact_Component,ECG_LA_Contact001,Cardiovascular_Sensors,ECG biopotential electrode,Torso / LA,Torso limb-lead placement is modified; clinical rhythm interpretation needs validation
+ECG_LA_Snap_Component,ECG_LA_Snap001,Cardiovascular_Sensors,Conductive snap,Torso / LA,
+ECG_RL_Carrier_Component,ECG_RL_Carrier001,Cardiovascular_Sensors,Replaceable electrode carrier,Torso / RL,
+ECG_RL_Contact_Component,ECG_RL_Contact001,Cardiovascular_Sensors,ECG biopotential electrode,Torso / RL,Torso limb-lead placement is modified; clinical rhythm interpretation needs validation
+ECG_RL_Snap_Component,ECG_RL_Snap001,Cardiovascular_Sensors,Conductive snap,Torso / RL,
+ECG_LL_Carrier_Component,ECG_LL_Carrier001,Cardiovascular_Sensors,Replaceable electrode carrier,Torso / LL,
+ECG_LL_Contact_Component,ECG_LL_Contact001,Cardiovascular_Sensors,ECG biopotential electrode,Torso / LL,Torso limb-lead placement is modified; clinical rhythm interpretation needs validation
+ECG_LL_Snap_Component,ECG_LL_Snap001,Cardiovascular_Sensors,Conductive snap,Torso / LL,
+ECG_V1_Carrier_Component,ECG_V1_Carrier001,Cardiovascular_Sensors,Replaceable electrode carrier,Torso / V1,
+ECG_V1_Contact_Component,ECG_V1_Contact001,Cardiovascular_Sensors,ECG biopotential electrode,Torso / V1,Torso limb-lead placement is modified; clinical rhythm interpretation needs validation
+ECG_V1_Snap_Component,ECG_V1_Snap001,Cardiovascular_Sensors,Conductive snap,Torso / V1,
+ECG_V2_Carrier_Component,ECG_V2_Carrier001,Cardiovascular_Sensors,Replaceable electrode carrier,Torso / V2,
+ECG_V2_Contact_Component,ECG_V2_Contact001,Cardiovascular_Sensors,ECG biopotential electrode,Torso / V2,Torso limb-lead placement is modified; clinical rhythm interpretation needs validation
+ECG_V2_Snap_Component,ECG_V2_Snap001,Cardiovascular_Sensors,Conductive snap,Torso / V2,
+ECG_V3_Carrier_Component,ECG_V3_Carrier001,Cardiovascular_Sensors,Replaceable electrode carrier,Torso / V3,
+ECG_V3_Contact_Component,ECG_V3_Contact001,Cardiovascular_Sensors,ECG biopotential electrode,Torso / V3,Torso limb-lead placement is modified; clinical rhythm interpretation needs validation
+ECG_V3_Snap_Component,ECG_V3_Snap001,Cardiovascular_Sensors,Conductive snap,Torso / V3,
+ECG_V4_Carrier_Component,ECG_V4_Carrier001,Cardiovascular_Sensors,Replaceable electrode carrier,Torso / V4,
+ECG_V4_Contact_Component,ECG_V4_Contact001,Cardiovascular_Sensors,ECG biopotential electrode,Torso / V4,Torso limb-lead placement is modified; clinical rhythm interpretation needs validation
+ECG_V4_Snap_Component,ECG_V4_Snap001,Cardiovascular_Sensors,Conductive snap,Torso / V4,
+ECG_V5_Carrier_Component,ECG_V5_Carrier001,Cardiovascular_Sensors,Replaceable electrode carrier,Torso / V5,
+ECG_V5_Contact_Component,ECG_V5_Contact001,Cardiovascular_Sensors,ECG biopotential electrode,Torso / V5,Torso limb-lead placement is modified; clinical rhythm interpretation needs validation
+ECG_V5_Snap_Component,ECG_V5_Snap001,Cardiovascular_Sensors,Conductive snap,Torso / V5,
+ECG_V6_Carrier_Component,ECG_V6_Carrier001,Cardiovascular_Sensors,Replaceable electrode carrier,Torso / V6,
+ECG_V6_Contact_Component,ECG_V6_Contact001,Cardiovascular_Sensors,ECG biopotential electrode,Torso / V6,Torso limb-lead placement is modified; clinical rhythm interpretation needs validation
+ECG_V6_Snap_Component,ECG_V6_Snap001,Cardiovascular_Sensors,Conductive snap,Torso / V6,
+ECG_AFE_Housing,ECG_AFE_Housing,Cardiovascular_Sensors,ECG differential analog front end,Left parasternal,
+ECG_AFE_ServiceLid,ECG_AFE_ServiceLid,Cardiovascular_Sensors,Removable service lid,Left parasternal,
+ECG_AFE_PCB,ECG_AFE_PCB,Cardiovascular_Sensors,Acquisition / sensor PCB,Left parasternal,
+ECG_AFE_IC,ECG_AFE_IC,Cardiovascular_Sensors,Signal acquisition IC,Left parasternal,
+Wrist_PPG_Housing,Wrist_PPG_Housing,Cardiovascular_Sensors,Peripheral PPG,Right wrist,"Motion, perfusion and contact affect signal; validation required"
+Wrist_PPG_ServiceLid,Wrist_PPG_ServiceLid,Cardiovascular_Sensors,Removable service lid,Right wrist,
+Wrist_PPG_PCB,Wrist_PPG_PCB,Cardiovascular_Sensors,Acquisition / sensor PCB,Right wrist,"Motion, perfusion and contact affect signal; validation required"
+Wrist_PPG_IC,Wrist_PPG_IC,Cardiovascular_Sensors,Signal acquisition IC,Right wrist,
+Wrist_PPG_GreenLED_Component,Wrist_PPG_GreenLED001,Cardiovascular_Sensors,Optical emitter package,Right wrist,
+Wrist_PPG_RedLED_Component,Wrist_PPG_RedLED001,Cardiovascular_Sensors,Optical emitter package,Right wrist,
+Wrist_PPG_IRLED_Component,Wrist_PPG_IRLED001,Cardiovascular_Sensors,Optical emitter package,Right wrist,
+Wrist_PPG_Photodiode,Wrist_PPG_Photodiode,Cardiovascular_Sensors,Photodiode detector,Right wrist,
+Wrist_PPG_OpticalBarrier,Wrist_PPG_OpticalBarrier,Cardiovascular_Sensors,Optical crosstalk barrier,Right wrist,
+Thoracic_Respiration_Band,Thoracic_Respiration_Band,Respiratory_Sensors,Conductive stretch band / connector substrate,Conformal geometric textile layer,Fabric mechanics not simulated
+Abdominal_Respiration_Band,Abdominal_Respiration_Band,Respiratory_Sensors,Conductive stretch band / connector substrate,Conformal geometric textile layer,Fabric mechanics not simulated
+Respiration_Readout_Housing,Respiration_Readout_Housing,Respiratory_Sensors,Stretch / respiratory impedance readout,Right chest,
+Respiration_Readout_ServiceLid,Respiration_Readout_ServiceLid,Respiratory_Sensors,Removable service lid,Right chest,
+Respiration_Readout_PCB,Respiration_Readout_PCB,Respiratory_Sensors,Acquisition / sensor PCB,Right chest,
+Respiration_Readout_IC,Respiration_Readout_IC,Respiratory_Sensors,Signal acquisition IC,Right chest,
+Impedance_L_Carrier_Component,Impedance_L_Carrier001,Respiratory_Sensors,Replaceable electrode carrier,Upper chest,
+Impedance_L_Contact_Component,Impedance_L_Contact001,Respiratory_Sensors,Dedicated respiratory impedance electrode,Upper chest,Excitation/current-limiting electronics require safety verification
+Impedance_L_Snap_Component,Impedance_L_Snap001,Respiratory_Sensors,Conductive snap,Upper chest,
+Impedance_R_Carrier_Component,Impedance_R_Carrier001,Respiratory_Sensors,Replaceable electrode carrier,Upper chest,
+Impedance_R_Contact_Component,Impedance_R_Contact001,Respiratory_Sensors,Dedicated respiratory impedance electrode,Upper chest,Excitation/current-limiting electronics require safety verification
+Impedance_R_Snap_Component,Impedance_R_Snap001,Respiratory_Sensors,Conductive snap,Upper chest,
+Temperature_Chest_Contact_Component,Temperature_Chest_Contact001,Temperature_Sensors,Skin temperature trend,Chest,Local skin temperature; does not directly measure core temperature
+Temperature_Chest_PCB,Temperature_Chest_PCB,Temperature_Sensors,Contact thermistor / digital sensor carrier,Chest,
+Temperature_UpperBack_Contact_Component,Temperature_UpperBack_Contact001,Temperature_Sensors,Skin temperature trend,UpperBack,Local skin temperature; does not directly measure core temperature
+Temperature_UpperBack_PCB,Temperature_UpperBack_PCB,Temperature_Sensors,Contact thermistor / digital sensor carrier,UpperBack,
+Temperature_Arm_Contact_Component,Temperature_Arm_Contact001,Temperature_Sensors,Skin temperature trend,Arm,Local skin temperature; does not directly measure core temperature
+Temperature_Arm_PCB,Temperature_Arm_PCB,Temperature_Sensors,Contact thermistor / digital sensor carrier,Arm,
+Temperature_Thigh_Contact_Component,Temperature_Thigh_Contact001,Temperature_Sensors,Skin temperature trend,Thigh,Local skin temperature; does not directly measure core temperature
+Temperature_Thigh_PCB,Temperature_Thigh_PCB,Temperature_Sensors,Contact thermistor / digital sensor carrier,Thigh,
+Left_Biceps_EMG_E1_Carrier_Component,Left_Biceps_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Biceps,
+Left_Biceps_EMG_E1_Contact_Component,Left_Biceps_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Biceps,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Biceps_EMG_E1_Snap_Component,Left_Biceps_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Left Biceps,
+Left_Biceps_EMG_E2_Carrier_Component,Left_Biceps_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Biceps,
+Left_Biceps_EMG_E2_Contact_Component,Left_Biceps_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Biceps,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Biceps_EMG_E2_Snap_Component,Left_Biceps_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Left Biceps,
+Left_Biceps_EMG_AFE_Housing,Left_Biceps_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Left Biceps,
+Left_Biceps_EMG_AFE_ServiceLid,Left_Biceps_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Left Biceps,
+Left_Biceps_EMG_AFE_PCB,Left_Biceps_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Left Biceps,
+Left_Biceps_EMG_AFE_IC,Left_Biceps_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Left Biceps,
+Left_Forearm_EMG_E1_Carrier_Component,Left_Forearm_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Forearm,
+Left_Forearm_EMG_E1_Contact_Component,Left_Forearm_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Forearm,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Forearm_EMG_E1_Snap_Component,Left_Forearm_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Left Forearm,
+Left_Forearm_EMG_E2_Carrier_Component,Left_Forearm_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Forearm,
+Left_Forearm_EMG_E2_Contact_Component,Left_Forearm_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Forearm,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Forearm_EMG_E2_Snap_Component,Left_Forearm_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Left Forearm,
+Left_Forearm_EMG_AFE_Housing,Left_Forearm_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Left Forearm,
+Left_Forearm_EMG_AFE_ServiceLid,Left_Forearm_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Left Forearm,
+Left_Forearm_EMG_AFE_PCB,Left_Forearm_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Left Forearm,
+Left_Forearm_EMG_AFE_IC,Left_Forearm_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Left Forearm,
+Left_Quadriceps_EMG_E1_Carrier_Component,Left_Quadriceps_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Quadriceps,
+Left_Quadriceps_EMG_E1_Contact_Component,Left_Quadriceps_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Quadriceps,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Quadriceps_EMG_E1_Snap_Component,Left_Quadriceps_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Left Quadriceps,
+Left_Quadriceps_EMG_E2_Carrier_Component,Left_Quadriceps_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Quadriceps,
+Left_Quadriceps_EMG_E2_Contact_Component,Left_Quadriceps_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Quadriceps,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Quadriceps_EMG_E2_Snap_Component,Left_Quadriceps_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Left Quadriceps,
+Left_Quadriceps_EMG_AFE_Housing,Left_Quadriceps_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Left Quadriceps,
+Left_Quadriceps_EMG_AFE_ServiceLid,Left_Quadriceps_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Left Quadriceps,
+Left_Quadriceps_EMG_AFE_PCB,Left_Quadriceps_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Left Quadriceps,
+Left_Quadriceps_EMG_AFE_IC,Left_Quadriceps_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Left Quadriceps,
+Left_Hamstrings_EMG_E1_Carrier_Component,Left_Hamstrings_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Hamstrings,
+Left_Hamstrings_EMG_E1_Contact_Component,Left_Hamstrings_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Hamstrings,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Hamstrings_EMG_E1_Snap_Component,Left_Hamstrings_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Left Hamstrings,
+Left_Hamstrings_EMG_E2_Carrier_Component,Left_Hamstrings_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Hamstrings,
+Left_Hamstrings_EMG_E2_Contact_Component,Left_Hamstrings_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Hamstrings,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Hamstrings_EMG_E2_Snap_Component,Left_Hamstrings_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Left Hamstrings,
+Left_Hamstrings_EMG_AFE_Housing,Left_Hamstrings_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Left Hamstrings,
+Left_Hamstrings_EMG_AFE_ServiceLid,Left_Hamstrings_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Left Hamstrings,
+Left_Hamstrings_EMG_AFE_PCB,Left_Hamstrings_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Left Hamstrings,
+Left_Hamstrings_EMG_AFE_IC,Left_Hamstrings_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Left Hamstrings,
+Left_Calf_EMG_E1_Carrier_Component,Left_Calf_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Calf,
+Left_Calf_EMG_E1_Contact_Component,Left_Calf_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Calf,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Calf_EMG_E1_Snap_Component,Left_Calf_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Left Calf,
+Left_Calf_EMG_E2_Carrier_Component,Left_Calf_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Calf,
+Left_Calf_EMG_E2_Contact_Component,Left_Calf_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Calf,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Calf_EMG_E2_Snap_Component,Left_Calf_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Left Calf,
+Left_Calf_EMG_AFE_Housing,Left_Calf_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Left Calf,
+Left_Calf_EMG_AFE_ServiceLid,Left_Calf_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Left Calf,
+Left_Calf_EMG_AFE_PCB,Left_Calf_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Left Calf,
+Left_Calf_EMG_AFE_IC,Left_Calf_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Left Calf,
+Left_Back_EMG_E1_Carrier_Component,Left_Back_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Back,
+Left_Back_EMG_E1_Contact_Component,Left_Back_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Back,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Back_EMG_E1_Snap_Component,Left_Back_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Left Back,
+Left_Back_EMG_E2_Carrier_Component,Left_Back_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Left Back,
+Left_Back_EMG_E2_Contact_Component,Left_Back_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Left Back,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Left_Back_EMG_E2_Snap_Component,Left_Back_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Left Back,
+Left_Back_EMG_AFE_Housing,Left_Back_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Left Back,
+Left_Back_EMG_AFE_ServiceLid,Left_Back_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Left Back,
+Left_Back_EMG_AFE_PCB,Left_Back_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Left Back,
+Left_Back_EMG_AFE_IC,Left_Back_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Left Back,
+Left_UpperArm_IMU_Housing,Left_UpperArm_IMU_Housing,Motion_Tracking_Modules,Segment orientation / motion,Left UpperArm,Orientation needs calibration; magnetic disturbance affects heading
+Left_UpperArm_IMU_ServiceLid,Left_UpperArm_IMU_ServiceLid,Motion_Tracking_Modules,Removable service lid,Left UpperArm,
+Left_UpperArm_IMU_PCB,Left_UpperArm_IMU_PCB,Motion_Tracking_Modules,Acquisition / sensor PCB,Left UpperArm,Orientation needs calibration; magnetic disturbance affects heading
+Left_UpperArm_IMU_IC,Left_UpperArm_IMU_IC,Motion_Tracking_Modules,Signal acquisition IC,Left UpperArm,
+Left_UpperArm_IMU_MEMS,Left_UpperArm_IMU_MEMS,Motion_Tracking_Modules,6/9-axis inertial sensor package,Left UpperArm,
+Left_UpperArm_IMU_Indicator,Left_UpperArm_IMU_Indicator,Motion_Tracking_Modules,Acquisition status,Left UpperArm,
+Left_Forearm_IMU_Housing,Left_Forearm_IMU_Housing,Motion_Tracking_Modules,Segment orientation / motion,Left Forearm,Orientation needs calibration; magnetic disturbance affects heading
+Left_Forearm_IMU_ServiceLid,Left_Forearm_IMU_ServiceLid,Motion_Tracking_Modules,Removable service lid,Left Forearm,
+Left_Forearm_IMU_PCB,Left_Forearm_IMU_PCB,Motion_Tracking_Modules,Acquisition / sensor PCB,Left Forearm,Orientation needs calibration; magnetic disturbance affects heading
+Left_Forearm_IMU_IC,Left_Forearm_IMU_IC,Motion_Tracking_Modules,Signal acquisition IC,Left Forearm,
+Left_Forearm_IMU_MEMS,Left_Forearm_IMU_MEMS,Motion_Tracking_Modules,6/9-axis inertial sensor package,Left Forearm,
+Left_Forearm_IMU_Indicator,Left_Forearm_IMU_Indicator,Motion_Tracking_Modules,Acquisition status,Left Forearm,
+Left_Thigh_IMU_Housing,Left_Thigh_IMU_Housing,Motion_Tracking_Modules,Segment orientation / motion,Left Thigh,Orientation needs calibration; magnetic disturbance affects heading
+Left_Thigh_IMU_ServiceLid,Left_Thigh_IMU_ServiceLid,Motion_Tracking_Modules,Removable service lid,Left Thigh,
+Left_Thigh_IMU_PCB,Left_Thigh_IMU_PCB,Motion_Tracking_Modules,Acquisition / sensor PCB,Left Thigh,Orientation needs calibration; magnetic disturbance affects heading
+Left_Thigh_IMU_IC,Left_Thigh_IMU_IC,Motion_Tracking_Modules,Signal acquisition IC,Left Thigh,
+Left_Thigh_IMU_MEMS,Left_Thigh_IMU_MEMS,Motion_Tracking_Modules,6/9-axis inertial sensor package,Left Thigh,
+Left_Thigh_IMU_Indicator,Left_Thigh_IMU_Indicator,Motion_Tracking_Modules,Acquisition status,Left Thigh,
+Left_Shank_IMU_Housing,Left_Shank_IMU_Housing,Motion_Tracking_Modules,Segment orientation / motion,Left Shank,Orientation needs calibration; magnetic disturbance affects heading
+Left_Shank_IMU_ServiceLid,Left_Shank_IMU_ServiceLid,Motion_Tracking_Modules,Removable service lid,Left Shank,
+Left_Shank_IMU_PCB,Left_Shank_IMU_PCB,Motion_Tracking_Modules,Acquisition / sensor PCB,Left Shank,Orientation needs calibration; magnetic disturbance affects heading
+Left_Shank_IMU_IC,Left_Shank_IMU_IC,Motion_Tracking_Modules,Signal acquisition IC,Left Shank,
+Left_Shank_IMU_MEMS,Left_Shank_IMU_MEMS,Motion_Tracking_Modules,6/9-axis inertial sensor package,Left Shank,
+Left_Shank_IMU_Indicator,Left_Shank_IMU_Indicator,Motion_Tracking_Modules,Acquisition status,Left Shank,
+Left_Elbow_Bend,Left_Elbow_Bend,Motion_Tracking_Modules,Flexible resistive bend sensor,Left Elbow,Geometry represents flex; calibration and IMU fusion required
+Left_Knee_Bend,Left_Knee_Bend,Motion_Tracking_Modules,Flexible resistive bend sensor,Left Knee,Geometry represents flex; calibration and IMU fusion required
+Left_Hip_Bend,Left_Hip_Bend,Motion_Tracking_Modules,Flexible resistive bend sensor,Left Hip,Geometry represents flex; calibration and IMU fusion required
+Left_Wrist_Bend,Left_Wrist_Bend,Motion_Tracking_Modules,Flexible resistive bend sensor,Left Wrist,Geometry represents flex; calibration and IMU fusion required
+Right_Biceps_EMG_E1_Carrier_Component,Right_Biceps_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Biceps,
+Right_Biceps_EMG_E1_Contact_Component,Right_Biceps_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Biceps,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Biceps_EMG_E1_Snap_Component,Right_Biceps_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Right Biceps,
+Right_Biceps_EMG_E2_Carrier_Component,Right_Biceps_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Biceps,
+Right_Biceps_EMG_E2_Contact_Component,Right_Biceps_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Biceps,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Biceps_EMG_E2_Snap_Component,Right_Biceps_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Right Biceps,
+Right_Biceps_EMG_AFE_Housing,Right_Biceps_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Right Biceps,
+Right_Biceps_EMG_AFE_ServiceLid,Right_Biceps_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Right Biceps,
+Right_Biceps_EMG_AFE_PCB,Right_Biceps_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Right Biceps,
+Right_Biceps_EMG_AFE_IC,Right_Biceps_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Right Biceps,
+Right_Forearm_EMG_E1_Carrier_Component,Right_Forearm_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Forearm,
+Right_Forearm_EMG_E1_Contact_Component,Right_Forearm_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Forearm,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Forearm_EMG_E1_Snap_Component,Right_Forearm_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Right Forearm,
+Right_Forearm_EMG_E2_Carrier_Component,Right_Forearm_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Forearm,
+Right_Forearm_EMG_E2_Contact_Component,Right_Forearm_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Forearm,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Forearm_EMG_E2_Snap_Component,Right_Forearm_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Right Forearm,
+Right_Forearm_EMG_AFE_Housing,Right_Forearm_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Right Forearm,
+Right_Forearm_EMG_AFE_ServiceLid,Right_Forearm_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Right Forearm,
+Right_Forearm_EMG_AFE_PCB,Right_Forearm_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Right Forearm,
+Right_Forearm_EMG_AFE_IC,Right_Forearm_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Right Forearm,
+Right_Quadriceps_EMG_E1_Carrier_Component,Right_Quadriceps_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Quadriceps,
+Right_Quadriceps_EMG_E1_Contact_Component,Right_Quadriceps_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Quadriceps,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Quadriceps_EMG_E1_Snap_Component,Right_Quadriceps_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Right Quadriceps,
+Right_Quadriceps_EMG_E2_Carrier_Component,Right_Quadriceps_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Quadriceps,
+Right_Quadriceps_EMG_E2_Contact_Component,Right_Quadriceps_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Quadriceps,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Quadriceps_EMG_E2_Snap_Component,Right_Quadriceps_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Right Quadriceps,
+Right_Quadriceps_EMG_AFE_Housing,Right_Quadriceps_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Right Quadriceps,
+Right_Quadriceps_EMG_AFE_ServiceLid,Right_Quadriceps_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Right Quadriceps,
+Right_Quadriceps_EMG_AFE_PCB,Right_Quadriceps_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Right Quadriceps,
+Right_Quadriceps_EMG_AFE_IC,Right_Quadriceps_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Right Quadriceps,
+Right_Hamstrings_EMG_E1_Carrier_Component,Right_Hamstrings_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Hamstrings,
+Right_Hamstrings_EMG_E1_Contact_Component,Right_Hamstrings_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Hamstrings,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Hamstrings_EMG_E1_Snap_Component,Right_Hamstrings_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Right Hamstrings,
+Right_Hamstrings_EMG_E2_Carrier_Component,Right_Hamstrings_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Hamstrings,
+Right_Hamstrings_EMG_E2_Contact_Component,Right_Hamstrings_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Hamstrings,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Hamstrings_EMG_E2_Snap_Component,Right_Hamstrings_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Right Hamstrings,
+Right_Hamstrings_EMG_AFE_Housing,Right_Hamstrings_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Right Hamstrings,
+Right_Hamstrings_EMG_AFE_ServiceLid,Right_Hamstrings_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Right Hamstrings,
+Right_Hamstrings_EMG_AFE_PCB,Right_Hamstrings_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Right Hamstrings,
+Right_Hamstrings_EMG_AFE_IC,Right_Hamstrings_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Right Hamstrings,
+Right_Calf_EMG_E1_Carrier_Component,Right_Calf_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Calf,
+Right_Calf_EMG_E1_Contact_Component,Right_Calf_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Calf,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Calf_EMG_E1_Snap_Component,Right_Calf_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Right Calf,
+Right_Calf_EMG_E2_Carrier_Component,Right_Calf_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Calf,
+Right_Calf_EMG_E2_Contact_Component,Right_Calf_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Calf,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Calf_EMG_E2_Snap_Component,Right_Calf_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Right Calf,
+Right_Calf_EMG_AFE_Housing,Right_Calf_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Right Calf,
+Right_Calf_EMG_AFE_ServiceLid,Right_Calf_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Right Calf,
+Right_Calf_EMG_AFE_PCB,Right_Calf_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Right Calf,
+Right_Calf_EMG_AFE_IC,Right_Calf_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Right Calf,
+Right_Back_EMG_E1_Carrier_Component,Right_Back_EMG_E1_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Back,
+Right_Back_EMG_E1_Contact_Component,Right_Back_EMG_E1_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Back,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Back_EMG_E1_Snap_Component,Right_Back_EMG_E1_Snap001,EMG_Assemblies,Conductive snap,Right Back,
+Right_Back_EMG_E2_Carrier_Component,Right_Back_EMG_E2_Carrier001,EMG_Assemblies,Replaceable electrode carrier,Right Back,
+Right_Back_EMG_E2_Contact_Component,Right_Back_EMG_E2_Contact001,EMG_Assemblies,Surface muscle electrical activation,Right Back,Motion artifact and crosstalk; not direct strength or fatigue diagnosis
+Right_Back_EMG_E2_Snap_Component,Right_Back_EMG_E2_Snap001,EMG_Assemblies,Conductive snap,Right Back,
+Right_Back_EMG_AFE_Housing,Right_Back_EMG_AFE_Housing,EMG_Assemblies,Surface EMG amplifier / acquisition,Right Back,
+Right_Back_EMG_AFE_ServiceLid,Right_Back_EMG_AFE_ServiceLid,EMG_Assemblies,Removable service lid,Right Back,
+Right_Back_EMG_AFE_PCB,Right_Back_EMG_AFE_PCB,EMG_Assemblies,Acquisition / sensor PCB,Right Back,
+Right_Back_EMG_AFE_IC,Right_Back_EMG_AFE_IC,EMG_Assemblies,Signal acquisition IC,Right Back,
+Right_UpperArm_IMU_Housing,Right_UpperArm_IMU_Housing,Motion_Tracking_Modules,Segment orientation / motion,Right UpperArm,Orientation needs calibration; magnetic disturbance affects heading
+Right_UpperArm_IMU_ServiceLid,Right_UpperArm_IMU_ServiceLid,Motion_Tracking_Modules,Removable service lid,Right UpperArm,
+Right_UpperArm_IMU_PCB,Right_UpperArm_IMU_PCB,Motion_Tracking_Modules,Acquisition / sensor PCB,Right UpperArm,Orientation needs calibration; magnetic disturbance affects heading
+Right_UpperArm_IMU_IC,Right_UpperArm_IMU_IC,Motion_Tracking_Modules,Signal acquisition IC,Right UpperArm,
+Right_UpperArm_IMU_MEMS,Right_UpperArm_IMU_MEMS,Motion_Tracking_Modules,6/9-axis inertial sensor package,Right UpperArm,
+Right_UpperArm_IMU_Indicator,Right_UpperArm_IMU_Indicator,Motion_Tracking_Modules,Acquisition status,Right UpperArm,
+Right_Forearm_IMU_Housing,Right_Forearm_IMU_Housing,Motion_Tracking_Modules,Segment orientation / motion,Right Forearm,Orientation needs calibration; magnetic disturbance affects heading
+Right_Forearm_IMU_ServiceLid,Right_Forearm_IMU_ServiceLid,Motion_Tracking_Modules,Removable service lid,Right Forearm,
+Right_Forearm_IMU_PCB,Right_Forearm_IMU_PCB,Motion_Tracking_Modules,Acquisition / sensor PCB,Right Forearm,Orientation needs calibration; magnetic disturbance affects heading
+Right_Forearm_IMU_IC,Right_Forearm_IMU_IC,Motion_Tracking_Modules,Signal acquisition IC,Right Forearm,
+Right_Forearm_IMU_MEMS,Right_Forearm_IMU_MEMS,Motion_Tracking_Modules,6/9-axis inertial sensor package,Right Forearm,
+Right_Forearm_IMU_Indicator,Right_Forearm_IMU_Indicator,Motion_Tracking_Modules,Acquisition status,Right Forearm,
+Right_Thigh_IMU_Housing,Right_Thigh_IMU_Housing,Motion_Tracking_Modules,Segment orientation / motion,Right Thigh,Orientation needs calibration; magnetic disturbance affects heading
+Right_Thigh_IMU_ServiceLid,Right_Thigh_IMU_ServiceLid,Motion_Tracking_Modules,Removable service lid,Right Thigh,
+Right_Thigh_IMU_PCB,Right_Thigh_IMU_PCB,Motion_Tracking_Modules,Acquisition / sensor PCB,Right Thigh,Orientation needs calibration; magnetic disturbance affects heading
+Right_Thigh_IMU_IC,Right_Thigh_IMU_IC,Motion_Tracking_Modules,Signal acquisition IC,Right Thigh,
+Right_Thigh_IMU_MEMS,Right_Thigh_IMU_MEMS,Motion_Tracking_Modules,6/9-axis inertial sensor package,Right Thigh,
+Right_Thigh_IMU_Indicator,Right_Thigh_IMU_Indicator,Motion_Tracking_Modules,Acquisition status,Right Thigh,
+Right_Shank_IMU_Housing,Right_Shank_IMU_Housing,Motion_Tracking_Modules,Segment orientation / motion,Right Shank,Orientation needs calibration; magnetic disturbance affects heading
+Right_Shank_IMU_ServiceLid,Right_Shank_IMU_ServiceLid,Motion_Tracking_Modules,Removable service lid,Right Shank,
+Right_Shank_IMU_PCB,Right_Shank_IMU_PCB,Motion_Tracking_Modules,Acquisition / sensor PCB,Right Shank,Orientation needs calibration; magnetic disturbance affects heading
+Right_Shank_IMU_IC,Right_Shank_IMU_IC,Motion_Tracking_Modules,Signal acquisition IC,Right Shank,
+Right_Shank_IMU_MEMS,Right_Shank_IMU_MEMS,Motion_Tracking_Modules,6/9-axis inertial sensor package,Right Shank,
+Right_Shank_IMU_Indicator,Right_Shank_IMU_Indicator,Motion_Tracking_Modules,Acquisition status,Right Shank,
+Right_Elbow_Bend,Right_Elbow_Bend,Motion_Tracking_Modules,Flexible resistive bend sensor,Right Elbow,Geometry represents flex; calibration and IMU fusion required
+Right_Knee_Bend,Right_Knee_Bend,Motion_Tracking_Modules,Flexible resistive bend sensor,Right Knee,Geometry represents flex; calibration and IMU fusion required
+Right_Hip_Bend,Right_Hip_Bend,Motion_Tracking_Modules,Flexible resistive bend sensor,Right Hip,Geometry represents flex; calibration and IMU fusion required
+Right_Wrist_Bend,Right_Wrist_Bend,Motion_Tracking_Modules,Flexible resistive bend sensor,Right Wrist,Geometry represents flex; calibration and IMU fusion required
+Chest_IMU_Housing,Chest_IMU_Housing,Motion_Tracking_Modules,Segment orientation / motion,Sternum,Orientation needs calibration; magnetic disturbance affects heading
+Chest_IMU_ServiceLid,Chest_IMU_ServiceLid,Motion_Tracking_Modules,Removable service lid,Sternum,
+Chest_IMU_PCB,Chest_IMU_PCB,Motion_Tracking_Modules,Acquisition / sensor PCB,Sternum,Orientation needs calibration; magnetic disturbance affects heading
+Chest_IMU_IC,Chest_IMU_IC,Motion_Tracking_Modules,Signal acquisition IC,Sternum,
+Chest_IMU_MEMS,Chest_IMU_MEMS,Motion_Tracking_Modules,6/9-axis inertial sensor package,Sternum,
+Chest_IMU_Indicator,Chest_IMU_Indicator,Motion_Tracking_Modules,Acquisition status,Sternum,
+Pelvis_IMU_Housing,Pelvis_IMU_Housing,Motion_Tracking_Modules,Segment orientation / motion,Pelvis,Orientation needs calibration; magnetic disturbance affects heading
+Pelvis_IMU_ServiceLid,Pelvis_IMU_ServiceLid,Motion_Tracking_Modules,Removable service lid,Pelvis,
+Pelvis_IMU_PCB,Pelvis_IMU_PCB,Motion_Tracking_Modules,Acquisition / sensor PCB,Pelvis,Orientation needs calibration; magnetic disturbance affects heading
+Pelvis_IMU_IC,Pelvis_IMU_IC,Motion_Tracking_Modules,Signal acquisition IC,Pelvis,
+Pelvis_IMU_MEMS,Pelvis_IMU_MEMS,Motion_Tracking_Modules,6/9-axis inertial sensor package,Pelvis,
+Pelvis_IMU_Indicator,Pelvis_IMU_Indicator,Motion_Tracking_Modules,Acquisition status,Pelvis,
+Sweat_Reader_Housing,Sweat_Reader_Housing,Hydration_Patches,Electrochemical sweat reader,Lateral torso,Exploratory: sweat electrolytes do not establish blood electrolytes or total hydration
+Sweat_Reader_ServiceLid,Sweat_Reader_ServiceLid,Hydration_Patches,Removable service lid,Lateral torso,
+Sweat_Reader_PCB,Sweat_Reader_PCB,Hydration_Patches,Acquisition / sensor PCB,Lateral torso,Exploratory: sweat electrolytes do not establish blood electrolytes or total hydration
+Sweat_Reader_IC,Sweat_Reader_IC,Hydration_Patches,Signal acquisition IC,Lateral torso,
+Sweat_Replaceable_Cartridge,Sweat_Replaceable_Cartridge,Hydration_Patches,Replaceable microfluidic sweat collection cartridge,Torso,
+Sweat_Electrochemical_Well_0_Component,Sweat_Electrochemical_Well_001,Hydration_Patches,Sodium electrode concept,Sweat cartridge,
+Sweat_Electrochemical_Well_1_Component,Sweat_Electrochemical_Well_002,Hydration_Patches,Chloride electrode concept,Sweat cartridge,
+Sweat_Electrochemical_Well_2_Component,Sweat_Electrochemical_Well_003,Hydration_Patches,Reference electrode,Sweat cartridge,
+Sweat_Collection_Inlet_Component,Sweat_Collection_Inlet001,Hydration_Patches,Sweat collection inlet,Local skin,
+Wrist_EDA_L0_Carrier_Component,Wrist_EDA_L0_Carrier001,EDA_Assemblies,Replaceable electrode carrier,L volar wrist,
+Wrist_EDA_L0_Contact_Component,Wrist_EDA_L0_Contact001,EDA_Assemblies,Electrodermal conductance contact,L volar wrist,EDA reflects sympathetic activity; not an emotion or psychiatric diagnosis
+Wrist_EDA_L0_Snap_Component,Wrist_EDA_L0_Snap001,EDA_Assemblies,Conductive snap,L volar wrist,
+Wrist_EDA_L1_Carrier_Component,Wrist_EDA_L1_Carrier001,EDA_Assemblies,Replaceable electrode carrier,L volar wrist,
+Wrist_EDA_L1_Contact_Component,Wrist_EDA_L1_Contact001,EDA_Assemblies,Electrodermal conductance contact,L volar wrist,EDA reflects sympathetic activity; not an emotion or psychiatric diagnosis
+Wrist_EDA_L1_Snap_Component,Wrist_EDA_L1_Snap001,EDA_Assemblies,Conductive snap,L volar wrist,
+Wrist_EDA_R0_Carrier_Component,Wrist_EDA_R0_Carrier001,EDA_Assemblies,Replaceable electrode carrier,R volar wrist,
+Wrist_EDA_R0_Contact_Component,Wrist_EDA_R0_Contact001,EDA_Assemblies,Electrodermal conductance contact,R volar wrist,EDA reflects sympathetic activity; not an emotion or psychiatric diagnosis
+Wrist_EDA_R0_Snap_Component,Wrist_EDA_R0_Snap001,EDA_Assemblies,Conductive snap,R volar wrist,
+Wrist_EDA_R1_Carrier_Component,Wrist_EDA_R1_Carrier001,EDA_Assemblies,Replaceable electrode carrier,R volar wrist,
+Wrist_EDA_R1_Contact_Component,Wrist_EDA_R1_Contact001,EDA_Assemblies,Electrodermal conductance contact,R volar wrist,EDA reflects sympathetic activity; not an emotion or psychiatric diagnosis
+Wrist_EDA_R1_Snap_Component,Wrist_EDA_R1_Snap001,EDA_Assemblies,Conductive snap,R volar wrist,
+Dosimeter_Housing,Dosimeter_Housing,Radiation_Dosimeter,Personal dose exposure logging,Left chest,Detector response and dose conversion need calibration; no cellular damage measurement
+Dosimeter_ServiceLid,Dosimeter_ServiceLid,Radiation_Dosimeter,Removable service lid,Left chest,
+Dosimeter_PCB,Dosimeter_PCB,Radiation_Dosimeter,Acquisition / sensor PCB,Left chest,Detector response and dose conversion need calibration; no cellular damage measurement
+Dosimeter_IC,Dosimeter_IC,Radiation_Dosimeter,Signal acquisition IC,Left chest,
+Dosimeter_Detector,Dosimeter_Detector,Radiation_Dosimeter,Radiation detector sensitive volume,Dosimeter enclosure,
+Dosimeter_Electronics_Shield,Dosimeter_Electronics_Shield,Radiation_Dosimeter,Local electronics EMI shield; detector aperture left unshielded,Dosimeter,
+Dosimeter_Clip,Dosimeter_Clip,Radiation_Dosimeter,Removable mounting clip,Left chest,
+Environment_Pod_Housing,Environment_Pod_Housing,Environmental_Sensors,Exposed local ambient sampling,Outer shoulder,Local reading may differ from cabin atmosphere; characterize airflow
+Environment_Pod_ServiceLid,Environment_Pod_ServiceLid,Environmental_Sensors,Removable service lid,Outer shoulder,
+Environment_Pod_PCB,Environment_Pod_PCB,Environmental_Sensors,Acquisition / sensor PCB,Outer shoulder,Local reading may differ from cabin atmosphere; characterize airflow
+Environment_Pod_IC,Environment_Pod_IC,Environmental_Sensors,Signal acquisition IC,Outer shoulder,
+Environment_Vent_0,Environment_Vent_0,Environmental_Sensors,Exposed intake grille,Shoulder pod,
+Environment_Vent_1,Environment_Vent_1,Environmental_Sensors,Exposed intake grille,Shoulder pod,
+Environment_Vent_2,Environment_Vent_2,Environmental_Sensors,Exposed intake grille,Shoulder pod,
+Environment_Vent_3,Environment_Vent_3,Environmental_Sensors,Exposed intake grille,Shoulder pod,
+Environment_TemperatureHumidity,Environment_TemperatureHumidity,Environmental_Sensors,TemperatureHumidity sensor package,Ventilated ambient pod,
+Environment_Pressure,Environment_Pressure,Environmental_Sensors,Pressure sensor package,Ventilated ambient pod,
+Environment_CO2_NDIR,Environment_CO2_NDIR,Environmental_Sensors,CO2_NDIR sensor package,Ventilated ambient pod,
+Environment_O2_Electrochemical,Environment_O2_Electrochemical,Environmental_Sensors,O2_Electrochemical sensor package,Ventilated ambient pod,
+ECU_Serviceable_Enclosure,ECU_Serviceable_Enclosure,Electronics_Control_Unit,Central processor and acquisition enclosure,Upper back,Packaging concept only; thermal and electrical safety not validated
+ECU_Removable_Cover,ECU_Removable_Cover,Electronics_Control_Unit,Translucent removable cover,Back,
+ECU_Processor_PCB,ECU_Processor_PCB,Electronics_Control_Unit,Processor board,Upper-back ECU,
+ECU_Processor_Chip,ECU_Processor_Chip,Electronics_Control_Unit,Processor integrated circuit,ECU,
+ECU_Microcontroller_PCB,ECU_Microcontroller_PCB,Electronics_Control_Unit,Microcontroller board,Upper-back ECU,
+ECU_Microcontroller_Chip,ECU_Microcontroller_Chip,Electronics_Control_Unit,Microcontroller integrated circuit,ECU,
+ECU_BiopotentialAFE_PCB,ECU_BiopotentialAFE_PCB,Electronics_Control_Unit,BiopotentialAFE board,Upper-back ECU,
+ECU_BiopotentialAFE_Chip,ECU_BiopotentialAFE_Chip,Electronics_Control_Unit,BiopotentialAFE integrated circuit,ECU,
+ECU_IMUAcquisition_PCB,ECU_IMUAcquisition_PCB,Electronics_Control_Unit,IMUAcquisition board,Upper-back ECU,
+ECU_IMUAcquisition_Chip,ECU_IMUAcquisition_Chip,Electronics_Control_Unit,IMUAcquisition integrated circuit,ECU,
+ECU_OpticalInterface_PCB,ECU_OpticalInterface_PCB,Electronics_Control_Unit,OpticalInterface board,Upper-back ECU,
+ECU_OpticalInterface_Chip,ECU_OpticalInterface_Chip,Electronics_Control_Unit,OpticalInterface integrated circuit,ECU,
+ECU_Wireless_PCB,ECU_Wireless_PCB,Electronics_Control_Unit,Wireless board,Upper-back ECU,
+ECU_Wireless_Chip,ECU_Wireless_Chip,Electronics_Control_Unit,Wireless integrated circuit,ECU,
+ECU_NonvolatileStorage_PCB,ECU_NonvolatileStorage_PCB,Electronics_Control_Unit,NonvolatileStorage board,Upper-back ECU,
+ECU_NonvolatileStorage_Chip,ECU_NonvolatileStorage_Chip,Electronics_Control_Unit,NonvolatileStorage integrated circuit,ECU,
+ECU_TimeSyncInterface_PCB,ECU_TimeSyncInterface_PCB,Electronics_Control_Unit,TimeSyncInterface board,Upper-back ECU,
+ECU_TimeSyncInterface_Chip,ECU_TimeSyncInterface_Chip,Electronics_Control_Unit,TimeSyncInterface integrated circuit,ECU,
+ECU_PowerDistribution_PCB,ECU_PowerDistribution_PCB,Electronics_Control_Unit,PowerDistribution board,Upper-back ECU,
+ECU_PowerDistribution_Chip,ECU_PowerDistribution_Chip,Electronics_Control_Unit,PowerDistribution integrated circuit,ECU,
+ECU_HarnessSocket_0,ECU_HarnessSocket_0,Electronics_Control_Unit,Keyed harness connector,ECU base,
+ECU_StrainRelief_0_Component,ECU_StrainRelief_001,Fasteners_And_Connectors,Cable strain relief,Back ECU,
+ECU_HarnessSocket_1,ECU_HarnessSocket_1,Electronics_Control_Unit,Keyed harness connector,ECU base,
+ECU_StrainRelief_1_Component,ECU_StrainRelief_002,Fasteners_And_Connectors,Cable strain relief,Back ECU,
+ECU_HarnessSocket_2,ECU_HarnessSocket_2,Electronics_Control_Unit,Keyed harness connector,ECU base,
+ECU_StrainRelief_2_Component,ECU_StrainRelief_003,Fasteners_And_Connectors,Cable strain relief,Back ECU,
+ECU_HarnessSocket_3,ECU_HarnessSocket_3,Electronics_Control_Unit,Keyed harness connector,ECU base,
+ECU_StrainRelief_3_Component,ECU_StrainRelief_004,Fasteners_And_Connectors,Cable strain relief,Back ECU,
+ECU_HarnessSocket_4,ECU_HarnessSocket_4,Electronics_Control_Unit,Keyed harness connector,ECU base,
+ECU_StrainRelief_4_Component,ECU_StrainRelief_005,Fasteners_And_Connectors,Cable strain relief,Back ECU,
+ECU_HarnessSocket_5,ECU_HarnessSocket_5,Electronics_Control_Unit,Keyed harness connector,ECU base,
+ECU_StrainRelief_5_Component,ECU_StrainRelief_006,Fasteners_And_Connectors,Cable strain relief,Back ECU,
+ECU_PowerSwitch,ECU_PowerSwitch,Electronics_Control_Unit,Physical power switch,ECU side,
+ECU_Status_LED_0,ECU_Status_LED_0,Electronics_Control_Unit,System status light,ECU cover,
+ECU_Status_LED_1,ECU_Status_LED_1,Electronics_Control_Unit,System status light,ECU cover,
+ECU_Status_LED_2,ECU_Status_LED_2,Electronics_Control_Unit,System status light,ECU cover,
+Battery_Compartment,Battery_Compartment,Battery_And_Power,Replaceable protected battery compartment,Lower back,
+Battery_Service_Lid,Battery_Service_Lid,Battery_And_Power,Quick-release battery service lid,Lower back,
+Battery_Cell_0,Battery_Cell_0,Battery_And_Power,Protected prismatic cell concept,Battery compartment,Capacity and flight acceptance not specified
+Battery_Cell_1,Battery_Cell_1,Battery_And_Power,Protected prismatic cell concept,Battery compartment,Capacity and flight acceptance not specified
+Battery_Management_PCB,Battery_Management_PCB,Battery_And_Power,Battery management / overcurrent protection,Battery module,
+Charging_Connector,Charging_Connector,Battery_And_Power,Keyed charging port,Lower-back battery,
+Acquisition_Isolation_Barrier,Acquisition_Isolation_Barrier,Electronics_Control_Unit,Conceptual acquisition-to-power isolation barrier,ECU,Electrical isolation topology and creepage need design verification
+Torso_Trunk_L_Segment00_Component,Torso_Trunk_L_Segment001,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Torso_Trunk_L_Segment01_Component,Torso_Trunk_L_Segment002,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Torso_Trunk_L_Segment02_Component,Torso_Trunk_L_Segment003,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Torso_Trunk_L_Bend00_Component,Torso_Trunk_L_Bend001,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Torso_Trunk_L_Bend01_Component,Torso_Trunk_L_Bend002,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Arm_Trunk_L_Segment00_Component,Arm_Trunk_L_Segment001,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Arm_Trunk_L_Segment01_Component,Arm_Trunk_L_Segment002,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Arm_Trunk_L_Segment02_Component,Arm_Trunk_L_Segment003,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Arm_Trunk_L_Segment03_Component,Arm_Trunk_L_Segment004,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Arm_Trunk_L_Segment04_Component,Arm_Trunk_L_Segment005,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Arm_Trunk_L_Bend00_Component,Arm_Trunk_L_Bend001,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Arm_Trunk_L_Bend01_Component,Arm_Trunk_L_Bend002,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Arm_Trunk_L_Bend02_Component,Arm_Trunk_L_Bend003,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Arm_Trunk_L_Bend03_Component,Arm_Trunk_L_Bend004,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Leg_Trunk_L_Segment00_Component,Leg_Trunk_L_Segment001,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Leg_Trunk_L_Segment01_Component,Leg_Trunk_L_Segment002,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Leg_Trunk_L_Segment02_Component,Leg_Trunk_L_Segment003,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Leg_Trunk_L_Segment03_Component,Leg_Trunk_L_Segment004,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Leg_Trunk_L_Segment04_Component,Leg_Trunk_L_Segment005,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Leg_Trunk_L_Bend00_Component,Leg_Trunk_L_Bend001,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Leg_Trunk_L_Bend01_Component,Leg_Trunk_L_Bend002,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Leg_Trunk_L_Bend02_Component,Leg_Trunk_L_Bend003,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Leg_Trunk_L_Bend03_Component,Leg_Trunk_L_Bend004,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Torso_Trunk_R_Segment00_Component,Torso_Trunk_R_Segment001,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Torso_Trunk_R_Segment01_Component,Torso_Trunk_R_Segment002,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Torso_Trunk_R_Segment02_Component,Torso_Trunk_R_Segment003,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Torso_Trunk_R_Bend00_Component,Torso_Trunk_R_Bend001,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Torso_Trunk_R_Bend01_Component,Torso_Trunk_R_Bend002,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Arm_Trunk_R_Segment00_Component,Arm_Trunk_R_Segment001,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Arm_Trunk_R_Segment01_Component,Arm_Trunk_R_Segment002,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Arm_Trunk_R_Segment02_Component,Arm_Trunk_R_Segment003,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Arm_Trunk_R_Segment03_Component,Arm_Trunk_R_Segment004,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Arm_Trunk_R_Segment04_Component,Arm_Trunk_R_Segment005,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Arm_Trunk_R_Bend00_Component,Arm_Trunk_R_Bend001,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Arm_Trunk_R_Bend01_Component,Arm_Trunk_R_Bend002,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Arm_Trunk_R_Bend02_Component,Arm_Trunk_R_Bend003,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Arm_Trunk_R_Bend03_Component,Arm_Trunk_R_Bend004,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Leg_Trunk_R_Segment00_Component,Leg_Trunk_R_Segment001,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Leg_Trunk_R_Segment01_Component,Leg_Trunk_R_Segment002,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Leg_Trunk_R_Segment02_Component,Leg_Trunk_R_Segment003,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Leg_Trunk_R_Segment03_Component,Leg_Trunk_R_Segment004,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Leg_Trunk_R_Segment04_Component,Leg_Trunk_R_Segment005,Flexible_Wiring,Insulated flexible signal harness,Textile service channel,
+Leg_Trunk_R_Bend00_Component,Leg_Trunk_R_Bend001,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Leg_Trunk_R_Bend01_Component,Leg_Trunk_R_Bend002,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Leg_Trunk_R_Bend02_Component,Leg_Trunk_R_Bend003,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Leg_Trunk_R_Bend03_Component,Leg_Trunk_R_Bend004,Flexible_Wiring,Insulated flexible signal harness,Harness elbow,
+Power_Trunk_Segment00_Component,Power_Trunk_Segment001,Flexible_Wiring,Insulated power harness,Textile service channel,
+Power_Trunk_Segment01_Component,Power_Trunk_Segment002,Flexible_Wiring,Insulated power harness,Textile service channel,
+Power_Trunk_Bend00_Component,Power_Trunk_Bend001,Flexible_Wiring,Insulated power harness,Harness elbow,
+Left_Glove_Palm,Left_Glove_Palm,BioGlove_Left,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_Finger_1,Left_Finger_1,BioGlove_Left,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_FingerTip_1_Component,Left_FingerTip_002,BioGlove_Left,Closed fingertip cap,1750 mm stylized adult reference,
+Left_FingerFlex_1,Left_FingerFlex_1,BioGlove_Left,Finger flex sensor,Left finger 1,
+Left_FingerPressure_1,Left_FingerPressure_1,BioGlove_Left,Finger contact-pressure zone,Left fingertip,Contact force only; free-floating motion is not load
+Left_FingerPanel_1,Left_FingerPanel_1,BioGlove_Left,Segmented dorsal finger protection,Left finger,
+Left_Finger_2,Left_Finger_2,BioGlove_Left,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_FingerTip_2_Component,Left_FingerTip_003,BioGlove_Left,Closed fingertip cap,1750 mm stylized adult reference,
+Left_FingerFlex_2,Left_FingerFlex_2,BioGlove_Left,Finger flex sensor,Left finger 2,
+Left_FingerPressure_2,Left_FingerPressure_2,BioGlove_Left,Finger contact-pressure zone,Left fingertip,Contact force only; free-floating motion is not load
+Left_FingerPanel_2,Left_FingerPanel_2,BioGlove_Left,Segmented dorsal finger protection,Left finger,
+Left_Finger_3,Left_Finger_3,BioGlove_Left,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_FingerTip_3_Component,Left_FingerTip_004,BioGlove_Left,Closed fingertip cap,1750 mm stylized adult reference,
+Left_FingerFlex_3,Left_FingerFlex_3,BioGlove_Left,Finger flex sensor,Left finger 3,
+Left_FingerPressure_3,Left_FingerPressure_3,BioGlove_Left,Finger contact-pressure zone,Left fingertip,Contact force only; free-floating motion is not load
+Left_FingerPanel_3,Left_FingerPanel_3,BioGlove_Left,Segmented dorsal finger protection,Left finger,
+Left_Finger_4,Left_Finger_4,BioGlove_Left,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_FingerTip_4_Component,Left_FingerTip_005,BioGlove_Left,Closed fingertip cap,1750 mm stylized adult reference,
+Left_FingerFlex_4,Left_FingerFlex_4,BioGlove_Left,Finger flex sensor,Left finger 4,
+Left_FingerPressure_4,Left_FingerPressure_4,BioGlove_Left,Finger contact-pressure zone,Left fingertip,Contact force only; free-floating motion is not load
+Left_FingerPanel_4,Left_FingerPanel_4,BioGlove_Left,Segmented dorsal finger protection,Left finger,
+Left_Thumb,Left_Thumb,BioGlove_Left,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Left_ThumbTip_Component,Left_ThumbTip001,BioGlove_Left,Closed thumb tip,1750 mm stylized adult reference,
+Left_ThumbFlex,Left_ThumbFlex,BioGlove_Left,Thumb flex sensor,Left thumb,
+Left_Glove_Electronics_Housing,Left_Glove_Electronics_Housing,BioGlove_Left,Detachable glove acquisition module,Left dorsal wrist,
+Left_Glove_Electronics_ServiceLid,Left_Glove_Electronics_ServiceLid,BioGlove_Left,Removable service lid,Left dorsal wrist,
+Left_Glove_Electronics_PCB,Left_Glove_Electronics_PCB,BioGlove_Left,Acquisition / sensor PCB,Left dorsal wrist,
+Left_Glove_Electronics_IC,Left_Glove_Electronics_IC,BioGlove_Left,Signal acquisition IC,Left dorsal wrist,
+Left_Hand_IMU_Housing,Left_Hand_IMU_Housing,BioGlove_Left,Segment orientation / motion,Left hand,Orientation needs calibration; magnetic disturbance affects heading
+Left_Hand_IMU_ServiceLid,Left_Hand_IMU_ServiceLid,BioGlove_Left,Removable service lid,Left hand,
+Left_Hand_IMU_PCB,Left_Hand_IMU_PCB,BioGlove_Left,Acquisition / sensor PCB,Left hand,Orientation needs calibration; magnetic disturbance affects heading
+Left_Hand_IMU_IC,Left_Hand_IMU_IC,BioGlove_Left,Signal acquisition IC,Left hand,
+Left_Hand_IMU_MEMS,Left_Hand_IMU_MEMS,BioGlove_Left,6/9-axis inertial sensor package,Left hand,
+Left_Hand_IMU_Indicator,Left_Hand_IMU_Indicator,BioGlove_Left,Acquisition status,Left hand,
+Left_Finger_SpO2_Housing,Left_Finger_SpO2_Housing,BioGlove_Left,Peripheral pulse oximetry,Left index/middle fingertip,"Motion, perfusion and contact affect signal; validation required"
+Left_Finger_SpO2_ServiceLid,Left_Finger_SpO2_ServiceLid,BioGlove_Left,Removable service lid,Left index/middle fingertip,
+Left_Finger_SpO2_PCB,Left_Finger_SpO2_PCB,BioGlove_Left,Acquisition / sensor PCB,Left index/middle fingertip,"Motion, perfusion and contact affect signal; validation required"
+Left_Finger_SpO2_IC,Left_Finger_SpO2_IC,BioGlove_Left,Signal acquisition IC,Left index/middle fingertip,
+Left_Finger_SpO2_GreenLED_Component,Left_Finger_SpO2_GreenLED001,BioGlove_Left,Optical emitter package,Left index/middle fingertip,
+Left_Finger_SpO2_RedLED_Component,Left_Finger_SpO2_RedLED001,BioGlove_Left,Optical emitter package,Left index/middle fingertip,
+Left_Finger_SpO2_IRLED_Component,Left_Finger_SpO2_IRLED001,BioGlove_Left,Optical emitter package,Left index/middle fingertip,
+Left_Finger_SpO2_Photodiode,Left_Finger_SpO2_Photodiode,BioGlove_Left,Photodiode detector,Left index/middle fingertip,
+Left_Finger_SpO2_OpticalBarrier,Left_Finger_SpO2_OpticalBarrier,BioGlove_Left,Optical crosstalk barrier,Left index/middle fingertip,
+Left_Peripheral_PPG_Housing,Left_Peripheral_PPG_Housing,BioGlove_Left,Peripheral PPG,Left wrist,"Motion, perfusion and contact affect signal; validation required"
+Left_Peripheral_PPG_ServiceLid,Left_Peripheral_PPG_ServiceLid,BioGlove_Left,Removable service lid,Left wrist,
+Left_Peripheral_PPG_PCB,Left_Peripheral_PPG_PCB,BioGlove_Left,Acquisition / sensor PCB,Left wrist,"Motion, perfusion and contact affect signal; validation required"
+Left_Peripheral_PPG_IC,Left_Peripheral_PPG_IC,BioGlove_Left,Signal acquisition IC,Left wrist,
+Left_Peripheral_PPG_GreenLED_Component,Left_Peripheral_PPG_GreenLED001,BioGlove_Left,Optical emitter package,Left wrist,
+Left_Peripheral_PPG_RedLED_Component,Left_Peripheral_PPG_RedLED001,BioGlove_Left,Optical emitter package,Left wrist,
+Left_Peripheral_PPG_IRLED_Component,Left_Peripheral_PPG_IRLED001,BioGlove_Left,Optical emitter package,Left wrist,
+Left_Peripheral_PPG_Photodiode,Left_Peripheral_PPG_Photodiode,BioGlove_Left,Photodiode detector,Left wrist,
+Left_Peripheral_PPG_OpticalBarrier,Left_Peripheral_PPG_OpticalBarrier,BioGlove_Left,Optical crosstalk barrier,Left wrist,
+Left_Glove_EDA1_Carrier_Component,Left_Glove_EDA1_Carrier001,BioGlove_Left,Replaceable electrode carrier,Left palm,
+Left_Glove_EDA1_Contact_Component,Left_Glove_EDA1_Contact001,BioGlove_Left,EDA contact,Left palm,Trend only; needs contact quality
+Left_Glove_EDA1_Snap_Component,Left_Glove_EDA1_Snap001,BioGlove_Left,Conductive snap,Left palm,
+Left_Glove_EDA2_Carrier_Component,Left_Glove_EDA2_Carrier001,BioGlove_Left,Replaceable electrode carrier,Left palm,
+Left_Glove_EDA2_Contact_Component,Left_Glove_EDA2_Contact001,BioGlove_Left,EDA contact,Left palm,Trend only; needs contact quality
+Left_Glove_EDA2_Snap_Component,Left_Glove_EDA2_Snap001,BioGlove_Left,Conductive snap,Left palm,
+Left_Glove_Temperature_Component,Left_Glove_Temperature001,BioGlove_Left,Skin temperature contact,Left palm,
+Left_PalmPressure_N17,Left_PalmPressure_N17,BioGlove_Left,Palm pressure sensor,Left palm,
+Left_PalmPressure_17,Left_PalmPressure_17,BioGlove_Left,Palm pressure sensor,Left palm,
+Right_Glove_Palm,Right_Glove_Palm,BioGlove_Right,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_Finger_1,Right_Finger_1,BioGlove_Right,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_FingerTip_1_Component,Right_FingerTip_002,BioGlove_Right,Closed fingertip cap,1750 mm stylized adult reference,
+Right_FingerFlex_1,Right_FingerFlex_1,BioGlove_Right,Finger flex sensor,Right finger 1,
+Right_FingerPressure_1,Right_FingerPressure_1,BioGlove_Right,Finger contact-pressure zone,Right fingertip,Contact force only; free-floating motion is not load
+Right_FingerPanel_1,Right_FingerPanel_1,BioGlove_Right,Segmented dorsal finger protection,Right finger,
+Right_Finger_2,Right_Finger_2,BioGlove_Right,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_FingerTip_2_Component,Right_FingerTip_003,BioGlove_Right,Closed fingertip cap,1750 mm stylized adult reference,
+Right_FingerFlex_2,Right_FingerFlex_2,BioGlove_Right,Finger flex sensor,Right finger 2,
+Right_FingerPressure_2,Right_FingerPressure_2,BioGlove_Right,Finger contact-pressure zone,Right fingertip,Contact force only; free-floating motion is not load
+Right_FingerPanel_2,Right_FingerPanel_2,BioGlove_Right,Segmented dorsal finger protection,Right finger,
+Right_Finger_3,Right_Finger_3,BioGlove_Right,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_FingerTip_3_Component,Right_FingerTip_004,BioGlove_Right,Closed fingertip cap,1750 mm stylized adult reference,
+Right_FingerFlex_3,Right_FingerFlex_3,BioGlove_Right,Finger flex sensor,Right finger 3,
+Right_FingerPressure_3,Right_FingerPressure_3,BioGlove_Right,Finger contact-pressure zone,Right fingertip,Contact force only; free-floating motion is not load
+Right_FingerPanel_3,Right_FingerPanel_3,BioGlove_Right,Segmented dorsal finger protection,Right finger,
+Right_Finger_4,Right_Finger_4,BioGlove_Right,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_FingerTip_4_Component,Right_FingerTip_005,BioGlove_Right,Closed fingertip cap,1750 mm stylized adult reference,
+Right_FingerFlex_4,Right_FingerFlex_4,BioGlove_Right,Finger flex sensor,Right finger 4,
+Right_FingerPressure_4,Right_FingerPressure_4,BioGlove_Right,Finger contact-pressure zone,Right fingertip,Contact force only; free-floating motion is not load
+Right_FingerPanel_4,Right_FingerPanel_4,BioGlove_Right,Segmented dorsal finger protection,Right finger,
+Right_Thumb,Right_Thumb,BioGlove_Right,Flexible garment segment,Conformal geometric textile layer,Fabric mechanics not simulated
+Right_ThumbTip_Component,Right_ThumbTip001,BioGlove_Right,Closed thumb tip,1750 mm stylized adult reference,
+Right_ThumbFlex,Right_ThumbFlex,BioGlove_Right,Thumb flex sensor,Right thumb,
+Right_Glove_Electronics_Housing,Right_Glove_Electronics_Housing,BioGlove_Right,Detachable glove acquisition module,Right dorsal wrist,
+Right_Glove_Electronics_ServiceLid,Right_Glove_Electronics_ServiceLid,BioGlove_Right,Removable service lid,Right dorsal wrist,
+Right_Glove_Electronics_PCB,Right_Glove_Electronics_PCB,BioGlove_Right,Acquisition / sensor PCB,Right dorsal wrist,
+Right_Glove_Electronics_IC,Right_Glove_Electronics_IC,BioGlove_Right,Signal acquisition IC,Right dorsal wrist,
+Right_Hand_IMU_Housing,Right_Hand_IMU_Housing,BioGlove_Right,Segment orientation / motion,Right hand,Orientation needs calibration; magnetic disturbance affects heading
+Right_Hand_IMU_ServiceLid,Right_Hand_IMU_ServiceLid,BioGlove_Right,Removable service lid,Right hand,
+Right_Hand_IMU_PCB,Right_Hand_IMU_PCB,BioGlove_Right,Acquisition / sensor PCB,Right hand,Orientation needs calibration; magnetic disturbance affects heading
+Right_Hand_IMU_IC,Right_Hand_IMU_IC,BioGlove_Right,Signal acquisition IC,Right hand,
+Right_Hand_IMU_MEMS,Right_Hand_IMU_MEMS,BioGlove_Right,6/9-axis inertial sensor package,Right hand,
+Right_Hand_IMU_Indicator,Right_Hand_IMU_Indicator,BioGlove_Right,Acquisition status,Right hand,
+Right_Finger_SpO2_Housing,Right_Finger_SpO2_Housing,BioGlove_Right,Peripheral pulse oximetry,Right index/middle fingertip,"Motion, perfusion and contact affect signal; validation required"
+Right_Finger_SpO2_ServiceLid,Right_Finger_SpO2_ServiceLid,BioGlove_Right,Removable service lid,Right index/middle fingertip,
+Right_Finger_SpO2_PCB,Right_Finger_SpO2_PCB,BioGlove_Right,Acquisition / sensor PCB,Right index/middle fingertip,"Motion, perfusion and contact affect signal; validation required"
+Right_Finger_SpO2_IC,Right_Finger_SpO2_IC,BioGlove_Right,Signal acquisition IC,Right index/middle fingertip,
+Right_Finger_SpO2_GreenLED_Component,Right_Finger_SpO2_GreenLED001,BioGlove_Right,Optical emitter package,Right index/middle fingertip,
+Right_Finger_SpO2_RedLED_Component,Right_Finger_SpO2_RedLED001,BioGlove_Right,Optical emitter package,Right index/middle fingertip,
+Right_Finger_SpO2_IRLED_Component,Right_Finger_SpO2_IRLED001,BioGlove_Right,Optical emitter package,Right index/middle fingertip,
+Right_Finger_SpO2_Photodiode,Right_Finger_SpO2_Photodiode,BioGlove_Right,Photodiode detector,Right index/middle fingertip,
+Right_Finger_SpO2_OpticalBarrier,Right_Finger_SpO2_OpticalBarrier,BioGlove_Right,Optical crosstalk barrier,Right index/middle fingertip,
+Right_Peripheral_PPG_Housing,Right_Peripheral_PPG_Housing,BioGlove_Right,Peripheral PPG,Right wrist,"Motion, perfusion and contact affect signal; validation required"
+Right_Peripheral_PPG_ServiceLid,Right_Peripheral_PPG_ServiceLid,BioGlove_Right,Removable service lid,Right wrist,
+Right_Peripheral_PPG_PCB,Right_Peripheral_PPG_PCB,BioGlove_Right,Acquisition / sensor PCB,Right wrist,"Motion, perfusion and contact affect signal; validation required"
+Right_Peripheral_PPG_IC,Right_Peripheral_PPG_IC,BioGlove_Right,Signal acquisition IC,Right wrist,
+Right_Peripheral_PPG_GreenLED_Component,Right_Peripheral_PPG_GreenLED001,BioGlove_Right,Optical emitter package,Right wrist,
+Right_Peripheral_PPG_RedLED_Component,Right_Peripheral_PPG_RedLED001,BioGlove_Right,Optical emitter package,Right wrist,
+Right_Peripheral_PPG_IRLED_Component,Right_Peripheral_PPG_IRLED001,BioGlove_Right,Optical emitter package,Right wrist,
+Right_Peripheral_PPG_Photodiode,Right_Peripheral_PPG_Photodiode,BioGlove_Right,Photodiode detector,Right wrist,
+Right_Peripheral_PPG_OpticalBarrier,Right_Peripheral_PPG_OpticalBarrier,BioGlove_Right,Optical crosstalk barrier,Right wrist,
+Right_Glove_EDA1_Carrier_Component,Right_Glove_EDA1_Carrier001,BioGlove_Right,Replaceable electrode carrier,Right palm,
+Right_Glove_EDA1_Contact_Component,Right_Glove_EDA1_Contact001,BioGlove_Right,EDA contact,Right palm,Trend only; needs contact quality
+Right_Glove_EDA1_Snap_Component,Right_Glove_EDA1_Snap001,BioGlove_Right,Conductive snap,Right palm,
+Right_Glove_EDA2_Carrier_Component,Right_Glove_EDA2_Carrier001,BioGlove_Right,Replaceable electrode carrier,Right palm,
+Right_Glove_EDA2_Contact_Component,Right_Glove_EDA2_Contact001,BioGlove_Right,EDA contact,Right palm,Trend only; needs contact quality
+Right_Glove_EDA2_Snap_Component,Right_Glove_EDA2_Snap001,BioGlove_Right,Conductive snap,Right palm,
+Right_Glove_Temperature_Component,Right_Glove_Temperature001,BioGlove_Right,Skin temperature contact,Right palm,
+Right_PalmPressure_N17,Right_PalmPressure_N17,BioGlove_Right,Palm pressure sensor,Right palm,
+Right_PalmPressure_17,Right_PalmPressure_17,BioGlove_Right,Palm pressure sensor,Right palm,
+Left_Insole_Solid,Left_Insole_Solid,Smart_Insoles,Removable smart insole substrate,Left boot,
+Left_PlantarZone_0_Component,Left_PlantarZone_001,Smart_Insoles,Plantar contact-pressure zone,Left sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Left_PlantarZone_1_Component,Left_PlantarZone_002,Smart_Insoles,Plantar contact-pressure zone,Left sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Left_PlantarZone_2_Component,Left_PlantarZone_003,Smart_Insoles,Plantar contact-pressure zone,Left sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Left_PlantarZone_3_Component,Left_PlantarZone_004,Smart_Insoles,Plantar contact-pressure zone,Left sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Left_PlantarZone_4_Component,Left_PlantarZone_005,Smart_Insoles,Plantar contact-pressure zone,Left sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Left_PlantarZone_5_Component,Left_PlantarZone_006,Smart_Insoles,Plantar contact-pressure zone,Left sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Left_PlantarZone_6_Component,Left_PlantarZone_007,Smart_Insoles,Plantar contact-pressure zone,Left sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Left_PlantarZone_7_Component,Left_PlantarZone_008,Smart_Insoles,Plantar contact-pressure zone,Left sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Left_Insole_Readout,Left_Insole_Readout,Smart_Insoles,Pressure array acquisition,Heel,
+Right_Insole_Solid,Right_Insole_Solid,Smart_Insoles,Removable smart insole substrate,Right boot,
+Right_PlantarZone_0_Component,Right_PlantarZone_001,Smart_Insoles,Plantar contact-pressure zone,Right sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Right_PlantarZone_1_Component,Right_PlantarZone_002,Smart_Insoles,Plantar contact-pressure zone,Right sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Right_PlantarZone_2_Component,Right_PlantarZone_003,Smart_Insoles,Plantar contact-pressure zone,Right sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Right_PlantarZone_3_Component,Right_PlantarZone_004,Smart_Insoles,Plantar contact-pressure zone,Right sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Right_PlantarZone_4_Component,Right_PlantarZone_005,Smart_Insoles,Plantar contact-pressure zone,Right sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Right_PlantarZone_5_Component,Right_PlantarZone_006,Smart_Insoles,Plantar contact-pressure zone,Right sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Right_PlantarZone_6_Component,Right_PlantarZone_007,Smart_Insoles,Plantar contact-pressure zone,Right sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Right_PlantarZone_7_Component,Right_PlantarZone_008,Smart_Insoles,Plantar contact-pressure zone,Right sole,Surface / exercise restraint contact required; no free-floating body-weight estimate
+Right_Insole_Readout,Right_Insole_Readout,Smart_Insoles,Pressure array acquisition,Heel,
+Vision_L_Frame,Vision_L_Frame,VisionGuard_Interface,Optical frame and mounting rim,Head / eyewear,
+Vision_L_Lens,Vision_L_Lens,VisionGuard_Interface,Near-eye optical combiner,Eyewear,
+Vision_L_Temple,Vision_L_Temple,VisionGuard_Interface,Eyewear temple / cable channel,Head,
+Vision_L_EyeCamera_Barrel_Component,Vision_L_EyeCamera_Barrel001,VisionGuard_Interface,Inward-facing IR eye camera,Lower lens rim,Pupil / blink imaging; cannot diagnose SANS
+Vision_L_EyeCamera_Lens_Component,Vision_L_EyeCamera_Lens001,VisionGuard_Interface,IR camera optical lens,Inward-facing camera,
+Vision_L_CameraPCB,Vision_L_CameraPCB,VisionGuard_Interface,Eye camera PCB,Eyewear,
+Vision_L_IRHousing0_Component,Vision_L_IRHousing001,VisionGuard_Interface,Recessed IR illumination package,Eyewear,Eye exposure limits and optical safety require validation
+Vision_L_IRHousing1_Component,Vision_L_IRHousing002,VisionGuard_Interface,Recessed IR illumination package,Eyewear,Eye exposure limits and optical safety require validation
+Vision_R_Frame,Vision_R_Frame,VisionGuard_Interface,Optical frame and mounting rim,Head / eyewear,
+Vision_R_Lens,Vision_R_Lens,VisionGuard_Interface,Near-eye optical combiner,Eyewear,
+Vision_R_Temple,Vision_R_Temple,VisionGuard_Interface,Eyewear temple / cable channel,Head,
+Vision_R_EyeCamera_Barrel_Component,Vision_R_EyeCamera_Barrel001,VisionGuard_Interface,Inward-facing IR eye camera,Lower lens rim,Pupil / blink imaging; cannot diagnose SANS
+Vision_R_EyeCamera_Lens_Component,Vision_R_EyeCamera_Lens001,VisionGuard_Interface,IR camera optical lens,Inward-facing camera,
+Vision_R_CameraPCB,Vision_R_CameraPCB,VisionGuard_Interface,Eye camera PCB,Eyewear,
+Vision_R_IRHousing0_Component,Vision_R_IRHousing001,VisionGuard_Interface,Recessed IR illumination package,Eyewear,Eye exposure limits and optical safety require validation
+Vision_R_IRHousing1_Component,Vision_R_IRHousing002,VisionGuard_Interface,Recessed IR illumination package,Eyewear,Eye exposure limits and optical safety require validation
+Vision_Bridge,Vision_Bridge,VisionGuard_Interface,Nose bridge,Eyewear,
+Vision_TestDisplay,Vision_TestDisplay,VisionGuard_Interface,Near-eye visual testing microdisplay,Right lens,Acuity testing concept; requires optical design and validation
+Vision_BatteryProcessor_Housing,Vision_BatteryProcessor_Housing,VisionGuard_Interface,Eyewear processor and battery,Left temple,
+Vision_BatteryProcessor_ServiceLid,Vision_BatteryProcessor_ServiceLid,VisionGuard_Interface,Removable service lid,Left temple,
+Vision_BatteryProcessor_PCB,Vision_BatteryProcessor_PCB,VisionGuard_Interface,Acquisition / sensor PCB,Left temple,
+Vision_BatteryProcessor_IC,Vision_BatteryProcessor_IC,VisionGuard_Interface,Signal acquisition IC,Left temple,
+Vision_Head_IMU,Vision_Head_IMU,VisionGuard_Interface,Head motion inertial module,Right temple,
+Vision_CollarDock_N1,Vision_CollarDock_N1,VisionGuard_Interface,Mechanical eyewear tether dock,Collar,
+Vision_CollarDock_1,Vision_CollarDock_1,VisionGuard_Interface,Mechanical eyewear tether dock,Collar,
+Vision_DataTether_Segment00_Component,Vision_DataTether_Segment001,VisionGuard_Interface,Insulated flexible signal harness,Textile service channel,
+Vision_DataTether_Segment01_Component,Vision_DataTether_Segment002,VisionGuard_Interface,Insulated flexible signal harness,Textile service channel,
+Vision_DataTether_Segment02_Component,Vision_DataTether_Segment003,VisionGuard_Interface,Insulated flexible signal harness,Textile service channel,
+Vision_DataTether_Bend00_Component,Vision_DataTether_Bend001,VisionGuard_Interface,Insulated flexible signal harness,Harness elbow,
+Vision_DataTether_Bend01_Component,Vision_DataTether_Bend002,VisionGuard_Interface,Insulated flexible signal harness,Harness elbow,
+Accessory_Rack,Accessory_Rack,Detachable_Medical_Accessories,Separate medical accessories demonstration rack,Off-body accessory station,
+BP_Inflatable_Cuff,BP_Inflatable_Cuff,Detachable_Medical_Accessories,Intermittent cuff-based blood pressure measurement,Conformal geometric textile layer,Fabric mechanics not simulated
+BP_Cuff_Closure,BP_Cuff_Closure,Detachable_Medical_Accessories,Cuff hook-and-loop closure,Accessory cuff,
+BP_PumpDisplay_Housing,BP_PumpDisplay_Housing,Detachable_Medical_Accessories,"Cuff pump, pressure transducer and electronics",Accessory rack,Cuff sizing / oscillometric algorithm / calibration require validation
+BP_PumpDisplay_ServiceLid,BP_PumpDisplay_ServiceLid,Detachable_Medical_Accessories,Removable service lid,Accessory rack,
+BP_PumpDisplay_PCB,BP_PumpDisplay_PCB,Detachable_Medical_Accessories,Acquisition / sensor PCB,Accessory rack,Cuff sizing / oscillometric algorithm / calibration require validation
+BP_PumpDisplay_IC,BP_PumpDisplay_IC,Detachable_Medical_Accessories,Signal acquisition IC,Accessory rack,
+BP_Display,BP_Display,Detachable_Medical_Accessories,Blood pressure display,BP accessory,
+BP_PneumaticTube_Segment00_Component,BP_PneumaticTube_Segment001,Detachable_Medical_Accessories,Cuff pneumatic connection,Textile service channel,
+BP_PneumaticTube_Segment01_Component,BP_PneumaticTube_Segment002,Detachable_Medical_Accessories,Cuff pneumatic connection,Textile service channel,
+BP_PneumaticTube_Segment02_Component,BP_PneumaticTube_Segment003,Detachable_Medical_Accessories,Cuff pneumatic connection,Textile service channel,
+BP_PneumaticTube_Bend00_Component,BP_PneumaticTube_Bend001,Detachable_Medical_Accessories,Cuff pneumatic connection,Harness elbow,
+BP_PneumaticTube_Bend01_Component,BP_PneumaticTube_Bend002,Detachable_Medical_Accessories,Cuff pneumatic connection,Harness elbow,
+Capnography_Module_Housing,Capnography_Module_Housing,Detachable_Medical_Accessories,Separate sampled end-tidal CO2 instrument,Accessory rack,Requires breathing circuit / cannula sampling; not ambient CO2
+Capnography_Module_ServiceLid,Capnography_Module_ServiceLid,Detachable_Medical_Accessories,Removable service lid,Accessory rack,
+Capnography_Module_PCB,Capnography_Module_PCB,Detachable_Medical_Accessories,Acquisition / sensor PCB,Accessory rack,Requires breathing circuit / cannula sampling; not ambient CO2
+Capnography_Module_IC,Capnography_Module_IC,Detachable_Medical_Accessories,Signal acquisition IC,Accessory rack,
+Capnography_OpticalCell,Capnography_OpticalCell,Detachable_Medical_Accessories,CO2 optical sampling cell,Capnography instrument,
+Capno_SamplingLine_Segment00_Component,Capno_SamplingLine_Segment001,Detachable_Medical_Accessories,Respiratory gas sample tubing,Textile service channel,
+Capno_SamplingLine_Segment01_Component,Capno_SamplingLine_Segment002,Detachable_Medical_Accessories,Respiratory gas sample tubing,Textile service channel,
+Capno_SamplingLine_Segment02_Component,Capno_SamplingLine_Segment003,Detachable_Medical_Accessories,Respiratory gas sample tubing,Textile service channel,
+Capno_SamplingLine_Bend00_Component,Capno_SamplingLine_Bend001,Detachable_Medical_Accessories,Respiratory gas sample tubing,Harness elbow,
+Capno_SamplingLine_Bend01_Component,Capno_SamplingLine_Bend002,Detachable_Medical_Accessories,Respiratory gas sample tubing,Harness elbow,
+Nasal_Cannula_Segment00_Component,Nasal_Cannula_Segment001,Detachable_Medical_Accessories,Optional cannula sampling interface,Textile service channel,
+Nasal_Cannula_Segment01_Component,Nasal_Cannula_Segment002,Detachable_Medical_Accessories,Optional cannula sampling interface,Textile service channel,
+Nasal_Cannula_Bend00_Component,Nasal_Cannula_Bend001,Detachable_Medical_Accessories,Optional cannula sampling interface,Harness elbow,
+Cannula_Prong_643_Component,Cannula_Prong_644,Detachable_Medical_Accessories,Cannula nasal prong,Accessory,
+Cannula_Prong_653_Component,Cannula_Prong_654,Detachable_Medical_Accessories,Cannula nasal prong,Accessory,
+CoreTemp_Receiver_Housing,CoreTemp_Receiver_Housing,Detachable_Medical_Accessories,Dedicated telemetric core-temperature receiver,Accessory rack,Optional ingestible sensor requires clinical protocol; no core inference from cloth
+CoreTemp_Receiver_ServiceLid,CoreTemp_Receiver_ServiceLid,Detachable_Medical_Accessories,Removable service lid,Accessory rack,
+CoreTemp_Receiver_PCB,CoreTemp_Receiver_PCB,Detachable_Medical_Accessories,Acquisition / sensor PCB,Accessory rack,Optional ingestible sensor requires clinical protocol; no core inference from cloth
+CoreTemp_Receiver_IC,CoreTemp_Receiver_IC,Detachable_Medical_Accessories,Signal acquisition IC,Accessory rack,
+CoreTemp_Telemetry_Capsule_Component,CoreTemp_Telemetry_Capsule001,Detachable_Medical_Accessories,Dedicated ingestible sensor housing concept,Separate accessory,
+Sleep_Amplifier_Housing,Sleep_Amplifier_Housing,Detachable_Medical_Accessories,Detachable EEG / EOG acquisition,Accessory rack,Sleep staging needs validated recording and analysis; not equivalent to polysomnography
+Sleep_Amplifier_ServiceLid,Sleep_Amplifier_ServiceLid,Detachable_Medical_Accessories,Removable service lid,Accessory rack,
+Sleep_Amplifier_PCB,Sleep_Amplifier_PCB,Detachable_Medical_Accessories,Acquisition / sensor PCB,Accessory rack,Sleep staging needs validated recording and analysis; not equivalent to polysomnography
+Sleep_Amplifier_IC,Sleep_Amplifier_IC,Detachable_Medical_Accessories,Signal acquisition IC,Accessory rack,
+Sleep_EEG_EOG_Pad_0_Carrier_Component,Sleep_EEG_EOG_Pad_0_Carrier001,Detachable_Medical_Accessories,Replaceable electrode carrier,Sleep headband accessory,
+Sleep_EEG_EOG_Pad_0_Contact_Component,Sleep_EEG_EOG_Pad_0_Contact001,Detachable_Medical_Accessories,EEG / EOG gel-contact electrode,Sleep headband accessory,Optional fitted accessory
+Sleep_EEG_EOG_Pad_0_Snap_Component,Sleep_EEG_EOG_Pad_0_Snap001,Detachable_Medical_Accessories,Conductive snap,Sleep headband accessory,
+Sleep_EEG_EOG_Pad_1_Carrier_Component,Sleep_EEG_EOG_Pad_1_Carrier001,Detachable_Medical_Accessories,Replaceable electrode carrier,Sleep headband accessory,
+Sleep_EEG_EOG_Pad_1_Contact_Component,Sleep_EEG_EOG_Pad_1_Contact001,Detachable_Medical_Accessories,EEG / EOG gel-contact electrode,Sleep headband accessory,Optional fitted accessory
+Sleep_EEG_EOG_Pad_1_Snap_Component,Sleep_EEG_EOG_Pad_1_Snap001,Detachable_Medical_Accessories,Conductive snap,Sleep headband accessory,
+Sleep_EEG_EOG_Pad_2_Carrier_Component,Sleep_EEG_EOG_Pad_2_Carrier001,Detachable_Medical_Accessories,Replaceable electrode carrier,Sleep headband accessory,
+Sleep_EEG_EOG_Pad_2_Contact_Component,Sleep_EEG_EOG_Pad_2_Contact001,Detachable_Medical_Accessories,EEG / EOG gel-contact electrode,Sleep headband accessory,Optional fitted accessory
+Sleep_EEG_EOG_Pad_2_Snap_Component,Sleep_EEG_EOG_Pad_2_Snap001,Detachable_Medical_Accessories,Conductive snap,Sleep headband accessory,
+Sleep_EEG_EOG_Pad_3_Carrier_Component,Sleep_EEG_EOG_Pad_3_Carrier001,Detachable_Medical_Accessories,Replaceable electrode carrier,Sleep headband accessory,
+Sleep_EEG_EOG_Pad_3_Contact_Component,Sleep_EEG_EOG_Pad_3_Contact001,Detachable_Medical_Accessories,EEG / EOG gel-contact electrode,Sleep headband accessory,Optional fitted accessory
+Sleep_EEG_EOG_Pad_3_Snap_Component,Sleep_EEG_EOG_Pad_3_Snap001,Detachable_Medical_Accessories,Conductive snap,Sleep headband accessory,
+Sleep_EEG_EOG_Pad_4_Carrier_Component,Sleep_EEG_EOG_Pad_4_Carrier001,Detachable_Medical_Accessories,Replaceable electrode carrier,Sleep headband accessory,
+Sleep_EEG_EOG_Pad_4_Contact_Component,Sleep_EEG_EOG_Pad_4_Contact001,Detachable_Medical_Accessories,EEG / EOG gel-contact electrode,Sleep headband accessory,Optional fitted accessory
+Sleep_EEG_EOG_Pad_4_Snap_Component,Sleep_EEG_EOG_Pad_4_Snap001,Detachable_Medical_Accessories,Conductive snap,Sleep headband accessory,
+Sleep_EEG_EOG_Pad_5_Carrier_Component,Sleep_EEG_EOG_Pad_5_Carrier001,Detachable_Medical_Accessories,Replaceable electrode carrier,Sleep headband accessory,
+Sleep_EEG_EOG_Pad_5_Contact_Component,Sleep_EEG_EOG_Pad_5_Contact001,Detachable_Medical_Accessories,EEG / EOG gel-contact electrode,Sleep headband accessory,Optional fitted accessory
+Sleep_EEG_EOG_Pad_5_Snap_Component,Sleep_EEG_EOG_Pad_5_Snap001,Detachable_Medical_Accessories,Conductive snap,Sleep headband accessory,
+Sleep_Harness_Segment00_Component,Sleep_Harness_Segment001,Detachable_Medical_Accessories,Insulated flexible signal harness,Textile service channel,
+Sleep_Harness_Segment01_Component,Sleep_Harness_Segment002,Detachable_Medical_Accessories,Insulated flexible signal harness,Textile service channel,
+Sleep_Harness_Bend00_Component,Sleep_Harness_Bend001,Detachable_Medical_Accessories,Insulated flexible signal harness,Harness elbow,
+Diagnostic_Docking_Plate,Diagnostic_Docking_Plate,Detachable_Medical_Accessories,Off-body OCT / retinal instrument docking location,Medical equipment rack,Mounting interface only: no OCT or retinal diagnostic instrument supplied
+Diagnostic_DockPin_572_Component,Diagnostic_DockPin_573,Detachable_Medical_Accessories,Equipment locating pin,Diagnostic dock,
+Diagnostic_DockPin_680_Component,Diagnostic_DockPin_681,Detachable_Medical_Accessories,Equipment locating pin,Diagnostic dock,
+Diagnostic_DataPort,Diagnostic_DataPort,Detachable_Medical_Accessories,Diagnostic instrument power/data interface,Separate diagnostic dock,
+Service_Fastener_0_Component,Service_Fastener_001,Fasteners_And_Connectors,Captive service screw,ECU / battery,
+Service_Fastener_1_Component,Service_Fastener_002,Fasteners_And_Connectors,Captive service screw,ECU / battery,
+Service_Fastener_2_Component,Service_Fastener_003,Fasteners_And_Connectors,Captive service screw,ECU / battery,
+Service_Fastener_3_Component,Service_Fastener_004,Fasteners_And_Connectors,Captive service screw,ECU / battery,
+Service_Fastener_4_Component,Service_Fastener_005,Fasteners_And_Connectors,Captive service screw,ECU / battery,
+Service_Fastener_5_Component,Service_Fastener_006,Fasteners_And_Connectors,Captive service screw,ECU / battery,
+Service_Fastener_6_Component,Service_Fastener_007,Fasteners_And_Connectors,Captive service screw,ECU / battery,
+Service_Fastener_7_Component,Service_Fastener_008,Fasteners_And_Connectors,Captive service screw,ECU / battery,
+Harness_Guide_N1_920,Harness_Guide_N1_920,Fasteners_And_Connectors,Harness retention and strain relief,Torso,
+Harness_Guide_N1_1040,Harness_Guide_N1_1040,Fasteners_And_Connectors,Harness retention and strain relief,Torso,
+Harness_Guide_N1_1140,Harness_Guide_N1_1140,Fasteners_And_Connectors,Harness retention and strain relief,Torso,
+Harness_Guide_1_920,Harness_Guide_1_920,Fasteners_And_Connectors,Harness retention and strain relief,Torso,
+Harness_Guide_1_1040,Harness_Guide_1_1040,Fasteners_And_Connectors,Harness retention and strain relief,Torso,
+Harness_Guide_1_1140,Harness_Guide_1_1140,Fasteners_And_Connectors,Harness retention and strain relief,Torso,

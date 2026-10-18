@@ -1,0 +1,49 @@
+"""Open in FreeCAD. Enter a view mode; no source geometry is modified."""
+import FreeCAD as App, FreeCADGui as Gui
+try:
+    from PySide import QtGui
+    mode,ok=QtGui.QInputDialog.getItem(Gui.getMainWindow(),'BioSuit views','Mode:',
+        ['Complete','Exploded','Transparent','Annotations','Front','Back','Electronics','Accessories','Orbit'],0,False)
+except Exception:
+    mode='Complete';ok=True
+d=App.ActiveDocument
+if not d or d.Name!='HaloCrew_BioSuit':raise RuntimeError('Open HaloCrew_BioSuit_Complete.FCStd first')
+if ok:
+    d.HaloCrew_BioSuit.Visibility=True
+    d.Exploded_Sensor_Assembly.Visibility=False
+    d.Sensor_Annotations.Visibility=False
+    d.Detachable_Medical_Accessories.Visibility=False
+    for group in d.HaloCrew_BioSuit.Group:group.Visibility=True
+    d.Detachable_Medical_Accessories.Visibility=False
+    for o in d.Construction_Geometry.Group:o.Visibility=False
+    d.Construction_Geometry.Visibility=False
+    for o in d.Reference_Body.Group:o.Visibility=o.Name in ['Reference_Head_Component','Reference_Nose_Component']
+    for o in d.Objects:
+        if 'AssemblyCategory' in o.PropertiesList:
+            o.ViewObject.Transparency=48 if o.Name=='ECU_Removable_Cover' else (72 if o.Name.endswith('_Lens') else (42 if o.Name=='Sweat_Replaceable_Cartridge' else 0))
+            o.Visibility=True
+    for o in d.Reference_Body.Group:o.Visibility=o.Name in ['Reference_Head_Component','Reference_Nose_Component']
+    for name in ['ECU_Removable_Cover','Battery_Service_Lid']:d.getObject(name).Visibility=True
+    if mode=='Exploded':
+        d.Exploded_Sensor_Assembly.Visibility=True
+        for g in d.HaloCrew_BioSuit.Group:
+            if g.Name not in ['Textile_Suit','Reference_Body','Flexible_Wiring']:g.Visibility=False
+    elif mode in ['Transparent','Annotations']:
+        for g in [d.Textile_Suit,d.Torso_Assembly]:
+            for o in g.Group:o.ViewObject.Transparency=85
+        if mode=='Annotations':d.Sensor_Annotations.Visibility=True
+    elif mode=='Electronics':
+        for g in d.HaloCrew_BioSuit.Group:g.Visibility=g.Name in ['Electronics_Control_Unit','Battery_And_Power']
+        d.ECU_Removable_Cover.Visibility=False;d.Battery_Service_Lid.Visibility=False
+    elif mode=='Accessories':
+        for g in d.HaloCrew_BioSuit.Group:g.Visibility=g.Name=='Detachable_Medical_Accessories'
+    view=Gui.activeDocument().activeView()
+    if mode in ['Front','Annotations']:view.viewFront()
+    elif mode in ['Back','Electronics']:view.viewRear()
+    else:view.viewAxonometric()
+    view.fitAll()
+    if mode=='Orbit':
+        import time
+        for angle in range(0,360,3):
+            rot=App.Rotation(App.Vector(0,0,1),angle).multiply(App.Rotation(App.Vector(1,0,0),75))
+            view.setCameraOrientation(rot.Q);Gui.updateGui();time.sleep(.035)
