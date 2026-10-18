@@ -1,0 +1,23 @@
+[
+  {
+    "view": "DORSAL",
+    "callouts": 6,
+    "physical_bodies": 89,
+    "valid": true,
+    "file": "HaloCrew_BioGlove_Dorsal_Labeled.FCStd"
+  },
+  {
+    "view": "PALM",
+    "callouts": 6,
+    "physical_bodies": 89,
+    "valid": true,
+    "file": "HaloCrew_BioGlove_Palm_Labeled.FCStd"
+  },
+  {
+    "view": "ELECTRONICS",
+    "callouts": 8,
+    "physical_bodies": 89,
+    "valid": true,
+    "file": "HaloCrew_BioGlove_Electronics_Labeled.FCStd"
+  }
+]

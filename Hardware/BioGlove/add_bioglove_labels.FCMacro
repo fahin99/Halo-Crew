@@ -1,0 +1,102 @@
+# HaloCrew BioGlove: native, editable annotations and arrow leaders.
+# Open your BioGlove FCStd, then Macro > Macros > Execute this file.
+# Change VIEW to 'PALM' or 'ELECTRONICS' and run again to switch the presentation.
+# Running again refreshes anchor positions from the current component geometry.
+import FreeCAD as App
+import FreeCADGui as Gui
+import Part, os
+from FreeCAD import Vector as V
+VIEW = os.environ.get('BIOGLOVE_LABEL_VIEW','DORSAL').upper()
+doc = App.ActiveDocument
+if doc is None or doc.getObject('PPG_Housing') is None:
+ raise RuntimeError('Open HaloCrew_BioGlove.FCStd before running this macro.')
+if VIEW not in ['DORSAL','PALM','ELECTRONICS']:
+ raise ValueError('VIEW must be DORSAL, PALM or ELECTRONICS')
+# Each target is a component name, label title, concise function, and label position.
+sets={
+ 'DORSAL':[
+  ('IndexPanel2','Protective polymer panels','Segmented protection above the fingers',(-130,172,42)),
+  ('MiddleFlexibleJoint1','Flexible joint band','Textile region permits finger bending',(65,150,42)),
+  ('EnclosureCover','Detachable electronics module','Contains processing, radio and power',(-130,71,42)),
+  ('InteractionButton','Physical interaction button','User input to the monitoring system',(65,65,42)),
+  ('CuffStrap','Adjustable cuff strap','Retains the glove around the wrist',(-130,-35,42)),
+  ('QuickReleaseSocket','Quick-release closure','Cuff buckle envelope for rapid removal',(65,-27,42))],
+ 'PALM':[
+  ('PPG_OpticalWindow','Reflective PPG window','Optical pulse signal contact at index fingertip',(-135,180,-42)),
+  ('EDA_Electrode1','EDA electrode 1','First conductive skin contact',(-135,124,-42)),
+  ('EDA_Electrode2','EDA electrode 2','Second contact for skin-conductance sensing',(65,103,-42)),
+  ('TemperatureSensor','Contact temperature sensor','Measures local skin temperature',(-135,57,-42)),
+  ('ECG_WristSkinContact','Optional ECG wrist electrode','Skin contact paired with opposite-hand electrode',(65,-22,-42)),
+  ('PalmShell','Textile glove envelope','Nominal 1.5 mm shell; no fabric simulation',(65,47,-42))],
+ 'ELECTRONICS':[
+  ('Microcontroller','Microcontroller envelope','Processes sensor signals',(-125,71,45)),
+  ('WirelessModule','Wireless module envelope','Transfers data to the host platform',(-125,43,45)),
+  ('IMU_6Axis','Six-axis IMU envelope','Accelerometer and gyroscope package',(60,71,45)),
+  ('Battery','Battery envelope','Supplies onboard power',(-125,8,45)),
+  ('HapticMotor','Haptic motor envelope','Provides vibration feedback',(60,18,45)),
+  ('SensorConnector2','Sensor connectors','Electrical interfaces to the glove sensors',(-125,-25,45)),
+  ('ChargingContact1','Charging contacts','External charging interface',(60,-16,45)),
+  ('ECG_OppositeHandContact','Optional ECG touch electrode','Opposite hand completes the two-contact arrangement',(60,44,45))]
+}
+# Remove only labels created by this macro. Physical Bodies remain untouched.
+for obj in reversed(list(doc.Objects)):
+ if obj.Name.startswith('BioLabel_'): doc.removeObject(obj.Name)
+root=doc.addObject('App::DocumentObjectGroup','BioLabel_All')
+root.Label='09 Arrow labels — switch views with annotation macro'
+root.addProperty('App::PropertyString','Instructions','Labels').Instructions='Run add_bioglove_labels.FCMacro with VIEW = DORSAL, PALM or ELECTRONICS. Double-click text labels to edit their properties.'
+root.addProperty('App::PropertyString','SpecificationStatus','Labels').SpecificationStatus='Sensor and electronics envelopes are provisional; functions describe intended roles, not validated performance.'
+for mode,items in sets.items():
+ group=doc.addObject('App::DocumentObjectGroup','BioLabel_'+mode); group.Label=mode.title()+' labels';root.addObject(group)
+ for index,(name,title,function,where) in enumerate(items,1):
+  target=doc.getObject(name)
+  if target is None: raise RuntimeError('Missing component: '+name)
+  bb=target.Shape.BoundBox
+  tip=V((bb.XMin+bb.XMax)/2,(bb.YMin+bb.YMax)/2,bb.ZMin if mode=='PALM' else bb.ZMax)
+  # Palm shell anchor is offset from the central axis to avoid the module.
+  if name=='PalmShell': tip=V(30,70,-9)
+  text=V(*where); elbow=V(text.x+12,text.y,text.z)
+  # Text begins at the left end of a short horizontal landing.
+  landing=V(text.x,text.y,text.z)
+  leader=doc.addObject('Part::Feature','BioLabel_'+mode+'_Arrow'+str(index)); group.addObject(leader)
+  leader.Label=title+' — arrow'
+  direction=elbow-tip; direction.normalize()
+  # Open arrowhead, with explicit native wire geometry (not a bitmap).
+  side=direction.cross(V(0,0,1))
+  if side.Length<1e-6: side=V(1,0,0)
+  side.normalize(); wing=tip+direction*3.0
+  leader.Shape=Part.makeCompound([Part.makePolygon([landing,elbow,tip]),Part.makePolygon([wing+side*1.2,tip,wing-side*1.2])])
+  leader.addProperty('App::PropertyLink','TargetComponent','Label').TargetComponent=target
+  leader.addProperty('App::PropertyString','Description','Label').Description=function
+  leader.ViewObject.LineColor=(0.05,0.70,0.82);leader.ViewObject.LineWidth=2.0
+  label=doc.addObject('App::AnnotationLabel','BioLabel_'+mode+'_Text'+str(index));group.addObject(label)
+  label.Label=title
+  label.LabelText=[title,function]
+  # Coin native text remains readable when the camera is rotated.
+  label.BasePosition=text;label.TextPosition=text
+  label.addProperty('App::PropertyLink','TargetComponent','Label').TargetComponent=target
+  label.ViewObject.TextColor=(0.10,0.72,0.85);label.ViewObject.FontSize=14
+  label.ViewObject.FontName='Sans';label.ViewObject.Justification='Right' if mode=='PALM' else 'Left'
+# Restore physical view before applying the selected presentation.
+for name in ['Textile','ProtectivePanels','Sensors','Electronics','Retention','Interconnects']:
+ if doc.getObject(name): doc.getObject(name).ViewObject.Visibility=True
+if doc.getObject('ExplodedAssembly'): doc.ExplodedAssembly.ViewObject.Visibility=False
+for name in ['EnclosureCover','MainPCB']:
+ if doc.getObject(name):doc.getObject(name).ViewObject.Visibility=True
+for mode in sets:
+ group=doc.getObject('BioLabel_'+mode)
+ for child in group.Group:child.ViewObject.Visibility=(mode==VIEW)
+if VIEW=='ELECTRONICS':
+ # Hide opaque cover and FR4 so lower components can be inspected.
+ # Package envelopes remain in their original assembled positions.
+ doc.EnclosureCover.ViewObject.Visibility=False
+ doc.MainPCB.ViewObject.Visibility=False
+ doc.ProtectivePanels.ViewObject.Visibility=False
+ doc.Textile.ViewObject.Visibility=False
+ doc.Retention.ViewObject.Visibility=False
+ doc.Interconnects.ViewObject.Visibility=False
+ doc.Sensors.ViewObject.Visibility=False
+Gui.Selection.clearSelection();doc.recompute()
+if VIEW=='PALM':Gui.activeDocument().activeView().viewBottom()
+else:Gui.activeDocument().activeView().viewTop()
+Gui.activeDocument().activeView().fitAll()
+App.Console.PrintMessage('Arrow labels added. Use File > Save As to preserve an annotated copy.\n')
