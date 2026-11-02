@@ -2,7 +2,7 @@ import PageAtmosphere from "./PageAtmosphere"
 import { Explore, SectionNavigator, type Destination } from "./Experience"
 import {useEffect, useState, type ReactNode} from "react"
 import { HardwareLab, Roadmap } from "./HealthLab"
-import { MissionProvider, useMission, connectionSummary } from "./mission-state"
+import { MissionProvider } from "./mission-state"
 import {
   DemoControls,
   DemoHome,
@@ -28,7 +28,7 @@ const EARTH_IMAGE =
 const NAV: { id: Page; label: string; icon: IconName; group?: string }[] = [
   { id: "home", label: "Home", icon: "home" },
   { id: "health", label: "Health Overview", icon: "heart" },
-  { id: "hardware", label: "Hardware Studio", icon: "model" },
+  { id: "hardware", label: "HaloSuit Studio", icon: "model" },
   { id: "wellbeing", label: "My Wellbeing", icon: "heart" },
   { id: "insights", label: "Insights", icon: "spark" },
   { id: "future", label: "Future Self", icon: "future" },
@@ -45,7 +45,7 @@ const NAV: { id: Page; label: string; icon: IconName; group?: string }[] = [
 const PAGE_TITLES: Record<Page, string> = {
   medical: "Medical Kit",
   handoff: "Mission Record",
-  hardware: "Hardware Studio",
+  hardware: "HaloSuit Studio",
   health: "Health Overview",
   roadmap: "What’s Next",
   home: "Home",
@@ -526,7 +526,7 @@ function Onboarding({ close }: { close: () => void }) {
         <div className="brand">
           <span className="brand-mark" />
           <b>
-            HALO<span>—CREW</span>
+            HALO<span>CREW</span>
           </b>
         </div>
         <span className="eyebrow">0{step + 1} · 05</span>
@@ -561,7 +561,6 @@ function App() {
   useEffect(() => {
     document.title = `HaloCrew - ${PAGE_TITLES[page]}`
   }, [page])
-  const mission = useMission()
   const content = (() => {
     switch (page) {
       case "hardware":
@@ -605,12 +604,12 @@ function App() {
     setHealthDomain(domain); setPage(p); setMobileOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  const connection=connectionSummary(mission.connections);
+
   const sections: {id:Destination;label:string;pages:string[]}[] = [
     {id:"home",label:"Explore",pages:["home"]},
     {id:"health",label:"My body",pages:["health","wellbeing","insights","medical","future"]},
     {id:"support",label:"My mind",pages:["support","family","copilot"]},
-    {id:"hardware",label:"Wearables",pages:["hardware"]},
+    {id:"hardware",label:"HaloSuit",pages:["hardware"]},
     {id:"handoff",label:"Mission record",pages:["handoff","crew","mission"]},
     {id:"roadmap",label:"What's next",pages:["roadmap"]},
   ];
@@ -623,7 +622,6 @@ function App() {
       <button className="experience-profile" onClick={()=>navigate("settings")} aria-label="Mission settings"><span>MC</span><small>MAYA / DAY 147</small></button>
     </header>
     <main id="main">
-      <button className={`wearable-connection-bar ${connection.count===0?"disconnected":connection.count===connection.total?"connected":"partial"}`} onClick={()=>navigate("hardware")} aria-label={`Wearables: ${connection.label}. View devices`}><span><i/> Wearables <b>→ {connection.label}</b></span><small>{connection.count}/{connection.total} devices <span>View devices ↗</span></small></button>
       <SectionNavigator page={page} go={navigate}/>
       <div className={`screen-content screen-${page}`}><PageAtmosphere page={page}/>{content}</div>
     </main>

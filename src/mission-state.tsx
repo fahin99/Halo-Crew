@@ -6,6 +6,7 @@ import {
   useRef,
   type ReactNode,
 } from "react"
+import { emptyVitals, type Vitals } from "./vitals"
 export const scenarios = [
   "Nominal",
   "Recovery shift",
@@ -38,6 +39,9 @@ type State = {
   exerciseExtra: number
   evidence: Record<string,string>
   stock: Record<string, number>
+  vitals: Vitals
+  routineDone: string[]
+  streak: number
 }
 const initial: State = {
   connections: wearableNames.map(()=>false),
@@ -53,6 +57,9 @@ const initial: State = {
     "Wound-care packs": 8,
     "Crew-prescribed medication": 6,
   },
+  vitals: emptyVitals,
+  routineDone: [],
+  streak: 6,
 }
 const KEY = "halo-mission-demo-v2"
 function read(): State {
@@ -86,8 +93,8 @@ export function getSignals(s: Scenario) {
     signalSource: "Synthetic mission scenario",
   }
 }
-export function calculate(s: Scenario, fatigue: number, completed?: number) {
-  const v = getSignals(s)
+export function calculate(s: Scenario, fatigue: number, completed?: number, live?: ReturnType<typeof getSignals>) {
+  const v = {...(live ?? getSignals(s))}
   if(completed!==undefined)v.sessions=completed
   const sleep = Math.min(100, Math.max(0, ((8 - v.sleep) / 8) * 100))
   const exercise = (1 - v.sessions / v.planned) * 100
@@ -156,6 +163,9 @@ type Mission = State & {
   notice: ReturnType<typeof assessment>
   storageError: boolean
   backendStatus: string
+  suitStreaming: boolean
+  simulationTick: number
+  setSuitStreaming: (running: boolean) => void
   setScenario: (s: Scenario) => void
   saveCheckin: (c: Checkin) => void
   log: (type: string, text: string) => void
@@ -165,6 +175,8 @@ type Mission = State & {
   useStock: (id: string) => void
   completeExercise: () => void
   saveEvidence: (kind:string,value:string)=>void
+  saveVitals: (v: Omit<Vitals, "at">) => void
+  toggleRoutine: (id: string) => void
   clearApprovals: () => void
   reset: () => void
 }
@@ -174,6 +186,13 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   const [storageError, setError] = useState(false)
   const [backendStatus, setBackendStatus] = useState("Connecting to local record service")
   const [hydrated, setHydrated] = useState(false)
+  const [suitStreaming, setStreaming] = useState(false)
+  const [simulationTick, setSimulationTick] = useState(0)
+  useEffect(() => {
+    if (!suitStreaming) return
+    const timer = window.setInterval(() => setSimulationTick(t => t + 1), 1000)
+    return () => window.clearInterval(timer)
+  }, [suitStreaming])
   const saveQueue = useRef(Promise.resolve())
   useEffect(() => {
     let cancelled = false
@@ -216,6 +235,11 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       logs: [entry(type, text), ...s.logs].slice(0, 200),
     }))
   const signals=getSignals(state.scenario);
+  if (simulationTick > 0) {
+    if(signals.pulse !== null) signals.pulse += Math.round(Math.sin(simulationTick * .7) * 2)
+    if(signals.hrv !== null) signals.hrv += Math.round(Math.sin(simulationTick * .4) * 2)
+    signals.temperature = Math.round((signals.temperature + Math.sin(simulationTick * .3) * .1) * 10) / 10
+  }
   signals.sessions=Math.min(signals.planned,signals.sessions+state.exerciseExtra);
   if(state.evidence["Immune laboratory result"])signals.immuneResult=state.evidence["Immune laboratory result"];
   const notice=assessment(state.scenario);
@@ -228,15 +252,22 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     healthState,
     ...state,
     signals,
-    scores: calculate(state.scenario, state.checkin.fatigue, signals.sessions),
+    scores: calculate(state.scenario, state.checkin.fatigue, signals.sessions, signals),
     notice,
     storageError,
     backendStatus,
+    suitStreaming,
+    simulationTick,
+    setSuitStreaming: running => {
+      setStreaming(running)
+      log(running ? "HaloSuit simulation started" : "HaloSuit simulation paused", running ? "Integrated suit modules are generating synthetic readings. No physical hardware is connected." : "Synthetic readings paused; the last sample remains visible.")
+    },
     setScenario: (scenario) => setState((s) => ({ ...s, scenario,exerciseExtra:0 })),
     saveCheckin: (checkin) =>
       setState((s) => ({
         ...s,
         checkin,
+        routineDone: [...new Set([...s.routineDone, "checkin"])],
         logs: [
           entry(
             "Check-in",
@@ -284,10 +315,18 @@ export function MissionProvider({ children }: { children: ReactNode }) {
               ],
             },
       ),
-    completeExercise: ()=>setState(s=>{const base=getSignals(s.scenario);if(base.sessions+s.exerciseExtra>=base.planned)return s;return {...s,exerciseExtra:s.exerciseExtra+1,logs:[entry("Exercise completed","One prescribed session logged by the presenter; load data remains simulated. Bone density is not inferred."),...s.logs].slice(0,200)}}),
+    completeExercise: ()=>setState(s=>{const base=getSignals(s.scenario);if(base.sessions+s.exerciseExtra>=base.planned)return s;return {...s,exerciseExtra:s.exerciseExtra+1,routineDone:[...new Set([...s.routineDone,"exercise"])],logs:[entry("Exercise completed","One prescribed session logged by the presenter; load data remains simulated. Bone density is not inferred."),...s.logs].slice(0,200)}}),
     saveEvidence:(kind,text)=>setState(s=>({...s,evidence:{...s.evidence,[kind]:text},logs:[entry("Manual evidence",`${kind}: ${text}. Presenter-entered sample record, not verified laboratory/device data.`),...s.logs].slice(0,200)})),
+    saveVitals: (v) => setState((s) => {
+      const parts = [v.bpSys !== null && v.bpDia !== null ? `BP ${v.bpSys}/${v.bpDia} mmHg` : "", v.glucose !== null ? `blood sugar ${v.glucose} mg/dL` : "", v.dose !== null ? `dose ${v.dose} mSv` : ""].filter(Boolean)
+      const ids = [v.bpSys !== null && v.bpDia !== null ? "bp" : "", v.glucose !== null ? "glucose" : "", v.dose !== null ? "dose" : ""].filter(Boolean)
+      if (!parts.length) return s
+      const vitals = { bpSys: v.bpSys ?? s.vitals.bpSys, bpDia: v.bpDia ?? s.vitals.bpDia, glucose: v.glucose ?? s.vitals.glucose, dose: v.dose ?? s.vitals.dose, at: new Date().toISOString() }
+      return { ...s, vitals, routineDone: [...new Set([...s.routineDone, ...ids])], logs: [entry("Vitals", `Manual entry: ${parts.join("; ")}.`), ...s.logs].slice(0, 200) }
+    }),
+    toggleRoutine: (id) => setState((s) => ({ ...s, routineDone: s.routineDone.includes(id) ? s.routineDone.filter((x) => x !== id) : [...s.routineDone, id] })),
     clearApprovals: () => setState((s) => ({ ...s, approved: [] })),
-    reset: () => setState({ ...initial, logs: [] }),
+    reset: () => { setStreaming(false); setSimulationTick(0); setState({ ...initial, logs: [] }) },
   }
   return <Context.Provider value={value}>{children}</Context.Provider>
 }

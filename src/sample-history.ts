@@ -14,6 +14,10 @@ export const sampleHistory = Array.from({ length: 30 }, (_, i) => {
     mood: recovery ? "Tired" : ["Calm", "Focused", "Calm", "Focused", "Tired", "Calm", "Calm"][phase],
     exerciseMinutes: phase === 4 ? 0 : [35, 40, 30, 45, 0, 35, 30][phase],
     co2: [850, 910, 820, 880, 940, 810, 850][phase],
+    bpSys: recovery ? 127 : [116, 118, 114, 119, 121, 115, 117][phase],
+    bpDia: recovery ? 82 : [74, 76, 72, 77, 78, 73, 75][phase],
+    glucose: recovery ? 104 : [88, 92, 85, 95, 97, 86, 90][phase],
+    dose: i === 14 ? 3.1 : [1.8, 1.7, 1.9, 1.8, 1.8, 1.7, 1.9][phase],
     note: recovery ? "Short sleep after a demanding workday; recovery break recorded." : phase === 4 ? "Rest day; movement plan reviewed." : "Daily check-in and routine movement completed.",
   };
 });

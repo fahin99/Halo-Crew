@@ -2,6 +2,7 @@ import { loadConversations, requestReply, loadServiceStatus, requestFamilySpeech
 import { sampleHistory } from "./sample-history"
 import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { scenarios, useMission, type Scenario } from "./mission-state"
+import { BodyMap, TrendChart, VitalsLog } from "./HealthCockpit"
 
 const SpaceMaterial=lazy(()=>import("./SpaceMaterial"));
 const MaterialPlaceholder=()=> <div className="material-placeholder" aria-hidden="true"><i/><span/></div>;
@@ -379,29 +380,9 @@ export function DemoHealth({initialDomain=0}:{initialDomain?:number}) {
   return (
     <div className="page fade-in">
       <Head eyebrow="WHOLE-PERSON HEALTH" title="Every signal has a place.">
-        Explore your health, one connected system at a time. Choose a card to see its signals, evidence and next steps.
+        Tap any part of the body to see its status, the evidence behind it and your next step. Colours show what needs attention at a glance.
       </Head>
-      <div className="health-domains sculpted-domains">
-        {domains.map((x, i) => (
-          <button
-            className={selected === i ? "active" : ""}
-            key={x.name}
-            onClick={() => {
-              setSelected(i)
-              setDone("")
-            }}
-          >
-            <span className="domain-number">{String(i + 1).padStart(2, "0")}</span>
-            <div className="domain-sculpture" aria-hidden="true"><Suspense fallback={<MaterialPlaceholder/>}><SpaceMaterial kind="domain" domain={i}/></Suspense></div>
-            <span className="domain-open" aria-hidden="true">↗</span>
-            <strong>{x.name}</strong>
-            <small>
-              {i < 4 ? "Core health domain" : "Additional health domain"}
-            </small>
-            <b>{x.indicator}</b>
-          </button>
-        ))}
-      </div>
+      <BodyMap names={domains.map(x=>x.name)} selected={selected} onSelect={i=>{setSelected(i);setDone("")}} />
       <Panel title={d.name} className="compact-domain-detail">
         <div className="domain-detail-layout"><div className="detail-sculpture"><Suspense fallback={<MaterialPlaceholder/>}><SpaceMaterial kind="domain" domain={selected}/></Suspense><span className="eyebrow">YOUR NEXT STEP / {String(selected+1).padStart(2,"0")}</span></div><div className="detail-fields">
         <div className="lab-readouts">
@@ -451,6 +432,7 @@ export function DemoHealth({initialDomain=0}:{initialDomain?:number}) {
         {done && <p role="status">{done}</p>}
         </div></div>
       </Panel>
+      <VitalsLog />
       {(selected===1 || selected===2) && <Panel title={selected===1?"Pocket biomarker reader · periodic assessment":"Compact bone-scan attachment · periodic assessment"}><span className="badge info">RESEARCH CONCEPT · ILLUSTRATIVE RECORD</span><div className="lab-readouts"><div><small>{selected===1?"Assay / indicator":"Acoustic indicator"}</small><strong>{selected===1?"CRP · 1.2 mg/L":"Acoustic speed · 3,500 m/s"}</strong></div><div><small>Source</small><strong>{selected===1?"Blood cartridge reader concept":"Quantitative ultrasound attachment concept"}</strong></div><div><small>Interpretation</small><strong>{selected===1?"Inflammation-related context; not total immune function":"Site-specific acoustic measurement; not DXA-equivalent density"}</strong></div></div><p>Periodic measurements complement daily wearable readings. The module, acquisition method and quality controls require validation before clinical use.</p></Panel>}
       <details className="evidence-disclosure"><summary>Periodic tests & evidence records <span>Record a sample, assessment or scheduled follow-up ↗</span></summary><SampleRecords /></details>
       <Panel title="Evidence across the mission">
@@ -614,22 +596,6 @@ export function DemoInsights() {
 }
 export function DemoWellbeing() {
   const m = useMission()
-  const [metric, setMetric] = useState("Heart rate")
-  const [range,setRange]=useState(30)
-  const history = sampleHistory.slice(-range, -1)
-  const values = [...history.map(row=>metric==="Heart rate"?row.pulse:metric==="HRV"?row.hrv:row.sleep),metric==="Heart rate"?m.signals.pulse:metric==="HRV"?m.signals.hrv:m.signals.sleep]
-  const step=510/(values.length-1)
-  const nums = values.filter((x): x is number => x !== null)
-  const lo = Math.min(...nums) - 2,
-    hi = Math.max(...nums) + 2
-  const pts = values
-    .map((v, i) =>
-      v === null
-        ? null
-        : `${40 + i * step},${160 - ((v - lo) / (hi - lo)) * 120}`,
-    )
-    .filter(Boolean)
-    .join(" ")
   return (
     <div className="page fade-in">
       <Head
@@ -638,71 +604,7 @@ export function DemoWellbeing() {
       >
         Thirty days of fictional mission records show sleep, recovery and movement patterns. The last point reflects your current record.
       </Head>
-      <Panel title={`${metric} · ${range}-day history`} className="signal-history-panel">
-        <div className="metric-pills">{[7,14,30].map(days=><button key={days} className={range===days?"active":""} onClick={()=>setRange(days)}>{days} days</button>)}</div>
-        <div className="metric-pills">
-          {["Heart rate", "HRV", "Sleep"].map((x) => (
-            <button
-              className={x === metric ? "active" : ""}
-              key={x}
-              onClick={() => setMetric(x)}
-            >
-              {x}
-            </button>
-          ))}
-        </div>
-        <svg
-          className="mission-trend"
-          viewBox="0 0 600 200"
-          role="img"
-          aria-label={`${metric} sample mission trend`}
-        ><defs><linearGradient id="signal-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#d2a3e4" stopOpacity=".25"/><stop offset="100%" stopColor="#d2a3e4" stopOpacity="0"/></linearGradient></defs>{[40,80,120,160].map(y=><line key={y} x1="40" x2="550" y1={y} y2={y} stroke="#c6a5df15" strokeDasharray="3 5"/>)}<polygon points={`40,170 ${pts} 550,170`} fill="url(#signal-area)"/>
-          {[40,100,160].map(y=><text key={`scale-${y}`} x="31" y={y+3} textAnchor="end" fill="#a58bb7" fontSize="9">{(lo+(160-y)/120*(hi-lo)).toFixed(metric==="Sleep"?1:0)}</text>)}
-          <line x1="40" y1="170" x2="550" y2="170" stroke="#485063" />
-          <polyline points={pts} fill="none" stroke="#a79ce8" strokeWidth="3" />
-          {values.map(
-            (v, i) =>
-              v !== null && (
-                <g key={i}>
-                  <circle
-                    cx={40 + i * step}
-                    cy={160 - ((v - lo) / (hi - lo)) * 120}
-                    r="3"
-                    fill="#7bd8c6"
-                  />
-                  <text
-                    x={40 + i * step}
-                    y="193"
-                    textAnchor="middle"
-                    fill="#aab3c5"
-                    fontSize="12"
-                  >
-                    {i === values.length-1 ? "Now" : i%5===0 ? `D${history[i].day}` : ""}
-                  </text>
-                </g>
-              ),
-          )}
-        </svg>
-        <div className="lab-readouts">
-          <div>
-            <small>Current</small>
-            <strong>
-              {values[values.length-1] ?? "Unavailable"}{" "}
-              {metric === "Sleep" ? "h" : metric === "HRV" ? "ms" : "bpm"}
-            </strong>
-          </div>
-          <div>
-            <small>Source</small>
-            <strong>Sample mission record</strong>
-          </div>
-          <div>
-            <small>Quality</small>
-            <strong>
-              {metric === "Sleep" ? "Illustrative log" : m.signals.quality}
-            </strong>
-          </div>
-        </div>
-      </Panel>
+      <TrendChart />
       <ScoreExplanation />
 <details className="evidence-disclosure"><summary>Browse 30 days of sample records</summary><div className="history-table-wrap"><table className="sample-history-table"><thead><tr>{["Mission day","Pulse","HRV","Sleep","Temperature","Fatigue","Movement","Mood"].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{sampleHistory.map((row,i)=>i===sampleHistory.length-1?{...row,pulse:m.signals.pulse,hrv:m.signals.hrv,sleep:m.signals.sleep,temperature:m.signals.temperature,fatigue:m.checkin.fatigue,mood:m.checkin.mood,exerciseMinutes:m.signals.sessions<4?0:35}:row).reverse().map(row=><tr key={row.day}><td>Day {row.day}</td><td>{row.pulse ?? "—"} bpm</td><td>{row.hrv ?? "—"} ms</td><td>{row.sleep} h</td><td>{row.temperature} °C</td><td>{row.fatigue}/10</td><td>{row.exerciseMinutes} min</td><td>{row.mood}</td></tr>)}</tbody></table></div></details>
     </div>
@@ -1824,4 +1726,4 @@ function SampleRecords(){
  const m=useMission();const [kind,setKind]=useState("Immune laboratory result"),[value,setValue]=useState(""),[due,setDue]=useState(""),[message,setMessage]=useState("");
  return <Panel title="Assessments & evidence" className="compact-evidence"><div className="evidence-layout"><div className="evidence-sculpture"><Suspense fallback={<MaterialPlaceholder/>}><SpaceMaterial kind="hardware" device={kind.includes("Bone")?4:5}/></Suspense><span className="eyebrow">MEASURE · RECORD · FOLLOW UP</span><p>Keep the source and date with every result.</p></div><div className="evidence-fields"><div className="form-grid"><label>Record type<select value={kind} onChange={e=>{setKind(e.target.value);setMessage("")}}>{["Immune laboratory result","Bone scan / biomarker result","Blood pressure assessment","Nutrition / hydration assessment","Radiation exposure record","Vision assessment"].map(x=><option key={x}>{x}</option>)}</select></label><label>Next assessment<input type="date" value={due} onChange={e=>setDue(e.target.value)}/></label></div><label className="field-label">Source, date and result<textarea value={value} onChange={e=>setValue(e.target.value)} placeholder="Add the measurement, unit, source and assessment date…"/></label><div className="evidence-actions"><button className="btn primary" disabled={!value.trim()} onClick={()=>{m.saveEvidence(kind,value.trim());setValue("");setMessage("Evidence saved to your mission record.")}}>Save evidence record</button><button className="btn secondary" disabled={!due} onClick={()=>{m.log("Assessment scheduled",`${kind}: scheduled ${due}; collection and laboratory analysis require the appropriate mission equipment.`);setMessage(`Assessment scheduled for ${due}.`)}}>Schedule assessment</button></div><small className="evidence-footnote">Schedule entries stay in your mission record; external reminders are not enabled.</small>{message&&<p role="status">{message}</p>}</div></div>{Object.entries(m.evidence).map(([k,v])=><div className="action-entry" key={k}><strong>{k} · manual record</strong><p>{v}</p></div>)}</Panel>
 }
-export function DemoSettings({go}:{go:(p:any)=>void}){const m=useMission();return <div className="page fade-in"><Head eyebrow="SAMPLE CONTROLS" title="Your mission preferences.">Choose a mission scenario, test communication delay and manage the local record.</Head><Panel title="Mission simulation"><label className="field-label">Scenario<select value={m.scenario} onChange={e=>m.setScenario(e.target.value as Scenario)}>{scenarios.map(s=><option key={s}>{s}</option>)}</select></label><label className="sample-checkbox"><input type="checkbox" checked={m.offline} onChange={e=>m.setOffline(e.target.checked)}/> Simulate offline communication</label><p>Offline mode pauses server saves and inbox transfers. Browser check-ins and logging continue.</p></Panel><Panel title="Workspace shortcuts"><p>{m.backendStatus}</p><button className="btn secondary" onClick={()=>go("hardware")}>Open My Wearables</button><button className="btn secondary" onClick={()=>go("privacy")}>Export or reset sample data</button><p>Explore your equipment, manage your record and keep the mission workspace organized.</p></Panel></div>}
+export function DemoSettings({go}:{go:(p:any)=>void}){const m=useMission();return <div className="page fade-in"><Head eyebrow="SAMPLE CONTROLS" title="Your mission preferences.">Choose a mission scenario, test communication delay and manage the local record.</Head><Panel title="Mission simulation"><label className="field-label">Scenario<select value={m.scenario} onChange={e=>m.setScenario(e.target.value as Scenario)}>{scenarios.map(s=><option key={s}>{s}</option>)}</select></label><label className="sample-checkbox"><input type="checkbox" checked={m.offline} onChange={e=>m.setOffline(e.target.checked)}/> Simulate offline communication</label><p>Offline mode pauses server saves and inbox transfers. Browser check-ins and logging continue.</p></Panel><Panel title="Workspace shortcuts"><p>{m.backendStatus}</p><button className="btn secondary" onClick={()=>go("hardware")}>Open HaloSuit Studio</button><button className="btn secondary" onClick={()=>go("privacy")}>Export or reset sample data</button><p>Explore your equipment, manage your record and keep the mission workspace organized.</p></Panel></div>}

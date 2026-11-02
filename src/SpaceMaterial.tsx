@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 type Props = {
-    kind?: "halo" | "family" | "roadmap" | "hardware" | "domain";
+    kind?: "halo" | "family" | "roadmap" | "hardware" | "domain" | "suit";
     device?: number;
     domain?: number;
     spin?: boolean;
@@ -71,7 +71,48 @@ export default function SpaceMaterial({ kind = "halo", device = 0, domain = 0, s
         const ball = (r: number, x: number, y: number, z: number, mat: THREE.Material = pearl, parent: THREE.Object3D = root) => { const m = mesh(new THREE.SphereGeometry(r, 40, 28), mat, parent); m.position.set(x, y, z); return m; };
         const box = (w: number, h: number, d: number, x: number, y: number, z: number, mat: THREE.Material = pearl) => { const m = mesh(new RoundedBoxGeometry(w, h, d, 4, Math.min(w, h, d) * .22), mat); m.position.set(x, y, z); components.push({ mesh: m, base: m.position.clone(), offset: new THREE.Vector3(x * .25, y * .4, z * .25) }); return m; };
         const ring = (r: number, tube: number, mat: THREE.Material, parent: THREE.Object3D = root) => mesh(new THREE.TorusGeometry(r, tube, 16, 100), mat, parent);
-        if (kind === "domain") {
+        if (kind === "suit") {
+            camera.position.set(0,.05,10.4);
+            const fabric = new THREE.MeshPhysicalMaterial({color:0xc6bad5,roughness:.63,metalness:.16,clearcoat:.18});
+            const seam = new THREE.MeshStandardMaterial({color:0x796887,roughness:.55});
+            const limb=(a:[number,number,number],b:[number,number,number],r:number,mat:THREE.Material=fabric)=>{
+                const start=new THREE.Vector3(...a),end=new THREE.Vector3(...b),delta=end.clone().sub(start);
+                const part=mesh(new THREE.CylinderGeometry(r*.86,r,delta.length(),24),mat);
+                part.position.copy(start).add(end).multiplyScalar(.5);part.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());
+                ball(r*.94,...a,mat);ball(r*.94,...b,mat);return part;
+            };
+            const torso=ball(1,0,.65,0,fabric);torso.scale.set(.69,1,.37);
+            const waist=ball(.56,0,-.22,0,seam);waist.scale.set(1.12,.45,.7);
+            limb([-.48,-.35,0],[-.48,-1.43,0],.28);limb([.48,-.35,0],[.48,-1.43,0],.28);
+            limb([-.48,-1.43,0],[-.5,-2.38,.02],.22);limb([.48,-1.43,0],[.5,-2.38,.02],.22);
+            for(const x of [-.5,.5]){box(.42,.32,.72,x,-2.49,.15,dark);const cuff=ring(.23,.055,chrome);cuff.rotation.x=Math.PI/2;cuff.position.set(x,-2.24,.02);}
+            for(const sign of [-1,1]){
+                limb([sign*.65,1.2,0],[sign*.98,.44,0],.23);
+                limb([sign*.98,.44,0],[sign*1.19,-.18,.06],.18);
+                const glove=ball(.23,sign*1.25,-.45,.06,fabric);glove.scale.set(.8,1.25,.6);glove.userData.destination="module:0";
+                for(let i=0;i<4;i++)limb([sign*(1.14+i*.06),-.57,.08],[sign*(1.14+i*.06),-.83+Math.abs(i-1)*.04,.08],.035,fabric);
+                const wrist=box(.2,.16,.16,sign*1.19,-.2,.2,pink);wrist.userData.destination="module:0";
+            }
+            limb([0,1.36,0],[0,1.65,0],.22,seam);
+            const helmet=ball(.57,0,2.03,0,fabric);helmet.scale.set(.85,1,.84);
+            const visor=ball(.46,0,2.07,.22,dark);visor.scale.set(.96,.62,.8);visor.userData.destination="module:1";
+            const hud=box(.38,.025,.03,.05,2.08,.59,glow);hud.userData.destination="module:1";
+            box(.7,.44,.12,0,.91,.35,dark);const chest=box(.42,.24,.08,0,.94,.45,pink);chest.userData.destination="module:2";
+            box(.22,.035,.02,0,.95,.5,glow);
+            const node=(x:number,y:number,z:number,module:number)=>{const n=ball(.075,x,y,z,glow);n.userData.destination=`module:${module}`;animated.push(n);};
+            node(-1.2,-.2,.32,0);node(.4,2.09,.4,1);node(0,.92,.52,2);node(.5,-1.39,.23,3);
+            const bone=box(.24,.48,.18,-.5,-1.76,.24,chrome);bone.userData.destination="module:4";node(-.5,-1.7,.36,4);
+            const cartridge=box(.3,.42,.25,.62,-.16,.28,pink);cartridge.userData.destination="module:5";node(.63,-.1,.44,5);
+            const paths:number[][][] = [[[-1.2,-.2,.26],[-.94,.5,.2],[-.55,1.14,.24],[0,.94,.45]],[[.5,-1.4,.22],[.5,-.2,.3],[.4,.55,.34],[0,.94,.45]],[[-.5,-1.7,.3],[-.5,-.25,.32],[0,.94,.45]],[[.62,-.1,.4],[.43,.35,.35],[0,.94,.45]]];
+            for(const points of paths){
+                const curve=new THREE.CatmullRomCurve3(points.map(v=>new THREE.Vector3(v[0],v[1],v[2])));
+                mesh(new THREE.TubeGeometry(curve,28,.012,6,false),pink);
+            }
+            const ground=ring(1.55,.018,chrome);ground.rotation.x=Math.PI/2;ground.position.y=-2.7;
+            const ground2=ring(1.85,.01,glass);ground2.rotation.x=Math.PI/2;ground2.position.y=-2.7;
+            root.rotation.y=-.15;
+        }
+        else if (kind === "domain") {
             camera.position.z=6.2;
             const pill=(x:number,y:number,z:number,scale: [number,number,number],mat:THREE.Material=pearl)=>{const b=ball(.48,x,y,z,mat);b.scale.set(...scale);return b;};
             if(domain===0){const shape=new THREE.Shape();shape.moveTo(0,-.85);shape.bezierCurveTo(-1.8,.15,-.9,1.6,0,.62);shape.bezierCurveTo(.9,1.6,1.8,.15,0,-.85);const heart=mesh(new THREE.ExtrudeGeometry(shape,{depth:.35,bevelEnabled:true,bevelSize:.12,bevelThickness:.12,bevelSegments:5,curveSegments:24}),pink);heart.position.z=-.2;heart.rotation.z=-.12;}
@@ -184,7 +225,7 @@ export default function SpaceMaterial({ kind = "halo", device = 0, domain = 0, s
             gm.opacity = .13;
             scene.add(grid);
         }
-        components.forEach((c,i)=>{const map=[[2,1,1,2,2,2,2,0,2,0],[0,0,1,0,0,1,2,1,0],[2,0,0,1,1,1],[0,2,2,0,1,1],[0,0,2,1,0],[1,1,0,0,2]][device];c.mesh.userData.destination=`part:${map[i] ?? 0}`;});
+        if(kind==="hardware")components.forEach((c,i)=>{const map=[[2,1,1,2,2,2,2,0,2,0],[0,0,1,0,0,1,2,1,0],[2,0,0,1,1,1],[0,2,2,0,1,1],[0,0,2,1,0],[1,1,0,0,2]][device];c.mesh.userData.destination=`part:${map[i] ?? 0}`;});
         const dotsGeometry = new THREE.BufferGeometry();
         const positions = [];
         for (let i = 0; i < 45; i++) {
@@ -216,7 +257,7 @@ export default function SpaceMaterial({ kind = "halo", device = 0, domain = 0, s
         } element.style.cursor=select.current && hit(e)?"pointer":"grab"; const b = element.getBoundingClientRect(); targetX = ((e.clientX - b.left) / b.width - .5) * .3; targetY = ((e.clientY - b.top) / b.height - .5) * .2; };
         const up = (e: PointerEvent) => { if(dragging && e.type!=="pointercancel" && Math.hypot(e.clientX-startX,e.clientY-startY)<6){const d=hit(e);if(d)select.current?.(d);} dragging=false; };
         const leave = () => { targetX = 0; targetY = 0; };
-        const keypress = (e: KeyboardEvent) => { if(e.key==="Enter" && select.current){e.preventDefault();select.current(kind==="hardware"?"part:0":"health");} if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        const keypress = (e: KeyboardEvent) => { if(e.key==="Enter" && select.current){e.preventDefault();select.current(kind==="hardware"?"part:0":kind==="suit"?"module:2":"health");} if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
             e.preventDefault();
             yaw += e.key === "ArrowLeft" ? -.2 : .2;
         } };
@@ -243,6 +284,6 @@ export default function SpaceMaterial({ kind = "halo", device = 0, domain = 0, s
                 materials.add(m);
         } }); geometries.forEach(g => g.dispose()); [pearl, pink, chrome, glass, dark, glow].forEach(m => materials.add(m)); materials.forEach(m => m.dispose()); environment.dispose(); renderer.dispose(); renderer.domElement.remove(); };
     }, [kind, device, domain]);
-    return <div className={`space-material ${className} ${failed ? "webgl-fallback" : ""}`} ref={host} tabIndex={kind === "domain" ? -1 : 0} role={onSelect?"button":"img"} aria-label={kind === "domain" ? ["Pearlescent heart","Immune cell sculpture","Bone sculpture","Brain sculpture","Crescent moon","Hydration droplet","Radiation orbit","Lung sculpture","Eye sculpture","Care cross"][domain] : kind === "hardware" ? `Interactive 3D ${["bioglove", "bioglass", "ECG wearable", "exercise sensor", "bone-scan attachment", "pocket biomarker reader"][device]} concept. Click a component to inspect it. Drag or use arrow keys to rotate.` : `Pearlescent HALO sculpture with lavender and pink orbital rings. ${onSelect ? "Click the core to open health. " : ""}Drag or use arrow keys to rotate.`}><div className="material-fallback"><i /><span /><b /></div>{failed && <small className="material-unavailable">3D unavailable · static material preview</small>}</div>;
+    return <div className={`space-material ${className} ${failed ? "webgl-fallback" : ""}`} ref={host} tabIndex={kind === "domain" ? -1 : 0} role={onSelect?"button":"img"} aria-label={kind === "suit" ? "Interactive HaloSuit concept with integrated glove, visor, chest sensors, movement module, bone assessment dock and biomarker reader. Drag or use arrow keys to rotate." : kind === "domain" ? ["Pearlescent heart","Immune cell sculpture","Bone sculpture","Brain sculpture","Crescent moon","Hydration droplet","Radiation orbit","Lung sculpture","Eye sculpture","Care cross"][domain] : kind === "hardware" ? `Interactive 3D ${["bioglove", "bioglass", "ECG wearable", "exercise sensor", "bone-scan attachment", "pocket biomarker reader"][device]} concept. Click a component to inspect it. Drag or use arrow keys to rotate.` : `Pearlescent HALO sculpture with lavender and pink orbital rings. ${onSelect ? "Click the core to open health. " : ""}Drag or use arrow keys to rotate.`}><div className="material-fallback">{kind === "suit" ? <svg className="suit-static-model" viewBox="0 0 300 520" aria-hidden="true"><defs><linearGradient id="suit-fabric" x1="0" x2="1"><stop stopColor="#9481ac"/><stop offset=".45" stopColor="#e0d3ed"/><stop offset="1" stopColor="#ac90c2"/></linearGradient></defs><ellipse cx="150" cy="491" rx="96" ry="15" fill="none" stroke="#a889c455"/><g fill="url(#suit-fabric)" stroke="#796289" strokeWidth="2"><rect x="120" y="32" width="60" height="73" rx="28"/><path d="M112 110Q91 112 87 142L80 223L61 291Q57 306 70 312Q84 318 90 299L113 232L119 178L117 282L109 443Q108 459 125 459Q141 459 143 442L150 317L157 442Q159 459 175 459Q191 459 190 443L183 282L181 178L187 232L210 299Q216 318 230 312Q243 306 239 291L220 223L213 142Q209 112 188 110Z"/><rect x="104" y="445" width="40" height="30" rx="10"/><rect x="156" y="445" width="40" height="30" rx="10"/></g><rect x="123" y="52" width="54" height="29" rx="13" fill="#40314f"/><path d="M137 67H163" stroke="#cef7e9" strokeWidth="3"/><rect x="130" y="151" width="40" height="29" rx="6" fill="#705478"/><path d="M137 167H144L148 157L153 174L157 164H164" fill="none" stroke="#c7f2dd" strokeWidth="2"/><path d="M73 286L104 225L115 133L150 167L173 274L177 364M150 167L125 370" fill="none" stroke="#cb96ca" strokeWidth="2"/><g fill="#a9ebd2"><circle cx="73" cy="286" r="5"/><circle cx="150" cy="167" r="5"/><circle cx="177" cy="364" r="5"/><circle cx="125" cy="370" r="5"/><circle cx="177" cy="274" r="5"/></g></svg> : <><i /><span /><b /></>}</div>{failed && <small className="material-unavailable">3D unavailable · static material preview</small>}</div>;
 }
 function gapValue(kind: string) { return kind === "hardware" ? 1.6 : 0; }

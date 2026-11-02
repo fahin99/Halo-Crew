@@ -1,3 +1,4 @@
+import HaloSuitSimulation from "./HaloSuitSimulation"
 import { useMission } from "./mission-state"
 import { lazy, Suspense, useEffect, useState } from "react"
 
@@ -84,12 +85,14 @@ export function HardwareLab() {
   return (
     <div className={`page fade-in ${cinema ? "hardware-cinema" : ""}`}>
       <div className="page-head">
-        <span className="eyebrow">HARDWARE STUDIO · CONCEPT PROTOTYPE</span>
-        <div className="page-title">One crew. A compact health kit.</div>
+        <span className="eyebrow">HALOSUIT · HALOCREW HARDWARE EXTENSION</span>
+        <div className="page-title">One suit. Every module connected.</div>
         <p>
-          Everyday wearables and periodic assessment modules connect to one personal health record. Explore each component and its sample data.
+          HaloSuit is HaloCrew’s hardware extension. Glove, visor, chest sensors and assessment docks form one integrated suit. Start the simulation, then explore the modules integrated into the suit.
         </p>
       </div>
+      <HaloSuitSimulation />
+      <div className="suit-module-explorer-heading"><span className="eyebrow">INSIDE HALOSUIT</span><h2>Explore each integrated module.</h2><p>Continuous sensing and periodic assessments, connected to the same record.</p></div>
       <div className="lab-device-tabs">
         {devices.map((x, i) => (
           <button
@@ -195,11 +198,11 @@ export function Roadmap() {
         <span className="eyebrow">WHAT’S NEXT</span>
         <div className="page-title">From concept to mission support.</div>
         <p>
-          Our next steps: connected hardware, compact assessments and validated
+          Our next steps: a connected HaloSuit, compact assessments and validated
           health support for longer missions.
         </p>
       </div>
-      <div className="roadmap-sculpture"><div><span className="eyebrow">THE NEXT ORBIT</span><h2>Designed for today.<br/><em>Imagined for deep space.</em></h2><p>From a personal companion to a connected, suit-integrated ecosystem.</p></div><Suspense fallback={<div className="material-placeholder"><i/></div>}><SpaceMaterial kind="roadmap"/></Suspense></div>
+      <div className="roadmap-sculpture"><div><span className="eyebrow">THE NEXT ORBIT</span><h2>Designed for today.<br/><em>Imagined for deep space.</em></h2><p>One integrated suit, developed and tested module by module.</p></div><Suspense fallback={<div className="material-placeholder"><i/></div>}><SpaceMaterial kind="roadmap"/></Suspense></div>
       <div className="roadmap-grid">{[
         [
           "01 · Connected wearables",
@@ -214,7 +217,7 @@ export function Roadmap() {
           "Evaluate sensor accuracy, baseline methods, clinical protocols, sample-result integrations, consent, encryption and offline synchronization with appropriate specialists.",
         ],
         [
-          "04 · Suit-integrated ecosystem",
+          "04 · Suit engineering and integration",
           "Modular sensors and hands-free prompts integrated into a suit concept. Validate comfort, power, reliability, cleaning, communications and mission suitability.",
         ],
         [
