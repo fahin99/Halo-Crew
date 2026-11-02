@@ -6,7 +6,7 @@ import {
   useRef,
   type ReactNode,
 } from "react"
-import { emptyVitals, ROUTINE, STATUS, bpStatus, doseStatus, glucoseStatus, worst, type Vitals } from "./vitals"
+import { emptyVitals, freshVitals, localDay, migrateVitals, ROUTINE, STATUS, bpStatus, doseStatus, glucoseStatus, worst, type Vitals } from "./vitals"
 export const scenarios = [
   "Nominal",
   "Recovery shift",
@@ -44,7 +44,6 @@ type State = {
   routineDate: string
   streak: number
 }
-const localDay = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
 // Start a fresh routine each local day; the streak grows only when yesterday's routine was finished.
 function rollRoutine(s: State): State {
   const today = localDay()
@@ -54,7 +53,9 @@ function rollRoutine(s: State): State {
   return { ...s, routineDone: [], routineDate: today, streak: finished && s.routineDate === yesterday ? s.streak + 1 : 0 }
 }
 // Records saved before the routine had a date carry a placeholder streak; drop it.
-const normalize = (x: State): State => rollRoutine(x.routineDate ? x : { ...x, routineDate: localDay(), streak: 0 })
+const normalize = (x: State): State => rollRoutine({ ...(x.routineDate ? x : { ...x, routineDate: localDay(), streak: 0 }), vitals: migrateVitals(x.vitals) })
+// A logged reading that needs a clinician outranks the simulated scenario in the main health state.
+export type HealthState = Scenario | "Reading alert"
 const initial: State = {
   connections: wearableNames.map(()=>false),
   exerciseExtra: 0,
@@ -170,7 +171,7 @@ export function assessment(s: Scenario) {
   }
 }
 type Mission = State & {
-  healthState: Scenario
+  healthState: HealthState
   signals: ReturnType<typeof getSignals>
   scores: ReturnType<typeof calculate>
   notice: ReturnType<typeof assessment>
@@ -188,7 +189,7 @@ type Mission = State & {
   useStock: (id: string) => void
   completeExercise: () => void
   saveEvidence: (kind:string,value:string)=>void
-  saveVitals: (v: Omit<Vitals, "at">) => void
+  saveVitals: (v: { bpSys: number | null; bpDia: number | null; glucose: number | null; dose: number | null }) => void
   toggleRoutine: (id: string) => void
   clearApprovals: () => void
   reset: () => void
@@ -263,10 +264,11 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   if(state.scenario==="Exercise gap")notice.body=`${signals.sessions} of ${signals.planned} sample resistance sessions are complete. Bone density has not been measured.`;
   if(state.scenario==="Nominal" && (state.checkin.fatigue>=7 || ["Stressed","Low"].includes(state.checkin.mood))){notice.title="Your check-in deserves attention";notice.body=`You reported ${state.checkin.mood.toLowerCase()} mood and fatigue ${state.checkin.fatigue}/10. Choose support and record how you respond; self-report is not a diagnosis.`;notice.action="Choose support and record follow-up";notice.tone="attention";}
   if(state.scenario==="Exercise gap" && signals.sessions===signals.planned){notice.title="Exercise plan completed in the sample";notice.body="Seven of seven sample sessions are logged. Bone density and biomarkers still require appropriate measurement.";notice.action="Record exercise follow-up";notice.tone="good";}
-  const vitalStatus=worst(bpStatus(state.vitals.bpSys,state.vitals.bpDia),glucoseStatus(state.vitals.glucose),doseStatus(state.vitals.dose));
-  if(vitalStatus==="act"||vitalStatus==="urgent"||(vitalStatus==="watch"&&notice.tone==="good")){const v=state.vitals;const parts=[bpStatus(v.bpSys,v.bpDia)===vitalStatus?`blood pressure ${v.bpSys}/${v.bpDia} mmHg`:"",glucoseStatus(v.glucose)===vitalStatus?`blood sugar ${v.glucose} mg/dL`:"",doseStatus(v.dose)===vitalStatus?`radiation dose ${v.dose} mSv`:""].filter(Boolean);notice.title=vitalStatus==="watch"?"A logged reading needs watching":`A logged reading needs ${STATUS[vitalStatus].tier}`;notice.body=`Your logged ${parts.join(" and ")} ${parts.length>1?"are":"is"} outside your range. ${STATUS[vitalStatus].action}`;notice.action=vitalStatus==="watch"?"Recheck later today":"Request medical review";notice.tone="attention";}
+  const today=freshVitals(state.vitals);
+  const vitalStatus=worst(bpStatus(today.bpSys,today.bpDia),glucoseStatus(today.glucose),doseStatus(today.dose));
+  if(vitalStatus==="act"||vitalStatus==="urgent"||(vitalStatus==="watch"&&notice.tone==="good")){const v=today;const parts=[bpStatus(v.bpSys,v.bpDia)===vitalStatus?`blood pressure ${v.bpSys}/${v.bpDia} mmHg`:"",glucoseStatus(v.glucose)===vitalStatus?`blood sugar ${v.glucose} mg/dL`:"",doseStatus(v.dose)===vitalStatus?`radiation dose ${v.dose} mSv`:""].filter(Boolean);notice.title=vitalStatus==="watch"?"A logged reading needs watching":`A logged reading needs ${STATUS[vitalStatus].tier}`;notice.body=`Your logged ${parts.join(" and ")} ${parts.length>1?"are":"is"} outside your range. ${STATUS[vitalStatus].action}`;notice.action=vitalStatus==="watch"?"Recheck later today":"Request medical review";notice.tone="attention";}
   if(state.checkin.pain==="Severe"){notice.title="Severe discomfort needs medical review";notice.body="Your self-report takes priority over reassuring sample readings. Use the mission medical evaluation pathway.";notice.action="Request medical review";notice.tone="attention";}
-  const healthState: Scenario = signals.quality === "Unreliable" ? "Poor contact" : signals.temperature >= 38 ? "Immune review" : signals.co2 >= 2000 ? "Habitat alert" : signals.sessions < 4 ? "Exercise gap" : signals.sleep < 6 || state.checkin.fatigue >= 7 || ["Stressed","Low"].includes(state.checkin.mood) ? "Recovery shift" : "Nominal";
+  const healthState: HealthState = vitalStatus === "act" || vitalStatus === "urgent" ? "Reading alert" : signals.quality === "Unreliable" ? "Poor contact" : signals.temperature >= 38 ? "Immune review" : signals.co2 >= 2000 ? "Habitat alert" : signals.sessions < 4 ? "Exercise gap" : signals.sleep < 6 || state.checkin.fatigue >= 7 || ["Stressed","Low"].includes(state.checkin.mood) ? "Recovery shift" : "Nominal";
   const value: Mission = {
     healthState,
     ...state,
@@ -340,7 +342,9 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       const parts = [v.bpSys !== null && v.bpDia !== null ? `BP ${v.bpSys}/${v.bpDia} mmHg` : "", v.glucose !== null ? `blood sugar ${v.glucose} mg/dL` : "", v.dose !== null ? `dose ${v.dose} mSv` : ""].filter(Boolean)
       const ids = [v.bpSys !== null && v.bpDia !== null ? "bp" : "", v.glucose !== null ? "glucose" : "", v.dose !== null ? "dose" : ""].filter(Boolean)
       if (!parts.length) return s
-      const vitals = { bpSys: v.bpSys ?? s.vitals.bpSys, bpDia: v.bpDia ?? s.vitals.bpDia, glucose: v.glucose ?? s.vitals.glucose, dose: v.dose ?? s.vitals.dose, at: new Date().toISOString() }
+      const now = new Date().toISOString(), old = s.vitals
+      const hasBp = v.bpSys !== null && v.bpDia !== null
+      const vitals: Vitals = { bpSys: hasBp ? v.bpSys : old.bpSys, bpDia: hasBp ? v.bpDia : old.bpDia, bpAt: hasBp ? now : old.bpAt, glucose: v.glucose ?? old.glucose, glucoseAt: v.glucose !== null ? now : old.glucoseAt, dose: v.dose ?? old.dose, doseAt: v.dose !== null ? now : old.doseAt }
       return { ...s, vitals, routineDone: [...new Set([...s.routineDone, ...ids])], logs: [entry("Vitals", `Manual entry: ${parts.join("; ")}.`), ...s.logs].slice(0, 200) }
     }),
     toggleRoutine: (id) => setState((s) => ({ ...s, routineDone: s.routineDone.includes(id) ? s.routineDone.filter((x) => x !== id) : [...s.routineDone, id] })),

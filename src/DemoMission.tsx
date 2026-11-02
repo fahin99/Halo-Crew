@@ -3,6 +3,7 @@ import { sampleHistory } from "./sample-history"
 import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { scenarios, useMission, type Scenario } from "./mission-state"
 import { BodyMap, TrendChart, VitalsLog } from "./HealthCockpit"
+import { ageLabel, bpStatus, doseStatus, freshVitals, glucoseStatus, isToday, STATUS } from "./vitals"
 
 const SpaceMaterial=lazy(()=>import("./SpaceMaterial"));
 const MaterialPlaceholder=()=> <div className="material-placeholder" aria-hidden="true"><i/><span/></div>;
@@ -1050,6 +1051,19 @@ export function DemoMedical() {
     </div>
   )
 }
+// Logged readings as structured fields, each with its own time, freshness and status.
+function measurementRecord(m: ReturnType<typeof useMission>) {
+  const v = m.vitals, f = freshVitals(v)
+  const item = (value: unknown, unit: string, at: string | null, status: keyof typeof STATUS) => at ? { value, unit, measuredAt: at, current: isToday(at), age: ageLabel(at), status: isToday(at) ? STATUS[status].label : "Stale: not measured today", source: "Manual entry, unverified" } : null
+  return {
+    bloodPressure: item(v.bpSys !== null ? { systolic: v.bpSys, diastolic: v.bpDia } : null, "mmHg", v.bpAt, bpStatus(f.bpSys, f.bpDia)),
+    fastingBloodSugar: item(v.glucose, "mg/dL", v.glucoseAt, glucoseStatus(f.glucose)),
+    radiationDose: item(v.dose, "mSv/day", v.doseAt, doseStatus(f.dose)),
+  }
+}
+function missingEvidence(m: ReturnType<typeof useMission>) {
+  return ["ECG", isToday(m.vitals.bpAt) ? "" : "BP (today)", "Immune assay", "Bone density", isToday(m.vitals.doseAt) ? "" : "Radiation dosimeter (today)", isToday(m.vitals.glucoseAt) ? "" : "Fasting blood sugar (today)"].filter(Boolean)
+}
 function downloadReport(m: ReturnType<typeof useMission>) {
   const body = {
     label: "HALO synthetic mission sample; not a clinical report",
@@ -1060,13 +1074,8 @@ function downloadReport(m: ReturnType<typeof useMission>) {
     supportIndex: m.scores,
     assessment: m.notice,
     manualEvidence: m.evidence,
-    missingEvidence: [
-      "ECG",
-      "BP",
-      "Immune assay",
-      "Bone density",
-      "Radiation dosimeter",
-    ],
+    measurements: measurementRecord(m),
+    missingEvidence: missingEvidence(m),
     actions: m.logs,
   }
   const url = URL.createObjectURL(
@@ -1127,7 +1136,7 @@ export function DemoHandoff() {
             /10; symptoms {m.checkin.symptoms || "none reported"}.
           </p>
           <p>
-            Missing verified evidence: laboratory immune result, bone density, ECG, BP and radiation dose. Manual records remain unverified.
+            Missing evidence: {missingEvidence(m).join(", ")}. Manual readings are unverified.
           </p>
         </Panel>
       </div>
@@ -1560,7 +1569,20 @@ export function DemoFamily() {
 }
 export function copilotAnswer(text: string, m: ReturnType<typeof useMission>) {
   const q = text.toLowerCase()
-  if (/medicine|dose|drug|prescri/.test(q))
+  const v = m.vitals, f = freshVitals(v)
+  if (/radiation|dosimeter|msv|sievert/.test(q))
+    return v.dose === null
+      ? "No dosimeter reading is logged. Read your personal dosimeter and log today's dose in Health Overview. Deep-space cruise is roughly 1.8 mSv per day; NASA's career limit is 600 mSv."
+      : `Your last logged radiation dose is ${v.dose} mSv (${ageLabel(v.doseAt)}). ${f.dose === null ? "It is not from today, so I cannot judge today's exposure." : `Status: ${STATUS[doseStatus(f.dose)].label}. ${STATUS[doseStatus(f.dose)].action}`} Deep-space cruise is roughly 1.8 mSv per day; a sharp rise can mean a solar particle event, so follow shelter procedures if instructed.`
+  if (/blood pressure|\bbp\b|systolic|diastolic/.test(q))
+    return v.bpSys === null
+      ? "No blood pressure is logged. Rest 5 minutes, take two cuff readings a minute apart and log the average in Health Overview."
+      : `Your last blood pressure is ${v.bpSys}/${v.bpDia} mmHg (${ageLabel(v.bpAt)}). ${f.bpSys === null ? "It is not from today; please log a new reading." : `Status: ${STATUS[bpStatus(f.bpSys, f.bpDia)].label}. ${STATUS[bpStatus(f.bpSys, f.bpDia)].action}`}`
+  if (/sugar|glucose/.test(q))
+    return v.glucose === null
+      ? "No blood sugar is logged. Measure before breakfast with a fresh strip and log it in mg/dL."
+      : `Your last fasting blood sugar is ${v.glucose} mg/dL (${ageLabel(v.glucoseAt)}). ${f.glucose === null ? "It is not from today; please log a new reading." : `Status: ${STATUS[glucoseStatus(f.glucose)].label}. ${STATUS[glucoseStatus(f.glucose)].action}`}`
+  if (/medicine|medication|\bdose\b|dosage|drug|prescri/.test(q))
     return "I do not generate medication doses. Open Mission Medical Kit, record symptom and allergy context, then demonstrate officer review before logging inventory use. No real clinical approval occurs in this sample."
   if (/immune|fever|temperature/.test(q))
     return `Current synthetic temperature: ${m.signals.temperature} °C. ${m.signals.immuneResult}. Temperature, sleep and symptoms do not establish immune function. Record context and request medical review; laboratory evidence is still missing.`
@@ -1570,8 +1592,8 @@ export function copilotAnswer(text: string, m: ReturnType<typeof useMission>) {
     return `Your support index is ${m.scores.load}: 50% sleep shortfall, 30% reported fatigue and 20% exercise gap. Current components: ${m.scores.sleep}, ${m.scores.fatigue}, ${m.scores.exercise}. It is an illustrative prioritization formula, not a clinical score or validated prediction.`
   if (/family|alone|home|mental/.test(q))
     return `Your latest mood is ${m.checkin.mood}. You can choose a support session, play an actual family recording or talk with a clearly labeled scripted family companion. If you need human support, record a medical/support review request.`
-  if (/radiation|vision|nutrition|hydration/.test(q))
-    return "Health Overview includes exposure, vision, nutrition and hydration pathways. No dosimeter, ocular test or nutrition laboratory result is connected, so I cannot infer a normal result. Record observations and use the appropriate review pathway."
+  if (/vision|nutrition|hydration/.test(q))
+    return "Health Overview includes vision, nutrition and hydration pathways. No ocular test or nutrition laboratory result is connected, so I cannot infer a normal result. Record observations and use the appropriate review pathway."
   if (/history|action|record/.test(q))
     return m.logs.length
       ? `Latest action: ${m.logs[0].type}. ${m.logs[0].text}. ${m.logs.filter((l) => !l.synced).length} local records await sample transfer.`
@@ -1596,7 +1618,7 @@ export function DemoCopilot() {
     const fallback=copilotAnswer(t,m)
     try {
       if(m.offline)throw new Error()
-      const result=await requestReply(t,"halo","HALO",{signals:m.signals,checkin:m.checkin,scores:m.scores,notice:m.notice,logs:m.logs.slice(0,8)},fallback)
+      const result=await requestReply(t,"halo","HALO",{signals:m.signals,checkin:m.checkin,scores:m.scores,notice:m.notice,measurements:measurementRecord(m),logs:m.logs.slice(0,8)},fallback)
       setMessages(result.messages)
       setChatStatus(result.engine==="cloud-model"?"Online AI · reply saved":result.engine==="local-model"?"Local AI · reply saved":"Rule-based assistant · reply saved")
     } catch {

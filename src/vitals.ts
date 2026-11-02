@@ -2,8 +2,32 @@
 // Ranges follow common adult reference guidance and are illustrative; they are not mission clinical limits.
 
 export type Status = "good" | "watch" | "act" | "urgent" | "unknown"
-export type Vitals = { bpSys: number | null; bpDia: number | null; glucose: number | null; dose: number | null; at: string | null }
-export const emptyVitals: Vitals = { bpSys: null, bpDia: null, glucose: null, dose: null, at: null }
+// Each measurement keeps its own timestamp so an old value is never shown as today's.
+export type Vitals = { bpSys: number | null; bpDia: number | null; bpAt: string | null; glucose: number | null; glucoseAt: string | null; dose: number | null; doseAt: string | null }
+export const emptyVitals: Vitals = { bpSys: null, bpDia: null, bpAt: null, glucose: null, glucoseAt: null, dose: null, doseAt: null }
+
+export const localDay = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+export const isToday = (at: string | null) => !!at && localDay(new Date(at)) === localDay()
+// Only today's readings count toward current status; older ones remain as history.
+export const freshVitals = (v: Vitals): Vitals => ({
+  ...v,
+  bpSys: isToday(v.bpAt) ? v.bpSys : null, bpDia: isToday(v.bpAt) ? v.bpDia : null,
+  glucose: isToday(v.glucoseAt) ? v.glucose : null,
+  dose: isToday(v.doseAt) ? v.dose : null,
+})
+export function ageLabel(at: string | null) {
+  if (!at) return "Never logged"
+  const d = new Date(at)
+  if (isToday(at)) return `Today ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+  const days = Math.round((new Date(localDay()).getTime() - new Date(localDay(d)).getTime()) / 86400000)
+  return days === 1 ? "Yesterday · log today's reading" : `${days} days ago · log today's reading`
+}
+// Records saved before per-reading timestamps shared one `at` field.
+export function migrateVitals(v: any): Vitals {
+  if (!v || typeof v !== "object") return emptyVitals
+  const { at = null, ...rest } = v
+  return { ...emptyVitals, ...rest, bpAt: v.bpAt ?? (v.bpSys != null ? at : null), glucoseAt: v.glucoseAt ?? (v.glucose != null ? at : null), doseAt: v.doseAt ?? (v.dose != null ? at : null) }
+}
 
 const rank: Record<Status, number> = { unknown: 0, good: 1, watch: 2, act: 3, urgent: 4 }
 export const worst = (...list: Status[]) => list.reduce((a, b) => (rank[b] > rank[a] ? b : a), "unknown" as Status)

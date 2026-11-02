@@ -4,7 +4,7 @@ import { useMission } from "./mission-state"
 import { sampleHistory } from "./sample-history"
 import {
   STATUS, GUIDES, ROUTINE, worst, domainStatuses, bpStatus, glucoseStatus, doseStatus, temperatureStatus,
-  oxygenStatus, pulseStatus, sleepStatus, validateVitals, type Status,
+  oxygenStatus, pulseStatus, sleepStatus, validateVitals, freshVitals, ageLabel, isToday, type Status,
 } from "./vitals"
 
 export function StatusChip({ status, label }: { status: Status; label?: string }) {
@@ -13,7 +13,7 @@ export function StatusChip({ status, label }: { status: Status; label?: string }
 
 export function useDomainStatuses() {
   const m = useMission()
-  return domainStatuses({ signals: m.signals, pulseZ: m.scores.pulseZ, checkin: m.checkin, vitals: m.vitals })
+  return domainStatuses({ signals: m.signals, pulseZ: m.scores.pulseZ, checkin: m.checkin, vitals: freshVitals(m.vitals) })
 }
 
 export function StatusLegend() {
@@ -82,12 +82,13 @@ export function VitalsLog() {
   const [saved, setSaved] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({})
   const [formError, setFormError] = useState("")
-  const v = m.vitals
+  // Older readings stay visible with their age, but only today's count toward status.
+  const v = m.vitals, f = freshVitals(v)
   const rows = [
-    { id: "bp", value: v.bpSys !== null ? `${v.bpSys}/${v.bpDia}` : "—", status: bpStatus(v.bpSys, v.bpDia) },
-    { id: "glucose", value: v.glucose ?? "—", status: glucoseStatus(v.glucose) },
-    { id: "temperature", value: m.signals.temperature, status: temperatureStatus(m.signals.temperature) },
-    { id: "dose", value: v.dose ?? "—", status: doseStatus(v.dose) },
+    { id: "bp", value: v.bpSys !== null ? `${v.bpSys}/${v.bpDia}` : "—", status: bpStatus(f.bpSys, f.bpDia), age: ageLabel(v.bpAt), stale: !isToday(v.bpAt) },
+    { id: "glucose", value: v.glucose ?? "—", status: glucoseStatus(f.glucose), age: ageLabel(v.glucoseAt), stale: !isToday(v.glucoseAt) },
+    { id: "temperature", value: m.signals.temperature, status: temperatureStatus(m.signals.temperature), age: "Suit sensor · live", stale: false },
+    { id: "dose", value: v.dose ?? "—", status: doseStatus(f.dose), age: ageLabel(v.doseAt), stale: !isToday(v.doseAt) },
   ]
   const g = GUIDES[guide]
   const field = (key: keyof typeof form, label: string, placeholder: string, step = "1", min = "0") => <label>{label}<input inputMode="decimal" type="number" min={min} step={step} placeholder={placeholder} value={form[key]} aria-invalid={!!errors[key]} onChange={e => { setForm({ ...form, [key]: e.target.value }); setSaved(false); setErrors({ ...errors, [key]: undefined }); setFormError("") }} />{errors[key] && <span className="field-error">{errors[key]}</span>}</label>
@@ -112,7 +113,7 @@ export function VitalsLog() {
         {formError && <p role="alert" className="form-error">{formError}</p>}
         {saved && <p role="status" className="saved-line">Saved to your mission record. Your body map and routine are updated.</p>}
         <div className="vitals-results">{rows.map(r => <button key={r.id} className={`vitals-result st-${r.status} ${guide === r.id ? "active" : ""}`} onClick={() => setGuide(r.id as keyof typeof GUIDES)}>
-          <small>{GUIDES[r.id].name}</small><strong>{r.value}<span>{GUIDES[r.id].unit}</span></strong><StatusChip status={r.status} /><em>{STATUS[r.status].tier}</em>
+          <small>{GUIDES[r.id].name}</small><strong className={r.stale && r.value !== "—" ? "stale" : ""}>{r.value}<span>{GUIDES[r.id].unit}</span></strong><StatusChip status={r.status} label={r.stale && r.value !== "—" ? "Needs today's reading" : undefined} /><em>{r.age}</em>
         </button>)}</div>
       </div>
       <div className="vitals-guide" aria-live="polite">
@@ -137,7 +138,7 @@ export function DailyRoutine({ onLog }: { onLog: () => void }) {
   const streak = m.streak + (complete ? 1 : 0)
   const next = ROUTINE.find(r => !done.includes(r.id))
   const badges = [
-    { name: "First reading", earned: !!m.vitals.at, hint: "Log a measurement" },
+    { name: "First reading", earned: !!(m.vitals.bpAt || m.vitals.glucoseAt || m.vitals.doseAt), hint: "Log a measurement" },
     { name: "Full orbit", earned: complete, hint: "Finish today's routine" },
     { name: "Week strong", earned: streak >= 7, hint: "7-day streak" },
   ]
@@ -179,14 +180,15 @@ export function TrendChart() {
   const [metric, setMetric] = useState<MetricKey>("pulse")
   const [range, setRange] = useState(14)
   const cfg = METRICS[metric]
-  const now: Record<MetricKey, number | null> = { pulse: m.signals.pulse, hrv: m.signals.hrv, sleep: m.signals.sleep, temperature: m.signals.temperature, bp: m.vitals.bpSys, glucose: m.vitals.glucose, oxygen: m.signals.oxygen, dose: m.vitals.dose }
+  const today = freshVitals(m.vitals)
+  const now: Record<MetricKey, number | null> = { pulse: m.signals.pulse, hrv: m.signals.hrv, sleep: m.signals.sleep, temperature: m.signals.temperature, bp: today.bpSys, glucose: today.glucose, oxygen: m.signals.oxygen, dose: today.dose }
   const rows = [
     ...sampleHistory.slice(-range, -1).map(r => ({ d: `D${r.day}`, v: metric === "bp" ? r.bpSys : r[metric], v2: metric === "bp" ? r.bpDia : undefined })),
-    { d: "Now", v: now[metric], v2: metric === "bp" ? m.vitals.bpDia ?? undefined : undefined },
+    { d: "Now", v: now[metric], v2: metric === "bp" ? today.bpDia ?? undefined : undefined },
   ]
   const values = rows.map(r => r.v).filter((x): x is number => x !== null)
   const current = now[metric]
-  const status: Status = metric === "bp" ? bpStatus(m.vitals.bpSys, m.vitals.bpDia) : current === null ? "unknown" : cfg.status(current)
+  const status: Status = metric === "bp" ? bpStatus(today.bpSys, today.bpDia) : current === null ? "unknown" : cfg.status(current)
   const avg = values.length ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10 : null
   const rowStatus = (r: { v: number | null; v2?: number }) => r.v === null ? "unknown" : metric === "bp" ? bpStatus(r.v, r.v2 ?? null) : cfg.status(r.v)
   const flagged = rows.filter(r => r.v !== null && rowStatus(r) !== "good").length
@@ -215,7 +217,7 @@ export function TrendChart() {
       </ResponsiveContainer>
     </div>
     <div className="trend-readouts">
-      <div><small>Now</small><strong>{metric === "bp" ? (m.vitals.bpSys !== null ? `${m.vitals.bpSys}/${m.vitals.bpDia}` : "—") : current ?? "—"} <span>{cfg.unit}</span></strong><StatusChip status={status} label={current === null ? "Not logged today" : undefined} /></div>
+      <div><small>Now</small><strong>{metric === "bp" ? (today.bpSys !== null ? `${today.bpSys}/${today.bpDia}` : "—") : current ?? "—"} <span>{cfg.unit}</span></strong><StatusChip status={status} label={current === null ? "Not logged today" : undefined} /></div>
       <div><small>{range}-day average</small><strong>{avg ?? "—"} <span>{cfg.unit}</span></strong></div>
       <div><small>Your range</small><strong>{cfg.band[0]}–{cfg.band[1]} <span>{cfg.unit}</span></strong></div>
       <div><small>Days outside range</small><strong>{flagged}<span> of {values.length}</span></strong></div>
