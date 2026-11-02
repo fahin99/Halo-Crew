@@ -6,7 +6,7 @@ import {
   useRef,
   type ReactNode,
 } from "react"
-import { emptyVitals, type Vitals } from "./vitals"
+import { emptyVitals, ROUTINE, STATUS, bpStatus, doseStatus, glucoseStatus, worst, type Vitals } from "./vitals"
 export const scenarios = [
   "Nominal",
   "Recovery shift",
@@ -41,8 +41,20 @@ type State = {
   stock: Record<string, number>
   vitals: Vitals
   routineDone: string[]
+  routineDate: string
   streak: number
 }
+const localDay = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+// Start a fresh routine each local day; the streak grows only when yesterday's routine was finished.
+function rollRoutine(s: State): State {
+  const today = localDay()
+  if (s.routineDate === today) return s
+  const yesterday = localDay(new Date(Date.now() - 86400000))
+  const finished = ROUTINE.every((r) => s.routineDone.includes(r.id))
+  return { ...s, routineDone: [], routineDate: today, streak: finished && s.routineDate === yesterday ? s.streak + 1 : 0 }
+}
+// Records saved before the routine had a date carry a placeholder streak; drop it.
+const normalize = (x: State): State => rollRoutine(x.routineDate ? x : { ...x, routineDate: localDay(), streak: 0 })
 const initial: State = {
   connections: wearableNames.map(()=>false),
   exerciseExtra: 0,
@@ -59,14 +71,15 @@ const initial: State = {
   },
   vitals: emptyVitals,
   routineDone: [],
-  streak: 6,
+  routineDate: localDay(),
+  streak: 0,
 }
 const KEY = "halo-mission-demo-v2"
 function read(): State {
   try {
     const x = JSON.parse(localStorage.getItem(KEY) || "null")
     if (x && scenarios.includes(x.scenario) && Array.isArray(x.logs))
-      return { ...initial, ...x, logs: x.logs.map((entry: Entry) => ({...entry, type: entry.type.replace(/\bdemo\b/gi, "sample"), text: entry.text.replace(/\bdemo\b/gi, "sample")})) }
+      return normalize({ ...initial, ...x, routineDate: x.routineDate, logs: x.logs.map((entry: Entry) => ({...entry, type: entry.type.replace(/\bdemo\b/gi, "sample"), text: entry.text.replace(/\bdemo\b/gi, "sample")})) })
   } catch {}
   return initial
 }
@@ -193,12 +206,16 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     const timer = window.setInterval(() => setSimulationTick(t => t + 1), 1000)
     return () => window.clearInterval(timer)
   }, [suitStreaming])
+  useEffect(() => {
+    const timer = window.setInterval(() => setState(rollRoutine), 60000)
+    return () => window.clearInterval(timer)
+  }, [])
   const saveQueue = useRef(Promise.resolve())
   useEffect(() => {
     let cancelled = false
     fetch("/api/mission").then(r=>{if(!r.ok)throw new Error();return r.json()}).then(data=>{
       if(cancelled)return
-      if(!read().offline && data.state && scenarios.includes(data.state.scenario) && Array.isArray(data.state.logs))setState({...initial,...data.state})
+      if(!read().offline && data.state && scenarios.includes(data.state.scenario) && Array.isArray(data.state.logs))setState(normalize({...initial,...data.state,routineDate:data.state.routineDate}))
       setBackendStatus("Mission server connected")
     }).catch(()=>{if(!cancelled)setBackendStatus("Browser storage · server unavailable")}).finally(()=>{if(!cancelled)setHydrated(true)})
     return ()=>{cancelled=true}
@@ -246,6 +263,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   if(state.scenario==="Exercise gap")notice.body=`${signals.sessions} of ${signals.planned} sample resistance sessions are complete. Bone density has not been measured.`;
   if(state.scenario==="Nominal" && (state.checkin.fatigue>=7 || ["Stressed","Low"].includes(state.checkin.mood))){notice.title="Your check-in deserves attention";notice.body=`You reported ${state.checkin.mood.toLowerCase()} mood and fatigue ${state.checkin.fatigue}/10. Choose support and record how you respond; self-report is not a diagnosis.`;notice.action="Choose support and record follow-up";notice.tone="attention";}
   if(state.scenario==="Exercise gap" && signals.sessions===signals.planned){notice.title="Exercise plan completed in the sample";notice.body="Seven of seven sample sessions are logged. Bone density and biomarkers still require appropriate measurement.";notice.action="Record exercise follow-up";notice.tone="good";}
+  const vitalStatus=worst(bpStatus(state.vitals.bpSys,state.vitals.bpDia),glucoseStatus(state.vitals.glucose),doseStatus(state.vitals.dose));
+  if(vitalStatus==="act"||vitalStatus==="urgent"||(vitalStatus==="watch"&&notice.tone==="good")){const v=state.vitals;const parts=[bpStatus(v.bpSys,v.bpDia)===vitalStatus?`blood pressure ${v.bpSys}/${v.bpDia} mmHg`:"",glucoseStatus(v.glucose)===vitalStatus?`blood sugar ${v.glucose} mg/dL`:"",doseStatus(v.dose)===vitalStatus?`radiation dose ${v.dose} mSv`:""].filter(Boolean);notice.title=vitalStatus==="watch"?"A logged reading needs watching":`A logged reading needs ${STATUS[vitalStatus].tier}`;notice.body=`Your logged ${parts.join(" and ")} ${parts.length>1?"are":"is"} outside your range. ${STATUS[vitalStatus].action}`;notice.action=vitalStatus==="watch"?"Recheck later today":"Request medical review";notice.tone="attention";}
   if(state.checkin.pain==="Severe"){notice.title="Severe discomfort needs medical review";notice.body="Your self-report takes priority over reassuring sample readings. Use the mission medical evaluation pathway.";notice.action="Request medical review";notice.tone="attention";}
   const healthState: Scenario = signals.quality === "Unreliable" ? "Poor contact" : signals.temperature >= 38 ? "Immune review" : signals.co2 >= 2000 ? "Habitat alert" : signals.sessions < 4 ? "Exercise gap" : signals.sleep < 6 || state.checkin.fatigue >= 7 || ["Stressed","Low"].includes(state.checkin.mood) ? "Recovery shift" : "Nominal";
   const value: Mission = {

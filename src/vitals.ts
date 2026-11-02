@@ -80,6 +80,22 @@ export function doseStatus(mSv: number | null): Status {
   return "good"
 }
 
+// Plausible input bounds; values outside them are almost certainly typing errors.
+export function validateVitals(f: { bpSys: string; bpDia: string; glucose: string; dose: string }) {
+  const errors: Partial<Record<keyof typeof f, string>> = {}
+  const num = (v: string) => (v.trim() === "" ? null : Number(v))
+  const sys = num(f.bpSys), dia = num(f.bpDia), glucose = num(f.glucose), dose = num(f.dose)
+  const bad = (v: number | null, lo: number, hi: number) => v !== null && (!Number.isFinite(v) || v < lo || v > hi)
+  if ((sys === null) !== (dia === null)) errors[sys === null ? "bpSys" : "bpDia"] = "Enter both blood pressure numbers"
+  if (bad(sys, 60, 260)) errors.bpSys = "Systolic must be 60–260 mmHg"
+  if (bad(dia, 30, 160)) errors.bpDia = "Diastolic must be 30–160 mmHg"
+  if (!errors.bpSys && !errors.bpDia && sys !== null && dia !== null && dia >= sys) errors.bpDia = "Diastolic must be lower than systolic"
+  if (bad(glucose, 20, 600)) errors.glucose = "Blood sugar must be 20–600 mg/dL"
+  if (bad(dose, 0, 100)) errors.dose = "Dose must be 0–100 mSv"
+  const empty = sys === null && dia === null && glucose === null && dose === null
+  return { errors, empty, values: { bpSys: sys, bpDia: dia, glucose, dose } }
+}
+
 export const GUIDES: Record<string, { name: string; unit: string; how: string; why: string; hazard: string; range: string }> = {
   bp: {
     name: "Blood pressure", unit: "mmHg",
@@ -114,16 +130,17 @@ type Inputs = {
   vitals: Vitals
 }
 // One status per health domain, in the same order as the Health Overview domains.
-export function domainStatuses({ signals, pulseZ, checkin, vitals }: Inputs): { status: Status; reason: string; hazard: string }[] {
+// `label` names what was actually observed when a domain is judged from a proxy, not a direct test.
+export function domainStatuses({ signals, pulseZ, checkin, vitals }: Inputs): { status: Status; reason: string; hazard: string; label?: string }[] {
   const adherence = signals.sessions / signals.planned
   const lowMood = ["Stressed", "Low"].includes(checkin.mood)
   const bp = bpStatus(vitals.bpSys, vitals.bpDia)
   const pulse = pulseStatus(signals.pulse, pulseZ)
   return [
     { status: worst(pulse, bp), reason: signals.pulse === null ? "Pulse withheld: sensor contact failed" : `Pulse ${signals.pulse} bpm${vitals.bpSys ? ` · BP ${vitals.bpSys}/${vitals.bpDia}` : " · BP not logged"}`, hazard: HAZARDS.gravity },
-    { status: worst(temperatureStatus(signals.temperature), checkin.symptoms.trim() ? "watch" : "good"), reason: `Temperature ${signals.temperature} °C${checkin.symptoms.trim() ? " · symptoms reported" : ""}`, hazard: HAZARDS.environment },
-    { status: adherence >= 0.85 ? "good" : "watch", reason: `${signals.sessions}/${signals.planned} resistance sessions this week`, hazard: HAZARDS.gravity },
-    { status: lowMood && checkin.fatigue >= 8 ? "act" : lowMood || checkin.fatigue >= 7 ? "watch" : "good", reason: `Mood ${checkin.mood.toLowerCase()} · fatigue ${checkin.fatigue}/10`, hazard: HAZARDS.isolation },
+    (() => { const s = worst(temperatureStatus(signals.temperature), checkin.symptoms.trim() ? "watch" : "good"); return { status: s, label: s === "good" ? "No fever or symptoms" : undefined, reason: `Temperature ${signals.temperature} °C${checkin.symptoms.trim() ? " · symptoms reported" : ""} · immune function not measured`, hazard: HAZARDS.environment } })(),
+    { status: adherence >= 0.85 ? "good" : "watch", label: adherence >= 0.85 ? "Exercise on plan" : "Exercise behind plan", reason: `${signals.sessions}/${signals.planned} resistance sessions this week · bone density not measured`, hazard: HAZARDS.gravity },
+    { status: lowMood && checkin.fatigue >= 8 ? "act" : lowMood || checkin.fatigue >= 7 ? "watch" : "good", label: lowMood || checkin.fatigue >= 7 ? undefined : "Check-in steady", reason: `Mood ${checkin.mood.toLowerCase()} · fatigue ${checkin.fatigue}/10`, hazard: HAZARDS.isolation },
     { status: sleepStatus(signals.sleep), reason: `${signals.sleep} h last night · target 7–8 h`, hazard: HAZARDS.isolation },
     { status: glucoseStatus(vitals.glucose), reason: vitals.glucose === null ? "Fasting blood sugar not logged" : `Fasting blood sugar ${vitals.glucose} mg/dL`, hazard: HAZARDS.distance },
     { status: doseStatus(vitals.dose), reason: vitals.dose === null ? "Dosimeter reading not logged" : `${vitals.dose} mSv today`, hazard: HAZARDS.radiation },
