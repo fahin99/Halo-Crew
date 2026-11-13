@@ -1,0 +1,10 @@
+{
+  "description": "HALO is an autonomous health-monitoring platform for astronauts, providing real-time physiological insights and mission readiness assessments to ensure safety during long-duration space missions.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

@@ -1,0 +1,516 @@
+"""HaloCrew BioSuit engineering concept. Execute with FreeCAD GUI Python.
+Native primitives, lofts, cuts and spreadsheet expressions; no external proxy.
+Set BIOSUIT_OUTPUT to choose export directory. All dimensions are mm.
+"""
+import os, math, csv, json, traceback
+import FreeCAD as App, Part
+from FreeCAD import Vector as V
+try:
+    import FreeCADGui as Gui
+    Gui.showMainWindow()
+    import PartGui
+except ImportError:
+    Gui = None
+OUT = os.environ.get('BIOSUIT_OUTPUT', os.path.join(os.path.expanduser('~'), 'HaloCrew_BioSuit'))
+os.makedirs(OUT, exist_ok=True)
+if App.ActiveDocument and App.ActiveDocument.Name == 'HaloCrew_BioSuit':
+    App.closeDocument(App.ActiveDocument.Name)
+doc = App.newDocument('HaloCrew_BioSuit')
+root = doc.addObject('App::Part', 'HaloCrew_BioSuit')
+root.Label = 'HALOCREW / BIOSUIT — IVA health monitoring concept'
+names = ['Reference_Body','Textile_Suit','Torso_Assembly','Cardiovascular_Sensors',
+'Respiratory_Sensors','Temperature_Sensors','EMG_Assemblies','Motion_Tracking_Modules',
+'Hydration_Patches','EDA_Assemblies','Radiation_Dosimeter','Environmental_Sensors',
+'Electronics_Control_Unit','Battery_And_Power','Flexible_Wiring','BioGlove_Left',
+'BioGlove_Right','VisionGuard_Interface','Smart_Insoles','Detachable_Medical_Accessories',
+'Fasteners_And_Connectors']
+groups={}
+for name in names:
+    groups[name] = doc.addObject('App::Part', name)
+    root.addObject(groups[name])
+construction = doc.addObject('App::DocumentObjectGroup', 'Construction_Geometry')
+params = doc.addObject('Spreadsheet::Sheet', 'Parameters')
+params.Label = 'EDIT HERE — dimensions and anatomical scale'
+definitions = [
+('BodyHeight',1750,'Reference body height'), ('ChestCircumference',900,'Chest circumference'),
+('WaistCircumference',780,'Waist circumference'),('ArmLength',560,'Shoulder to wrist'),
+('LegLength',790,'Hip to ankle'),('SensorSize',30,'Typical module width'),
+('ElectrodeSpacing',20,'EMG electrode centre spacing'),('EnclosureWidth',112,'Processor case width'),
+('EnclosureDepth',36,'Processor case depth'),('EnclosureHeight',150,'Processor case height'),
+('BatteryWidth',80,'Battery case width'),('BatteryDepth',28,'Battery case depth'),
+('BatteryHeight',110,'Battery case height'),('GarmentThickness',1.5,'Textile geometric thickness'),
+('PanelThickness',2,'Protective panel thickness')]
+for i,(alias,value,description) in enumerate(definitions,2):
+    params.set('A%d'%i,alias);params.set('B%d'%i,str(value));params.setAlias('B%d'%i,alias)
+    params.set('C%d'%i,description+' [mm]')
+params.set('A1','PARAMETER');params.set('B1','mm');params.set('C1','DESCRIPTION')
+params.setStyle('A1:C1','bold','add');params.setColumnWidth('A',205);params.setColumnWidth('C',340)
+S='(Parameters.BodyHeight / 1750)'
+C='(Parameters.ChestCircumference / 900)'
+W='(Parameters.WaistCircumference / 780)'
+T='Parameters.GarmentThickness'; P='Parameters.PanelThickness'
+SS='(Parameters.SensorSize / 30)'
+COL={'textile':(.075,.092,.11),'white':(.87,.9,.92),'metal':(.40,.47,.53),
+     'cyan':(.04,.74,.88),'pcb':(.025,.25,.22),'contact':(.77,.68,.43),
+     'silicone':(.18,.23,.27),'glass':(.14,.55,.66),'skin':(.58,.61,.64),'chip':(.045,.055,.07)}
+leaves=[]; entries=[]; textile=[]; cover=[]; harness=[]
+def expr(o,prop,value):
+    o.setExpression(prop,str(value))
+def pos(o,xyz,scale=True):
+    o.Placement.Base=V(*xyz)
+    if scale:
+        for a,v in zip('xyz',xyz):expr(o,'Placement.Base.'+a,'%s * %s'%(v,S))
+def style(o,key='metal',trans=0):
+    if Gui:
+        o.ViewObject.ShapeColor=COL[key];o.ViewObject.LineColor=(.12,.16,.19)
+        o.ViewObject.DisplayMode='Flat Lines' if key=='pcb' else 'Flat Lines'
+        o.ViewObject.LineWidth=1.0;o.ViewObject.Transparency=trans
+        o.ViewObject.Deviation=.12;o.ViewObject.AngularDeflection=15
+def finish(o,group,key,purpose,site='',limit='',trans=0):
+    # FreeCAD 0.19 primitive restorers discard dynamic properties on cylinders,
+    # spheres and ellipsoids. A native compound preserves metadata across reopen.
+    if o.TypeId in ['Part::Cylinder','Part::Sphere','Part::Ellipsoid']:
+        source=o; o=doc.addObject('Part::Compound',source.Name+'_Component')
+        o.Links=[source];o.Label=source.Name
+        if Gui:source.Visibility=False
+    elif o in construction.Group:
+        construction.removeObject(o)
+    groups[group].addObject(o);style(o,key,trans)
+    for field,value in [('IntendedFunction',purpose),('MountLocation',site),('MeasurementLimit',limit)]:
+        o.addProperty('App::PropertyString',field,'HaloCrew');setattr(o,field,value)
+    o.addProperty('App::PropertyString','AssemblyCategory','HaloCrew');o.AssemblyCategory=group
+    leaves.append(o);entries.append([o.Name,o.Label,group,purpose,site,limit])
+    return o
+def raw_box(name,xyz,dims,scale=S):
+    o=doc.addObject('Part::Box',name);pos(o,xyz)
+    for p,v in zip(['Length','Width','Height'],dims):
+        expr(o,p,str(v)+' * '+scale if isinstance(v,(int,float)) else v)
+    construction.addObject(o);return o
+def box(name,group,xyz,dims,key='metal',purpose='Mechanical enclosure',site='',limit='',trans=0,scale=S):
+    return finish(raw_box(name,xyz,dims,scale),group,key,purpose,site,limit,trans)
+def raw_cyl(name,xyz,r,h,direction=(0,0,1),scale=S):
+    o=doc.addObject('Part::Cylinder',name);pos(o,xyz)
+    o.Placement.Rotation=App.Rotation(V(0,0,1),V(*direction))
+    expr(o,'Radius',str(r)+' * '+scale if isinstance(r,(int,float)) else r)
+    expr(o,'Height',str(h)+' * '+scale if isinstance(h,(int,float)) else h)
+    construction.addObject(o);return o
+def cyl(name,group,xyz,r,h,key='metal',purpose='Mounting interface',site='',direction=(0,0,1),limit='',scale=S):
+    return finish(raw_cyl(name,xyz,r,h,direction,scale),group,key,purpose,site,limit)
+def ellipsoid(name,group,xyz,radii,key='skin',purpose='Anthropometric reference',visible=True):
+    o=doc.addObject('Part::Ellipsoid',name);pos(o,xyz)
+    # Radius1 = polar Z; Radius2 = X; Radius3 = Y.
+    for p,r in zip(['Radius2','Radius3','Radius1'],radii):expr(o,p,'%s * %s'%(r,S))
+    component=finish(o,group,key,purpose,'1750 mm stylized adult reference')
+    if Gui:component.ViewObject.Visibility=visible
+    return component
+def loft_raw(name,sections,thickness='0',rotation=None):
+    profiles=[]
+    for i,(x,y,z,rx,ry,cs) in enumerate(sections):
+        q=doc.addObject('Part::Ellipse',name+'_Section%02d'%i);pos(q,(x,y,z))
+        expr(q,'MajorRadius','(%s * %s * %s) - (%s)'%(rx,S,cs,thickness))
+        expr(q,'MinorRadius','(%s * %s * %s) - (%s)'%(ry,S,cs,thickness))
+        q.Angle0=0;q.Angle1=360
+        if rotation:q.Placement.Rotation=rotation
+        construction.addObject(q);profiles.append(q)
+    o=doc.addObject('Part::Loft',name);o.Sections=profiles;o.Solid=True;o.Ruled=False
+    construction.addObject(o);return o
+def shell(name,group,sections,key='textile',purpose='Flexible garment segment',thickness=T,rotation=None):
+    outer=loft_raw(name+'_Outer',sections,rotation=rotation)
+    inner=loft_raw(name+'_Inner',sections,thickness,rotation)
+    o=doc.addObject('Part::Cut',name);o.Base=outer;o.Tool=inner
+    finish(o,group,key,purpose,'Conformal geometric textile layer','Fabric mechanics not simulated')
+    textile.append(o);return o
+def ellipse_ring(name,group,z,rx,ry,height,key='cyan',thick='2',x=0,y=0,cs=S):
+    sect=[(x,y,z,rx,ry,'1'),(x,y,z+height,rx,ry,'1')]
+    return shell(name,group,sect,key,'Conductive stretch band / connector substrate',thick)
+def case(name,group,xyz,dims,purpose,site,limit='',key='white'):
+    x,y,z=xyz;a,b,c=dims
+    outer=raw_box(name+'_Blank',xyz,dims,scale=S+' * '+SS)
+    inner=raw_box(name+'_Void',(x+1.5,y+1.5,z+1.5),(a-3,b-1.5,c-3),scale=S+' * '+SS)
+    o=doc.addObject('Part::Cut',name+'_Housing');o.Base=outer;o.Tool=inner
+    finish(o,group,key,purpose,site,limit)
+    lid=box(name+'_ServiceLid',group,(x,y+b,z),(a,1.5,c),key,'Removable service lid',site,scale=S+' * '+SS)
+    cover.append(lid)
+    pcb=box(name+'_PCB',group,(x+3,y+2,z+3),(a-6,1.2,c-6),'pcb','Acquisition / sensor PCB',site,limit)
+    box(name+'_IC',group,(x+a*.35,y+3.2,z+c*.32),(a*.3,1.8,c*.3),'chip','Signal acquisition IC',site)
+    return o,pcb
+def patch(name,group,xyz,purpose,site,limit='',r=10):
+    x,y,z=xyz
+    base=cyl(name+'_Carrier',group,(x,y,z),r+2,1.5,'silicone','Replaceable electrode carrier',site,(0,-1,0))
+    pad=cyl(name+'_Contact',group,(x,y+.8,z),r,.8,'contact',purpose,site,(0,-1,0),limit)
+    cyl(name+'_Snap',group,(x,y-1.5,z),2.2,2.5,'metal','Conductive snap',site,(0,-1,0))
+    return pad
+def route(name,points,r=1.0,group='Flexible_Wiring',key='cyan',purpose='Insulated flexible signal harness'):
+    # Each native cylinder remains dimension-editable; routed bends use native spheres.
+    for i,(p,q) in enumerate(zip(points,points[1:])):
+        delta=V(*q)-V(*p);o=cyl(name+'_Segment%02d'%i,group,p,r,delta.Length,key,purpose,'Textile service channel',tuple(delta))
+        harness.append(o)
+    for i,p in enumerate(points[1:-1]):
+        o=doc.addObject('Part::Sphere',name+'_Bend%02d'%i);pos(o,p);expr(o,'Radius',str(r)+' * '+S)
+        finish(o,group,key,purpose,'Harness elbow');harness.append(o)
+def imu(name,xyz,site,group='Motion_Tracking_Modules'):
+    x,y,z=xyz
+    case(name,group,(x-12,y,z-16),(24,7,32),'Segment orientation / motion',site,
+         'Orientation needs calibration; magnetic disturbance affects heading')
+    box(name+'_MEMS',group,(x-3,y+4,z+6),(6,1,6),'metal','6/9-axis inertial sensor package',site)
+    box(name+'_Indicator',group,(x-7,y-.5,z+9),(14,.8,2),'cyan','Acquisition status',site)
+def optical(name,group,xyz,site,ox=False):
+    x,y,z=xyz
+    case(name,group,(x-8,y,z-11),(16,5,22),'Peripheral '+('pulse oximetry' if ox else 'PPG'),site,
+         'Motion, perfusion and contact affect signal; validation required','silicone')
+    for dx,key,n in [(-4,'cyan','GreenLED'),(0,'contact','RedLED'),(4,'glass','IRLED')]:
+        cyl(name+'_'+n,group,(x+dx,y-.3,z-2),1.4,1,key,'Optical emitter package',site,(0,-1,0))
+    box(name+'_Photodiode',group,(x-2,y-.8,z+3),(4,.8,4),'chip','Photodiode detector',site)
+    box(name+'_OpticalBarrier',group,(x-7,y-.6,z+1),(14,.5,1),'silicone','Optical crosstalk barrier',site)
+
+# REFERENCE AND GARMENT: head top is 1750 mm, feet at 0.
+ellipsoid('Reference_Head','Reference_Body',(0,0,1620),(79,91,130),visible=True)
+ellipsoid('Reference_Nose','Reference_Body',(0,-88,1604),(14,18,23),visible=True)
+ellipsoid('Reference_Torso','Reference_Body',(0,0,1170),(176,106,270),visible=False)
+ellipsoid('Reference_Pelvis','Reference_Body',(0,0,862),(143,99,110),visible=False)
+torso=[(0,0,825,142,99,W),(0,0,910,151,98,W),(0,0,1030,143,91,W),
+(0,0,1160,166,103,C),(0,0,1300,177,108,C),(0,0,1380,170,95,C),
+(0,0,1440,76,68,'1')]
+shell('Torso_Textile','Textile_Suit',torso)
+shell('Neck_Collar','Textile_Suit',[(0,0,1438,77,69,'1'),(0,0,1505,62,58,'1')],thickness='3')
+ellipse_ring('Collar_Interface','Torso_Assembly',1490,65,60,12,'white','3')
+for side,sign in [('Left',1),('Right',-1)]:
+    # Arm profile positions depend on ArmLength; edit propagates natively.
+    secs=[(sign*205,0,1358,59,57,'1'),(sign*247,0,1290,55,51,'1'),
+          (sign*290,0,1110,41,38,'1'),(sign*322,0,1060,37,35,'1'),
+          (sign*353,0,925,34,30,'1'),(sign*377,0,805,27,25,'1')]
+    arm=shell(side+'_Arm_Textile','Textile_Suit',secs)
+    for obj in doc.Objects:
+        if obj.Name.startswith(side+'_Arm_Textile_') and obj.TypeId=='Part::Ellipse':
+            original=float(obj.Placement.Base.z)
+            expr(obj,'Placement.Base.z','1358 * '+S+' - '+str(1358-original)+' * (Parameters.ArmLength / 560) * '+S)
+    shell(side+'_Leg_Textile','Textile_Suit',[(sign*98,0,120,46,42,'1'),
+    (sign*99,0,260,48,44,'1'),(sign*101,0,440,56,50,'1'),
+    (sign*100,0,570,56,53,'1'),(sign*91,0,740,75,64,'1'),(sign*86,0,860,80,70,'1')])
+    for obj in doc.Objects:
+        if obj.Name.startswith(side+'_Leg_Textile_') and obj.TypeId=='Part::Ellipse':
+            original=float(obj.Placement.Base.z)
+            expr(obj,'Placement.Base.z','120 * '+S+' + '+str(original-120)+' * (Parameters.LegLength / 790) * '+S)
+    # Hollow boot from ellipse sections, foot elongated toward front (negative Y).
+    shell(side+'_Boot','Textile_Suit',[(sign*98,-45,5,115,64,'1'),
+    (sign*98,-45,38,113,63,'1'),(sign*98,-20,90,72,53,'1'),
+    (sign*98,0,133,47,43,'1')],thickness='3',rotation=App.Rotation(V(0,0,1),90))
+    # Foot major axis follows Y; ruled sections avoid spline overshoot.
+    for obj in doc.Objects:
+        if obj.Name.startswith(side+'_Boot_') and obj.TypeId=='Part::Loft':
+            obj.Ruled=True
+    ellipsoid(side+'_Reference_Arm','Reference_Body',(sign*296,0,1090),(44,38,265),visible=False)
+    ellipsoid(side+'_Reference_Leg','Reference_Body',(sign*98,0,480),(63,54,363),visible=False)
+    # Low-profile segmented hard panels on the outside of the cloth.
+    for n,x,y,z,a,c in [('Shoulder',sign*237,-63,1285,60,83),
+    ('Forearm',sign*351,-42,901,35,116),('Knee',sign*100,-65,486,61,92),
+    ('Shin',sign*100,-56,217,46,177),('Thigh',sign*93,-75,662,53,98)]:
+        box(side+'_'+n+'_Panel','Torso_Assembly',(x-a/2,y,z),(a,P,c),'white','Segmented protective panel',side+' '+n)
+    for n,x,z,rx,ry in [('Elbow',sign*317,1060,39,37),('Knee',sign*100,478,58,55),('Ankle',sign*98,135,48,44)]:
+        ellipse_ring(side+'_'+n+'_FlexZone','Torso_Assembly',z,rx,ry,18,'silicone','2.5',x)
+    ellipse_ring(side+'_Wrist_Connector','Fasteners_And_Connectors',803,29,27,18,'white','3',sign*377)
+    for dx in [-10,0,10]:
+        cyl(side+'_Wrist_Pogo_'+str(dx).replace('-','N'),'Fasteners_And_Connectors',(sign*377+dx,-26,810),1.5,3,'contact','Glove power/data pogo contact',side+' wrist',(0,-1,0))
+box('Sternum_Service_Panel','Torso_Assembly',(-36,-126,1200),(72,P,126),'white','Serviceable chest sensor cover','Sternum')
+box('Sternum_Status_Stripe','Torso_Assembly',(-25,-129,1313),(50,1,4),'cyan','Status indicator','Sternum')
+box('Abdominal_Closure_Left','Torso_Assembly',(-44,-98,987),(35,P,56),'white','Quick-release front closure','Abdomen')
+box('Abdominal_Closure_Right','Torso_Assembly',(9,-98,987),(35,P,56),'white','Quick-release front closure','Abdomen')
+box('Closure_Latch','Fasteners_And_Connectors',(-8,-103,1003),(16,5,18),'metal','Mechanical quick release latch','Abdomen')
+
+# CARDIORESPIRATORY CONTACTS AND ACQUISITION.
+ecg_sites=[('RA',-94,-88,1334),('LA',94,-88,1334),('RL',-93,-80,916),
+('LL',93,-80,916),('V1',-21,-102,1248),('V2',21,-102,1248),
+('V3',50,-101,1214),('V4',78,-94,1182),('V5',113,-78,1198),('V6',148,-53,1217)]
+for lead,x,y,z in ecg_sites:
+    patch('ECG_'+lead,'Cardiovascular_Sensors',(x,y,z),'ECG biopotential electrode','Torso / '+lead,
+          'Torso limb-lead placement is modified; clinical rhythm interpretation needs validation',r=9)
+case('ECG_AFE','Cardiovascular_Sensors',(-64,-103,1270),(24,7,42),'ECG differential analog front end','Left parasternal')
+optical('Wrist_PPG','Cardiovascular_Sensors',(-375,-27,830),'Right wrist')
+ellipse_ring('Thoracic_Respiration_Band','Respiratory_Sensors',1170,168,105,18,'cyan','2')
+ellipse_ring('Abdominal_Respiration_Band','Respiratory_Sensors',1010,148,96,15,'cyan','2')
+case('Respiration_Readout','Respiratory_Sensors',(125,-70,1148),(26,8,32),'Stretch / respiratory impedance readout','Right chest')
+for x in [-66,66]:patch('Impedance_'+('L' if x<0 else 'R'),'Respiratory_Sensors',(x,-95,1280),
+    'Dedicated respiratory impedance electrode','Upper chest','Excitation/current-limiting electronics require safety verification',r=7)
+for n,p in [('Chest',(47,-106,1290)),('UpperBack',(42,99,1330)),('Arm',(263,-49,1235)),
+('Thigh',(-95,-62,743))]:
+    x,y,z=p
+    cyl('Temperature_'+n+'_Contact','Temperature_Sensors',p,5,1.2,'contact','Skin temperature trend',n,(0,-1,0),
+        'Local skin temperature; does not directly measure core temperature')
+    box('Temperature_'+n+'_PCB','Temperature_Sensors',(x-6,y-2,z-6),(12,1,12),'pcb','Contact thermistor / digital sensor carrier',n)
+
+# BILATERAL SURFACE EMG: contact pairs and local low-noise front ends.
+for side,sgn in [('Left',1),('Right',-1)]:
+    for muscle,x,y,z in [('Biceps',264,-48,1240),('Forearm',350,-31,948),
+    ('Quadriceps',94,-63,704),('Hamstrings',94,57,715),('Calf',100,43,300),('Back',72,101,1224)]:
+        for idx,dx in enumerate([-10,10]):
+            pad=patch(side+'_'+muscle+'_EMG_E'+str(idx+1),'EMG_Assemblies',(sgn*x+dx,y,z),
+             'Surface muscle electrical activation',side+' '+muscle,'Motion artifact and crosstalk; not direct strength or fatigue diagnosis',r=5)
+            for suff in ['Carrier','Contact','Snap']:
+                item=doc.getObject(side+'_'+muscle+'_EMG_E'+str(idx+1)+'_'+suff)
+                expr(item,'Placement.Base.x',str(sgn*x)+' * '+S+' + '+str((-1 if idx==0 else 1)/2)+' * Parameters.ElectrodeSpacing')
+        case(side+'_'+muscle+'_EMG_AFE','EMG_Assemblies',(sgn*x-9,y-5,z+13),(18,4,18),
+             'Surface EMG amplifier / acquisition',side+' '+muscle)
+    for segment,p in [('UpperArm',(sgn*287,-45,1154)),('Forearm',(sgn*366,-33,866)),
+    ('Thigh',(sgn*92,-67,779)),('Shank',(sgn*99,-48,400))]:imu(side+'_'+segment+'_IMU',p,side+' '+segment)
+    for j,p in [('Elbow',(sgn*319,-39,1068)),('Knee',(sgn*100,-58,500)),
+    ('Hip',(sgn*112,-70,854)),('Wrist',(sgn*376,-30,829))]:
+        x,y,z=p;box(side+'_'+j+'_Bend','Motion_Tracking_Modules',(x-3,y,z-28),(6,.8,56),'cyan',
+         'Flexible resistive bend sensor',side+' '+j,'Geometry represents flex; calibration and IMU fusion required')
+imu('Chest_IMU',(0,-118,1358),'Sternum')
+imu('Pelvis_IMU',(0,-103,895),'Pelvis')
+
+# SWEAT PATCH: replaceable cartridge with recessed channels, electrode wells and inlet.
+case('Sweat_Reader','Hydration_Patches',(126,-74,1030),(35,9,48),'Electrochemical sweat reader','Lateral torso',
+     'Exploratory: sweat electrolytes do not establish blood electrolytes or total hydration')
+cart=raw_box('Sweat_Cartridge_Blank',(127,-79,1034),(33,4,40))
+channelparts=[]
+for i,(x,z,w,h) in enumerate([(131,1039,1,26),(140,1039,1,26),(149,1039,1,26),
+                            (131,1039,10,1),(140,1064,10,1)]):
+    channelparts.append(raw_box('Sweat_Microchannel_'+str(i),(x,-80,z),(w,3,h)))
+channels=doc.addObject('Part::MultiFuse','Sweat_Channel_Tool');channels.Shapes=channelparts;construction.addObject(channels)
+cartridge=doc.addObject('Part::Cut','Sweat_Replaceable_Cartridge');cartridge.Base=cart;cartridge.Tool=channels
+finish(cartridge,'Hydration_Patches','glass','Replaceable microfluidic sweat collection cartridge','Torso',trans=42)
+for i,x in enumerate([133,143,153]):
+    cyl('Sweat_Electrochemical_Well_'+str(i),'Hydration_Patches',(x,-80,1055),2.3,1,'contact',
+        ['Sodium electrode concept','Chloride electrode concept','Reference electrode'][i],'Sweat cartridge',(0,-1,0))
+cyl('Sweat_Collection_Inlet','Hydration_Patches',(131,-79,1039),2,2,'metal','Sweat collection inlet','Local skin',(0,1,0))
+for side,sgn in [('L',1),('R',-1)]:
+    for i,x in enumerate([sgn*376-7,sgn*376+7]):patch('Wrist_EDA_'+side+str(i),'EDA_Assemblies',(x,-25,847),
+        'Electrodermal conductance contact',side+' volar wrist','EDA reflects sympathetic activity; not an emotion or psychiatric diagnosis',r=4)
+
+# DOSIMETER AND EXPOSED LOCAL ENVIRONMENT SAMPLER.
+case('Dosimeter','Radiation_Dosimeter',(-137,-78,1264),(35,12,56),'Personal dose exposure logging','Left chest',
+     'Detector response and dose conversion need calibration; no cellular damage measurement')
+box('Dosimeter_Detector','Radiation_Dosimeter',(-129,-73,1273),(19,3,28),'contact','Radiation detector sensitive volume','Dosimeter enclosure')
+box('Dosimeter_Electronics_Shield','Radiation_Dosimeter',(-134,-75,1299),(29,1,15),'metal',
+    'Local electronics EMI shield; detector aperture left unshielded','Dosimeter')
+box('Dosimeter_Clip','Radiation_Dosimeter',(-141,-77,1268),(4,13,43),'metal','Removable mounting clip','Left chest')
+case('Environment_Pod','Environmental_Sensors',(154,-25,1322),(28,28,65),'Exposed local ambient sampling','Outer shoulder',
+     'Local reading may differ from cabin atmosphere; characterize airflow')
+for i in range(4):box('Environment_Vent_'+str(i),'Environmental_Sensors',(160+i*5,-26,1330),(2,1,45),'chip','Exposed intake grille','Shoulder pod')
+for n,z in [('TemperatureHumidity',1336),('Pressure',1352),('CO2_NDIR',1368),('O2_Electrochemical',1380)]:
+    box('Environment_'+n,'Environmental_Sensors',(158,-18,z),(18,8,8),'metal',n+' sensor package','Ventilated ambient pod')
+
+# CENTRAL COMPUTING: parametric enclosure with actual hollow walls and separable cover.
+outer=raw_box('ECU_Outer',(-56,112,1180),('Parameters.EnclosureWidth','Parameters.EnclosureDepth','Parameters.EnclosureHeight'))
+inner=raw_box('ECU_Cavity',(-53,114,1183),('Parameters.EnclosureWidth - 6','Parameters.EnclosureDepth','Parameters.EnclosureHeight - 6'))
+ecu=doc.addObject('Part::Cut','ECU_Serviceable_Enclosure');ecu.Base=outer;ecu.Tool=inner
+finish(ecu,'Electronics_Control_Unit','white','Central processor and acquisition enclosure','Upper back',
+       'Packaging concept only; thermal and electrical safety not validated')
+lid=box('ECU_Removable_Cover','Electronics_Control_Unit',(-56,148,1180),
+        ('Parameters.EnclosureWidth','2','Parameters.EnclosureHeight'),'glass','Translucent removable cover','Back',trans=48)
+expr(lid,'Placement.Base.y','112 * '+S+' + Parameters.EnclosureDepth');cover.append(lid)
+board_specs=[('Processor',-49,116,1245,65,73),('Microcontroller',22,117,1273,25,40),
+('BiopotentialAFE',-48,117,1190,43,43),('IMUAcquisition',1,117,1190,42,24),
+('OpticalInterface',1,117,1219,42,22),('Wireless',21,130,1256,27,35),
+('NonvolatileStorage',-40,130,1250,24,30),('TimeSyncInterface',-8,131,1285,24,24),
+('PowerDistribution',-41,136,1193,79,30)]
+for n,x,y,z,w,h in board_specs:
+    box('ECU_'+n+'_PCB','Electronics_Control_Unit',(x,y,z),(w,1.4,h),'pcb',n+' board','Upper-back ECU')
+    box('ECU_'+n+'_Chip','Electronics_Control_Unit',(x+w*.22,y+1.4,z+h*.3),(w*.56,2.1,h*.4),'chip',n+' integrated circuit','ECU')
+for i in range(6):
+    box('ECU_HarnessSocket_'+str(i),'Electronics_Control_Unit',(-47+i*16,126,1174),(10,12,6),'metal','Keyed harness connector','ECU base')
+    cyl('ECU_StrainRelief_'+str(i),'Fasteners_And_Connectors',(-42+i*16,132,1160),4,14,'silicone','Cable strain relief','Back ECU')
+box('ECU_PowerSwitch','Electronics_Control_Unit',(54,125,1303),(5,13,16),'chip','Physical power switch','ECU side')
+for i in range(3):box('ECU_Status_LED_'+str(i),'Electronics_Control_Unit',(-18+i*14,151,1308),(7,1,4),'cyan','System status light','ECU cover')
+# Native parametric battery compartment.
+bouter=raw_box('Battery_Outer',(-40,103,977),('Parameters.BatteryWidth','Parameters.BatteryDepth','Parameters.BatteryHeight'))
+binner=raw_box('Battery_Void',(-37,105,980),('Parameters.BatteryWidth - 6','Parameters.BatteryDepth','Parameters.BatteryHeight - 6'))
+bcase=doc.addObject('Part::Cut','Battery_Compartment');bcase.Base=bouter;bcase.Tool=binner
+finish(bcase,'Battery_And_Power','white','Replaceable protected battery compartment','Lower back')
+blid=box('Battery_Service_Lid','Battery_And_Power',(-40,131,977),('Parameters.BatteryWidth','2','Parameters.BatteryHeight'),
+         'metal','Quick-release battery service lid','Lower back');cover.append(blid)
+expr(blid,'Placement.Base.y','103 * '+S+' + Parameters.BatteryDepth')
+for i in range(2):box('Battery_Cell_'+str(i),'Battery_And_Power',(-33+i*33,108,987),(29,15,72),'chip','Protected prismatic cell concept','Battery compartment','Capacity and flight acceptance not specified')
+box('Battery_Management_PCB','Battery_And_Power',(-30,125,984),(60,1.5,30),'pcb','Battery management / overcurrent protection','Battery module')
+box('Charging_Connector','Battery_And_Power',(38,114,1002),(7,13,12),'metal','Keyed charging port','Lower-back battery')
+box('Acquisition_Isolation_Barrier','Electronics_Control_Unit',(-8,115,1228),(4,15,15),'white',
+    'Conceptual acquisition-to-power isolation barrier','ECU','Electrical isolation topology and creepage need design verification')
+for side,sgn in [('L',1),('R',-1)]:
+    route('Torso_Trunk_'+side,[(sgn*42,104,1170),(sgn*116,72,1120),(sgn*125,-68,1120),(sgn*110,-78,1330)],1.8)
+    route('Arm_Trunk_'+side,[(sgn*120,-60,1320),(sgn*215,-42,1350),(sgn*278,-36,1150),
+    (sgn*321,-29,1060),(sgn*366,-23,880),(sgn*377,-19,807)],1.3)
+    route('Leg_Trunk_'+side,[(sgn*100,-74,1100),(sgn*94,-57,840),(sgn*98,-52,700),
+    (sgn*100,-44,480),(sgn*99,-37,300),(sgn*98,-34,136)],1.2)
+route('Power_Trunk',[(0,118,1090),(0,108,1140),(0,122,1168)],2.6,key='metal',purpose='Insulated power harness')
+
+# MATCHING REPLACEABLE FIVE-FINGER GLOVES.
+for side,sgn in [('Left',1),('Right',-1)]:
+    g='BioGlove_'+side;cx=sgn*386
+    shell(side+'_Glove_Palm',g,[(cx,0,687,41,18,'1'),(cx,0,728,43,22,'1'),
+                              (cx,0,780,34,24,'1'),(sgn*377,0,805,27,25,'1')])
+    for i,(off,length,rad) in enumerate([(-28,66,9),(-10,86,10),(9,91,10),(27,78,9)]):
+        x=cx+sgn*off;z=688-length
+        shell(side+'_Finger_'+str(i+1),g,[(x,0,z,rad-2,rad-2,'1'),(x,0,z+8,rad,rad,'1'),
+            (x,0,700,rad+1,rad,'1')],thickness='1.5')
+        ellipsoid(side+'_FingerTip_'+str(i+1),g,(x,0,z+1),(rad-2,rad-2,5),'textile','Closed fingertip cap')
+        box(side+'_FingerFlex_'+str(i+1),g,(x-2,rad+.5,z+14),(4,.7,length-18),'cyan','Finger flex sensor',side+' finger '+str(i+1))
+        box(side+'_FingerPressure_'+str(i+1),g,(x-4,-rad-1,z+12),(8,.7,10),'contact','Finger contact-pressure zone',side+' fingertip',
+            'Contact force only; free-floating motion is not load')
+        box(side+'_FingerPanel_'+str(i+1),g,(x-6,rad+1,z+22),(12,1.5,22),'white','Segmented dorsal finger protection',side+' finger')
+    tx=cx-sgn*42
+    shell(side+'_Thumb',g,[(tx-sgn*22,0,701,10,9,'1'),(tx-sgn*15,0,722,13,11,'1'),
+                           (tx,0,761,17,14,'1')])
+    ellipsoid(side+'_ThumbTip',g,(tx-sgn*22,0,699),(9,8,7),'textile','Closed thumb tip')
+    box(side+'_ThumbFlex',g,(tx-sgn*16,15,717),(4,.8,34),'cyan','Thumb flex sensor',side+' thumb')
+    case(side+'_Glove_Electronics',g,(cx-23,26,755),(46,15,41),'Detachable glove acquisition module',side+' dorsal wrist')
+    imu(side+'_Hand_IMU',(cx,27,724),side+' hand',g)
+    optical(side+'_Finger_SpO2',g,(cx-sgn*10,-12,623),side+' index/middle fingertip',True)
+    optical(side+'_Peripheral_PPG',g,(cx,-24,770),side+' wrist')
+    patch(side+'_Glove_EDA1',g,(cx-13,-21,734),'EDA contact',side+' palm','Trend only; needs contact quality',r=4)
+    patch(side+'_Glove_EDA2',g,(cx+13,-21,734),'EDA contact',side+' palm','Trend only; needs contact quality',r=4)
+    cyl(side+'_Glove_Temperature',g,(cx,-22,753),4,1,'contact','Skin temperature contact',side+' palm',(0,-1,0))
+    for dx in [-17,17]:box(side+'_PalmPressure_'+str(dx).replace('-','N'),g,(cx+dx-6,-22,710),(12,.8,16),'contact','Palm pressure sensor',side+' palm')
+
+# SMART INSOLES: removable structural plate and eight sensor regions per foot.
+for side,sgn in [('Left',1),('Right',-1)]:
+    sole=loft_raw(side+'_Insole_Solid',[(sgn*98,-45,0,114,60,'1'),(sgn*98,-45,5,114,60,'1')],
+                  rotation=App.Rotation(V(0,0,1),90))
+    finish(sole,'Smart_Insoles','white','Removable smart insole substrate',side+' boot')
+    for i,(dx,y) in enumerate([(-17,35),(17,35),(-22,-15),(22,-15),(-28,-66),(0,-66),(28,-66),(0,-129)]):
+        cyl(side+'_PlantarZone_'+str(i),'Smart_Insoles',(sgn*98+dx,y,5),9,1.2,'contact','Plantar contact-pressure zone',side+' sole',
+            limit='Surface / exercise restraint contact required; no free-floating body-weight estimate')
+    box(side+'_Insole_Readout','Smart_Insoles',(sgn*98-13,20,7),(26,18,5),'pcb','Pressure array acquisition','Heel')
+
+# OPTIONAL VISIONGUARD: structural frames, optical packages, separate display/PCB.
+g='VisionGuard_Interface'
+for side,sgn in [('L',1),('R',-1)]:
+    blank=raw_box('Vision_'+side+'_RimBlank',(sgn*36-33,-99,1609),(66,7,39))
+    opening=raw_box('Vision_'+side+'_LensOpening',(sgn*36-28,-100,1614),(56,10,29))
+    rim=doc.addObject('Part::Cut','Vision_'+side+'_Frame');rim.Base=blank;rim.Tool=opening
+    finish(rim,g,'white','Optical frame and mounting rim','Head / eyewear')
+    box('Vision_'+side+'_Lens',g,(sgn*36-27,-96,1615),(54,1.5,27),'glass','Near-eye optical combiner','Eyewear',trans=72)
+    box('Vision_'+side+'_Temple',g,(sgn*73-3,-91,1633),(6,119,7),'white','Eyewear temple / cable channel','Head')
+    cyl('Vision_'+side+'_EyeCamera_Barrel',g,(sgn*36,-94,1609),4.5,9,'metal','Inward-facing IR eye camera','Lower lens rim',(0,1,0),
+        'Pupil / blink imaging; cannot diagnose SANS')
+    cyl('Vision_'+side+'_EyeCamera_Lens',g,(sgn*36,-84,1609),3.5,1,'glass','IR camera optical lens','Inward-facing camera',(0,1,0))
+    box('Vision_'+side+'_CameraPCB',g,(sgn*36-5,-93,1602),(10,2,10),'pcb','Eye camera PCB','Eyewear')
+    for i,x in enumerate([sgn*17,sgn*54]):cyl('Vision_'+side+'_IRHousing'+str(i),g,(x,-91,1644),2,2,'cyan',
+        'Recessed IR illumination package','Eyewear',(0,1,0), 'Eye exposure limits and optical safety require validation')
+box('Vision_Bridge',g,(-8,-99,1631),(16,7,6),'metal','Nose bridge','Eyewear')
+box('Vision_TestDisplay',g,(48,-103,1630),(17,5,11),'chip','Near-eye visual testing microdisplay','Right lens',
+    'Acuity testing concept; requires optical design and validation')
+case('Vision_BatteryProcessor',g,(-86,8,1618),(15,28,27),'Eyewear processor and battery','Left temple')
+box('Vision_Head_IMU',g,(72,13,1632),(8,12,7),'pcb','Head motion inertial module','Right temple')
+for sgn in [-1,1]:
+    box('Vision_CollarDock_'+str(sgn).replace('-','N'),g,(sgn*55-7,14,1490),(14,13,9),'metal','Mechanical eyewear tether dock','Collar')
+route('Vision_DataTether',[(-78,25,1626),(-72,49,1518),(-52,69,1478),(-42,97,1335)],1.2,g)
+
+# OPTIONAL DETACHABLE ACCESSORIES on a separate presentation rack, hidden by default.
+g='Detachable_Medical_Accessories'
+box('Accessory_Rack',g,(535,110,40),(185,14,1270),'metal','Separate medical accessories demonstration rack','Off-body accessory station')
+# Cuff hollow sleeve and pump/display housing.
+shell('BP_Inflatable_Cuff',g,[(624,0,1050,64,56,'1'),(624,0,1160,64,56,'1')],'silicone',
+      'Intermittent cuff-based blood pressure measurement',thickness='6')
+box('BP_Cuff_Closure',g,(684,-15,1090),(7,35,45),'white','Cuff hook-and-loop closure','Accessory cuff')
+case('BP_PumpDisplay',g,(560,-28,940),(120,30,60),'Cuff pump, pressure transducer and electronics','Accessory rack',
+     'Cuff sizing / oscillometric algorithm / calibration require validation')
+box('BP_Display',g,(569,-30,957),(57,1,28),'glass','Blood pressure display','BP accessory')
+route('BP_PneumaticTube',[(677,0,970),(703,0,970),(703,0,1112),(683,0,1112)],2.5,g,'silicone','Cuff pneumatic connection')
+case('Capnography_Module',g,(561,-25,745),(118,27,70),'Separate sampled end-tidal CO2 instrument','Accessory rack',
+     'Requires breathing circuit / cannula sampling; not ambient CO2')
+box('Capnography_OpticalCell',g,(583,-18,760),(53,14,27),'metal','CO2 optical sampling cell','Capnography instrument')
+route('Capno_SamplingLine',[(625,-2,811),(698,-2,850),(690,-3,910),(649,-5,903)],1.1,g,'cyan','Respiratory gas sample tubing')
+route('Nasal_Cannula',[(637,-10,901),(648,-10,902),(659,-10,901)],1.2,g,'white','Optional cannula sampling interface')
+for x in [643,653]:cyl('Cannula_Prong_'+str(x),g,(x,-10,901),1.5,7,'white','Cannula nasal prong','Accessory',(0,-1,0))
+case('CoreTemp_Receiver',g,(572,-22,627),(97,22,59),'Dedicated telemetric core-temperature receiver','Accessory rack',
+     'Optional ingestible sensor requires clinical protocol; no core inference from cloth')
+cyl('CoreTemp_Telemetry_Capsule',g,(613,-8,708),5,21,'white','Dedicated ingestible sensor housing concept','Separate accessory',direction=(1,0,0))
+case('Sleep_Amplifier',g,(570,-21,448),(101,22,63),'Detachable EEG / EOG acquisition','Accessory rack',
+     'Sleep staging needs validated recording and analysis; not equivalent to polysomnography')
+for i in range(6):patch('Sleep_EEG_EOG_Pad_'+str(i),g,(571+i*18,-10,561),'EEG / EOG gel-contact electrode','Sleep headband accessory','Optional fitted accessory',r=6)
+route('Sleep_Harness',[(580,-4,550),(579,-3,530),(618,-2,512)],1.5,g)
+box('Diagnostic_Docking_Plate',g,(555,-20,215),(144,12,166),'white','Off-body OCT / retinal instrument docking location','Medical equipment rack',
+    'Mounting interface only: no OCT or retinal diagnostic instrument supplied')
+for x in [572,680]:
+    cyl('Diagnostic_DockPin_'+str(x),g,(x,-21,300),5,20,'metal','Equipment locating pin','Diagnostic dock',(0,-1,0))
+box('Diagnostic_DataPort',g,(615,-26,252),(25,6,20),'metal','Diagnostic instrument power/data interface','Separate diagnostic dock')
+
+# FASTENERS at service modules, plus cable guides.
+for i,(x,y,z) in enumerate([(-48,151,1188),(48,151,1188),(-48,151,1322),(48,151,1322),
+                          (-33,134,984),(33,134,984),(-33,134,1077),(33,134,1077)]):
+    cyl('Service_Fastener_'+str(i),'Fasteners_And_Connectors',(x,y,z),2.6,2,'metal','Captive service screw','ECU / battery',(0,1,0))
+for sgn in [-1,1]:
+    for z in [920,1040,1140]:box('Harness_Guide_'+str(sgn).replace('-','N')+'_'+str(z),
+    'Fasteners_And_Connectors',(sgn*117-4,-74,z),(8,5,11),'silicone','Harness retention and strain relief','Torso')
+
+print('All solid definitions created; recomputing native geometry',flush=True)
+doc.recompute()
+for o in construction.Group:
+    if Gui:o.ViewObject.Visibility=False
+construction.Visibility=False
+for o in leaves:
+    if Gui:o.Visibility=True
+groups['Detachable_Medical_Accessories'].Visibility=False
+# Reference body: head / nose shown only; body fit dummies remain off.
+if Gui:
+    for o in groups['Reference_Body'].Group:o.ViewObject.Visibility=o.Name in ['Reference_Head_Component','Reference_Nose_Component']
+
+# Native selectable arrows and text annotations. Arrow shape is a curve, not a solid.
+annotations=doc.addObject('App::DocumentObjectGroup','Sensor_Annotations')
+annotation_specs=[
+('ECG + impedance',(-106,-100,1320),(-550,-180,1390),'Rhythm, HRV and respiratory impedance'),
+('Respiratory bands',(154,-52,1178),(-550,-180,1210),'Thoracic / abdominal movement'),
+('Sweat cartridge',(144,-80,1055),(-550,-180,1030),'Exploratory local sodium / chloride'),
+('Surface EMG',(-94,-63,704),(-550,-180,800),'Selected muscle activation'),
+('Motion IMUs',(99,-48,400),(-550,-180,540),'Segment orientation and activity'),
+('Plantar zones',(98,-66,15),(-550,-180,200),'Pressure during surface contact'),
+('VisionGuard',(42,-99,1634),(470,-180,1610),'Eye tracking / visual testing; no SANS diagnosis'),
+('Ambient pod',(166,-25,1360),(470,-180,1400),'Exposed local CO2, O2, temperature / RH'),
+('Dosimeter',(-122,-78,1285),(470,-180,1230),'Personal radiation exposure logging'),
+('Back ECU + battery',(0,135,1230),(470,-180,1050),'Acquisition, processing, storage, power'),
+('BioGlove',(386,-15,719),(470,-180,800),'SpO2, PPG, EDA, flex and contact pressure')]
+for i,(title,target,label,detail) in enumerate(annotation_specs):
+    t=V(*target);l=V(*label);delta=(l-t);delta.normalize();cross=V(0,0,1).cross(delta);cross.normalize()
+    shape=Part.makeCompound([Part.makeLine(l,t),Part.makeLine(t,t+delta*16+cross*6),Part.makeLine(t,t+delta*16-cross*6)])
+    ar=doc.addObject('Part::Feature','Annotation_Arrow_'+str(i));ar.Shape=shape
+    annotations.addObject(ar)
+    if Gui:ar.ViewObject.LineColor=COL['cyan'];ar.ViewObject.LineWidth=2
+    note=doc.addObject('App::Annotation','Sensor_Callout_'+str(i));note.LabelText=[title,detail];note.Position=l
+    annotations.addObject(note)
+    if Gui:note.ViewObject.TextColor=(.15,.29,.34);note.ViewObject.FontSize=13
+annotations.Visibility=False
+
+# Exploded assembly uses native links, preserving source geometry and saved colors.
+exploded=doc.addObject('App::DocumentObjectGroup','Exploded_Sensor_Assembly')
+for o in leaves:
+    if o.AssemblyCategory in ['Reference_Body','Textile_Suit','Detachable_Medical_Accessories','Flexible_Wiring']:continue
+    link=doc.addObject('App::Link','Exploded_'+o.Name);link.setLink(o);exploded.addObject(link)
+    ctr=o.Shape.BoundBox.Center
+    if o.AssemblyCategory in ['Electronics_Control_Unit','Battery_And_Power']:shift=V(0,190,0)
+    elif o.AssemblyCategory=='VisionGuard_Interface':shift=V(0,-100,100)
+    else:shift=V(100 if ctr.x>30 else (-100 if ctr.x<-30 else 0),-115 if ctr.y<=0 else 115,0)
+    link.LinkPlacement=App.Placement(o.Placement.Base+shift,o.Placement.Rotation)
+exploded.Visibility=False
+
+doc.recompute()
+invalid=[]
+for o in leaves:
+    if o.Shape.isNull() or not o.Shape.isValid() or not o.Shape.Solids:invalid.append(o.Name)
+if invalid:raise RuntimeError('Invalid / non-solid leaves: '+str(invalid))
+if Gui:
+    Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll()
+doc.recompute()
+doc.saveAs(os.path.join(OUT,'HaloCrew_BioSuit_Complete.FCStd'))
+with open(os.path.join(OUT,'BioSuit_Components.csv'),'w',newline='',encoding='utf-8') as f:
+    writer=csv.writer(f);writer.writerow(['ObjectName','Label','Assembly','IntendedFunction','MountLocation','MeasurementLimit']);writer.writerows(entries)
+# STEP exports only final solids, excluding helper geometry, annotations and duplicates.
+exportable=[o for o in leaves if o.AssemblyCategory!='Reference_Body']
+Part.export(exportable,os.path.join(OUT,'HaloCrew_BioSuit_Assembly.step'))
+
+# Mesh snapshot for reproducible external renders / optional GLB.
+meshdata=[]
+for o in leaves:
+    vertices,triangles=o.Shape.tessellate(.9)
+    meshdata.append({'name':o.Name,'group':o.AssemblyCategory,'vertices':[[v.x,v.y,v.z] for v in vertices],
+    'faces':triangles,'color':list(o.ViewObject.ShapeColor) if Gui else list(COL['metal']),
+    'transparency':o.ViewObject.Transparency if Gui else 0,'visible':o.ViewObject.Visibility if Gui else True,
+    'placement':list(o.Placement.Base)})
+with open(os.path.join(OUT,'render_geometry.json'),'w') as f:json.dump(meshdata,f)
+report={'freecad_version':App.Version()[:3],'document':doc.Name,'solid_components':len(leaves),
+        'native_document_objects':len(doc.Objects),'invalid_components':invalid,
+        'scale_mm':{'height':1750,'chest_circumference':900,'waist_circumference':780},
+        'assemblies':{n:len([o for o in leaves if o.AssemblyCategory==n]) for n in names},
+        'concept_status':'Engineering concept; no medical, flight, textile or optical safety validation'}
+with open(os.path.join(OUT,'BioSuit_Validation.json'),'w') as f:json.dump(report,f,indent=2)
+print('BIOSUIT BUILD COMPLETE: %d valid solid components, %d document objects'%(len(leaves),len(doc.Objects)),flush=True)

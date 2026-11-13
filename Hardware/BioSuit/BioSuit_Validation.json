@@ -1,0 +1,343 @@
+{
+  "freecad_version": [
+    "0",
+    "19",
+    ""
+  ],
+  "document": "HaloCrew_BioSuit_Complete",
+  "solid_components": 677,
+  "native_document_objects": 2112,
+  "invalid_components": [],
+  "assemblies": {
+    "Reference_Body": 8,
+    "Textile_Suit": 8,
+    "Torso_Assembly": 21,
+    "Cardiovascular_Sensors": 43,
+    "Respiratory_Sensors": 12,
+    "Temperature_Sensors": 8,
+    "EMG_Assemblies": 120,
+    "Motion_Tracking_Modules": 68,
+    "Hydration_Patches": 9,
+    "EDA_Assemblies": 12,
+    "Radiation_Dosimeter": 7,
+    "Environmental_Sensors": 12,
+    "Electronics_Control_Unit": 31,
+    "Battery_And_Power": 6,
+    "Flexible_Wiring": 49,
+    "BioGlove_Left": 61,
+    "BioGlove_Right": 61,
+    "VisionGuard_Interface": 30,
+    "Smart_Insoles": 20,
+    "Detachable_Medical_Accessories": 62,
+    "Fasteners_And_Connectors": 29
+  },
+  "concept_status": "Engineering concept; no medical, flight, textile or optical safety validation",
+  "saved_document_reopened": true,
+  "live_parameter_checks": [
+    {
+      "parameter": "BodyHeight",
+      "test_value": 1800.0,
+      "measured_mm": 1800.0,
+      "passed": true
+    },
+    {
+      "parameter": "ChestCircumference",
+      "test_value": 950.0,
+      "measured_mm": 186.83333333333334,
+      "passed": true
+    },
+    {
+      "parameter": "WaistCircumference",
+      "test_value": 810.0,
+      "measured_mm": 148.5,
+      "passed": true
+    },
+    {
+      "parameter": "ArmLength",
+      "test_value": 580.0,
+      "measured_mm": 785.25,
+      "passed": true
+    },
+    {
+      "parameter": "LegLength",
+      "test_value": 810.0,
+      "measured_mm": 878.7341772151899,
+      "passed": true
+    },
+    {
+      "parameter": "SensorSize",
+      "test_value": 33.0,
+      "measured_mm": 26.4,
+      "passed": true
+    },
+    {
+      "parameter": "ElectrodeSpacing",
+      "test_value": 24.0,
+      "measured_mm": 24.0,
+      "passed": true
+    },
+    {
+      "parameter": "EnclosureWidth",
+      "test_value": 120.0,
+      "measured_mm": 120.0,
+      "passed": true
+    },
+    {
+      "parameter": "EnclosureDepth",
+      "test_value": 40.0,
+      "measured_mm": 40.0,
+      "passed": true
+    },
+    {
+      "parameter": "EnclosureHeight",
+      "test_value": 158.0,
+      "measured_mm": 158.0,
+      "passed": true
+    },
+    {
+      "parameter": "BatteryWidth",
+      "test_value": 86.0,
+      "measured_mm": 86.0,
+      "passed": true
+    },
+    {
+      "parameter": "BatteryDepth",
+      "test_value": 32.0,
+      "measured_mm": 32.0,
+      "passed": true
+    },
+    {
+      "parameter": "BatteryHeight",
+      "test_value": 116.0,
+      "measured_mm": 116.0,
+      "passed": true
+    },
+    {
+      "parameter": "GarmentThickness",
+      "test_value": 1.8,
+      "measured_mm": 1.8000000000000114,
+      "passed": true
+    },
+    {
+      "parameter": "PanelThickness",
+      "test_value": 2.4,
+      "measured_mm": 2.4,
+      "passed": true
+    }
+  ],
+  "selected_collision_checks": [
+    {
+      "a": "ECU_Serviceable_Enclosure",
+      "b": "Torso_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Battery_Compartment",
+      "b": "Torso_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Sternum_Service_Panel",
+      "b": "Torso_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Left_Knee_Panel",
+      "b": "Left_Leg_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Right_Knee_Panel",
+      "b": "Right_Leg_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Left_Glove_Electronics_Housing",
+      "b": "Left_Glove_Palm",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Right_Glove_Electronics_Housing",
+      "b": "Right_Glove_Palm",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Left_Shoulder_Panel",
+      "b": "Left_Arm_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Left_Forearm_Panel",
+      "b": "Left_Arm_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Left_Shin_Panel",
+      "b": "Left_Leg_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Left_Thigh_Panel",
+      "b": "Left_Leg_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Right_Shoulder_Panel",
+      "b": "Right_Arm_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Right_Forearm_Panel",
+      "b": "Right_Arm_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Right_Shin_Panel",
+      "b": "Right_Leg_Textile",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "a": "Right_Thigh_Panel",
+      "b": "Right_Leg_Textile",
+      "overlap_volume_mm3": 0.0
+    }
+  ],
+  "step_reimport_valid": true,
+  "step_solids": 669,
+  "orbit_angles_checked": [
+    0,
+    90,
+    180,
+    270,
+    360
+  ],
+  "collision_scope": "Selected enclosure/garment pairs only; not exhaustive interference or human-fit certification",
+  "final_component_validity": true,
+  "final_saved_file_reopen_passed": true,
+  "all_sensor_metadata_preserved": true,
+  "default_visibility_verified": true,
+  "imu_internal_clearance_checks": [
+    {
+      "mems": "Left_UpperArm_IMU_MEMS",
+      "acquisition_ic": "Left_UpperArm_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Left_Forearm_IMU_MEMS",
+      "acquisition_ic": "Left_Forearm_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Left_Thigh_IMU_MEMS",
+      "acquisition_ic": "Left_Thigh_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Left_Shank_IMU_MEMS",
+      "acquisition_ic": "Left_Shank_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Right_UpperArm_IMU_MEMS",
+      "acquisition_ic": "Right_UpperArm_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Right_Forearm_IMU_MEMS",
+      "acquisition_ic": "Right_Forearm_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Right_Thigh_IMU_MEMS",
+      "acquisition_ic": "Right_Thigh_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Right_Shank_IMU_MEMS",
+      "acquisition_ic": "Right_Shank_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Chest_IMU_MEMS",
+      "acquisition_ic": "Chest_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Pelvis_IMU_MEMS",
+      "acquisition_ic": "Pelvis_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Left_Hand_IMU_MEMS",
+      "acquisition_ic": "Left_Hand_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Right_Hand_IMU_MEMS",
+      "acquisition_ic": "Right_Hand_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Left_UpperArm_IMU_MEMS",
+      "acquisition_ic": "Exploded_Left_UpperArm_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Left_Forearm_IMU_MEMS",
+      "acquisition_ic": "Exploded_Left_Forearm_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Left_Thigh_IMU_MEMS",
+      "acquisition_ic": "Exploded_Left_Thigh_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Left_Shank_IMU_MEMS",
+      "acquisition_ic": "Exploded_Left_Shank_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Right_UpperArm_IMU_MEMS",
+      "acquisition_ic": "Exploded_Right_UpperArm_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Right_Forearm_IMU_MEMS",
+      "acquisition_ic": "Exploded_Right_Forearm_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Right_Thigh_IMU_MEMS",
+      "acquisition_ic": "Exploded_Right_Thigh_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Right_Shank_IMU_MEMS",
+      "acquisition_ic": "Exploded_Right_Shank_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Chest_IMU_MEMS",
+      "acquisition_ic": "Exploded_Chest_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Pelvis_IMU_MEMS",
+      "acquisition_ic": "Exploded_Pelvis_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Left_Hand_IMU_MEMS",
+      "acquisition_ic": "Exploded_Left_Hand_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    },
+    {
+      "mems": "Exploded_Right_Hand_IMU_MEMS",
+      "acquisition_ic": "Exploded_Right_Hand_IMU_IC",
+      "overlap_volume_mm3": 0.0
+    }
+  ],
+  "glb_roundtrip_passed": true,
+  "glb_named_components": 609
+}
