@@ -11,6 +11,9 @@
 
 > **Prototype disclaimer.** HALO Crew is a hackathon concept and design prototype, not a medical device. It is not clinically validated or qualified for spaceflight, and it must not be used to make medical decisions. Most sensor and mission values are simulated. Manual readings are user-entered demonstration data. Hardware models are concepts and are not working or validated sensors.
 
+### Live URL : https://halo-crew-787f.onrender.com
+###### Password : halo-crew-nasa-12345
+
 ## Overview
 
 HALO Crew is a browser-based astronaut health and wellbeing demo. It combines a mission dashboard, manual health logging, sample alerts, a daily routine, wellbeing support, and a mission record in one interface. The app can save mission data to a local server or PostgreSQL-backed server; browser storage provides an offline/local fallback. Optional AI and voice services can be configured for chat and family companion speech.
