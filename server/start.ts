@@ -5,8 +5,7 @@ import path from "node:path"
 import { createApiHandler } from "./backend.ts"
 
 export function createApp({ hosted = false, passcode = process.env.HALO_TEAM_PASSCODE, secret = process.env.HALO_SESSION_SECRET || randomBytes(32).toString("hex") } = {}) {
-  if(hosted && (!passcode || passcode.length<12))throw new Error("Set HALO_TEAM_PASSCODE to at least 12 characters before publishing")
-  if(hosted && !process.env.DATABASE_URL)throw new Error("DATABASE_URL is required for durable hosted records")
+  if(passcode && passcode.length<12)throw new Error("HALO_TEAM_PASSCODE must contain at least 12 characters")
   const api=createApiHandler(hosted)
   const dist=path.resolve("dist")
   const attempts=new Map<string,{count:number,at:number}>()

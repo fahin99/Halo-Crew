@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env*
+node_modules
+dist
+.halo-data
+.local-ai
+.voice-references
+voice-references
+.vite
+__pycache__
+hosting
+Hardware
+server/voice
+docs

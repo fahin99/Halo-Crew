@@ -9,8 +9,6 @@
 
 ---
 
-> **Prototype disclaimer.** HALO Crew is a hackathon concept and design prototype, not a medical device. It is not clinically validated or qualified for spaceflight, and it must not be used to make medical decisions. Most sensor and mission values are simulated. Manual readings are user-entered demonstration data. Hardware models are concepts and are not working or validated sensors.
-
 ## Overview
 
 HALO Crew is a browser-based astronaut health and wellbeing demo. It combines a mission dashboard, manual health logging, sample alerts, a daily routine, wellbeing support, and a mission record in one interface. The app can save mission data to a local server or PostgreSQL-backed server; browser storage provides an offline/local fallback. Optional AI and voice services can be configured for chat and family companion speech.
@@ -95,7 +93,18 @@ The development Vite plugin exposes `/api` endpoints for mission state, chat, sp
 | `HALO_TEAM_PASSCODE` | unset | Enables passcode-gated access in hosted mode; use at least 12 characters |
 | `HALO_SESSION_SECRET` | generated at startup | Secret used to sign hosted session cookies |
 
-For hosted production mode, set `NODE_ENV=production`, `HALO_TEAM_PASSCODE`, and `DATABASE_URL`. The server refuses hosted startup without a passcode of at least 12 characters and a database URL. Keep credentials in environment configuration and never commit them.
+For hosted production mode, set `NODE_ENV=production`. Set `HALO_TEAM_PASSCODE` only when the deployment should be access-controlled; it must contain at least 12 characters. Configure `DATABASE_URL` when shared mission records must persist. Keep credentials in environment configuration and never commit them.
+
+### Deploying on Vercel
+
+This repository uses Vercel's Services configuration with one public container service, `halo-crew`. The container builds the Vite frontend and runs the existing Node server, so `/api/*` routes and static assets use the same server. The root rewrite sends public requests to that service. In the Vercel project settings, select the Services framework and configure these environment variables for Production (and Preview if needed):
+
+- `NODE_ENV=production`
+- `DATABASE_URL`: optional PostgreSQL connection string for shared, durable mission records
+- `HF_TOKEN`: optional Hugging Face read token for cloud AI
+- `HALO_HF_SPACE`: optional Hugging Face Space name; defaults to `RJBee4u/halo-crew-ai`
+
+Do not set `HALO_TEAM_PASSCODE` for a public deployment. If you later add it, also set a stable random `HALO_SESSION_SECRET` of at least 32 characters. Vercel supplies `PORT` to the container. Without `DATABASE_URL`, server-side records use temporary container storage and may be lost when Vercel restarts or replaces the service. The optional local voice server is not deployed by this configuration; hosted voice generation remains unavailable unless a reachable `HALO_VOICE_URL` is configured. Hugging Face inference is an external service, so this Vercel setup has no internal service bindings.
 
 ## Data and limitations
 

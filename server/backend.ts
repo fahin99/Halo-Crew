@@ -8,8 +8,9 @@ export function createApiHandler(hosted = false) {
   const storage = createStorage()
   const cloud=createCloudAI()
   let queue = Promise.resolve()
-  const voiceUrl = process.env.HALO_VOICE_URL || "http://127.0.0.1:11435"
+  const voiceUrl = process.env.HALO_VOICE_URL || (hosted ? "" : "http://127.0.0.1:11435")
   const voiceStatus = async () => {
+    if (!voiceUrl) return []
     try { const r=await fetch(`${voiceUrl}/status`,{signal:AbortSignal.timeout(800)}); if(!r.ok)return []; const v=await r.json(); return Array.isArray(v.voices)?v.voices.filter((x:string)=>["family-0","family-1","family-2"].includes(x)):[] } catch { return [] }
   }
   const read = storage.read
