@@ -2,9 +2,11 @@
 
 ### HALO-CREW
 ### A calm health and wellbeing workspace for deep-space missions
-*Understand today's readings. Keep a mission record. Decide what to do next.*
+***Understand today's readings. Keep a mission record. Decide what to do next.***
 
 **NASA Space Apps Challenge:** *Create Health Monitoring Software for Astronauts on Space Missions*
+
+*Hosted on: https://halo-crew-nasa.vercel.app/*
 </div>
 
 ---
@@ -97,14 +99,7 @@ For hosted production mode, set `NODE_ENV=production`. Set `HALO_TEAM_PASSCODE` 
 
 ### Deploying on Vercel
 
-This repository uses Vercel's Services configuration with one public container service, `halo-crew`. The container builds the Vite frontend and runs the existing Node server, so `/api/*` routes and static assets use the same server. The root rewrite sends public requests to that service. In the Vercel project settings, select the Services framework and configure these environment variables for Production (and Preview if needed):
-
-- `NODE_ENV=production`
-- `DATABASE_URL`: optional PostgreSQL connection string for shared, durable mission records
-- `HF_TOKEN`: optional Hugging Face read token for cloud AI
-- `HALO_HF_SPACE`: optional Hugging Face Space name; defaults to `RJBee4u/halo-crew-ai`
-
-Do not set `HALO_TEAM_PASSCODE` for a public deployment. If you later add it, also set a stable random `HALO_SESSION_SECRET` of at least 32 characters. Vercel supplies `PORT` to the container. Without `DATABASE_URL`, server-side records use temporary container storage and may be lost when Vercel restarts or replaces the service. The optional local voice server is not deployed by this configuration; hosted voice generation remains unavailable unless a reachable `HALO_VOICE_URL` is configured. Hugging Face inference is an external service, so this Vercel setup has no internal service bindings.
+This repository uses Vercel's Services configuration with one public container service, `halo-crew`. The container builds the Vite frontend and runs the existing Node server, so `/api/*` routes and static assets use the same server. The root rewrite sends public requests to that service.
 
 ## Data and limitations
 
