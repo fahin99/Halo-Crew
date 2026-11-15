@@ -19,6 +19,27 @@ The app also includes **HaloSuit Studio**, an interactive simulation of proposed
 
 The demo uses a fictional Mars mission scenario and synthetic readings to show the user experience. Health ranges and alert tiers are illustrative references, not astronaut-specific clinical limits.
 
+ ## What Makes HALO Crew Different: One Model Per Astronaut
+HALO Crew replaces population-based monitoring with deeply personalized astronaut intelligence. Every astronaut gets an adaptive AI system that learns their individual baseline, detects deviations, and supports their wellbeing throughout the mission.
+
+1. Personalized AI Model Stack
+Individual ML models and RL policies trained on each astronaut’s pre-mission data — learning their unique patterns of sleep, HRV, activity, mood, and behaviour.
+
+2. Behavioural Adaptation Agent
+An RL agent detects behavioural and emotional changes, then suggests consented family videos or audio based on the astronaut’s needs. It learns from self-reported wellbeing, not app engagement.
+
+3. AI Family Companion
+Consent-based AI companions learn participating family members’ communication styles, offering familiar conversations while remaining clearly identified as AI.
+
+4. Individual Health Intelligence
+Dedicated models monitor vital health parameters, each reporting predictions, confidence, and signal quality. Unreliable readings are withheld, never fabricated.
+
+5. Instant Medical Decision Support
+An AI medical assistant combines model outputs to deliver immediate, evidence-grounded guidance, explain its reasoning, and flag when human medical intervention is needed.
+
+The core difference: HALO doesn't ask whether an astronaut is healthy compared to everyone else. It learns what healthy means for that astronaut.
+
+
 ## What you can explore
 
 - **Home and Health Overview:** mission summary, health domains, sample readings, data freshness, status explanations, and alerts.
