@@ -1,8 +1,8 @@
 <div align="center">
 
-### HALO-CREW
+# HALO-CREW
 ### A calm health and wellbeing workspace for deep-space missions
-***Understand today's readings. Keep a mission record. Decide what to do next.***
+**Understand today's readings. Keep a mission record. Decide what to do next.**
 
 **NASA Space Apps Challenge:** *Create Health Monitoring Software for Astronauts on Space Missions*
 
